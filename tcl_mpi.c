@@ -281,6 +281,7 @@ int Tclmpi_Init(Tcl_Interp *interp)
     /* add world communicator to translation table */
     first_comm = (tclmpi_comm_t *)malloc(sizeof(tclmpi_comm_t));
     first_comm->next = NULL;
+    first_comm->valid = 1;
     first_comm->comm = MPI_COMM_WORLD;
     label = (char *)malloc(32);
     strcpy(label,"::tclmpi::world");
