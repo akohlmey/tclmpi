@@ -128,6 +128,7 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
+    argv = (char **)Tcl_Alloc(narg*sizeof(char *));
     for (argc=0; argc < narg; ++argc) {
         Tcl_IncrRefCount(args[argc]);
         argv[argc] = Tcl_GetString(args[argc]);
@@ -140,18 +141,20 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
     if (argc == narg) {
         for (i=0; i < narg; ++i) {
             Tcl_ListObjAppendElement(interp,result,args[i]);
+            Tcl_DecrRefCount(args[i]);
         }
     } else {
         for (i=0, j=0; (i < argc) && (i+j < narg); ++i) {
             if (argv[i] == Tcl_GetString(args[i+j])) {
                 Tcl_ListObjAppendElement(interp,result,args[i+j]);
+                Tcl_DecrRefCount(args[i+j]);
             } else {
                 Tcl_DecrRefCount(args[i+j]);
                 ++j;
             }
         }
     }
-
+    Tcl_Free((char *)argv);
     Tcl_SetObjResult(interp,result);
     return TCL_OK;
 }

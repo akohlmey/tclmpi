@@ -1,8 +1,9 @@
 # configuration
 CC=mpicc
 LD=$(CC)
-CFLAGS=-fPIC -O2 -Wall -W
-LDFLAGS=-shared
+DEBUG=-g
+CFLAGS=-fPIC -O2 -Wall -W $(DEBUG)
+LDFLAGS=-shared $(DEBUG)
 LIBS=-ltcl
 #############################################
 
