@@ -1,0 +1,270 @@
+This directory contains software that wraps the MPI library for Tcl and
+allows MPI calls to be used from Tcl. The wrapper is a shared object
+that can be loaded into a running Tcl interpreter and will provide
+additional commands that act as an interface to an underlying MPI
+implementation and will allow to run Tcl scripts in parallel via
+"mpirun" or "mpiexec" similar to C, C++ or Fortran programs. The main
+motivation for writing this package is to allow using the VMD molecular
+visualization and analysis package in parallel without having to
+recompile VMD for MPI support and to enable writing companion Tcl
+wrapper for the LAMMPS molecular dynamics simulation software.
+The author of this package is Axel Kohlmeyer and you can reach him
+at akohlmey@gmail.com The official homepage for this project is:
+http://sites.google.com/site/akohlmey/software/tclmpi
+
+Compilation and Installation -------------------------------------------
+The package currently consist of a single C source file which needs to
+be compiled for dynamic linkage. The corresponding commands for Linux
+systems are included in the provided makefile. All that is required to
+compile the package is an installed Tcl development system and a working
+MPI installation. Since this creates a dynamically loaded shared object
+(DSO), both Tcl and MPI have to be compiled and linked as shared
+libraries (this is the default for Tcl and OpenMPI on Linux, but your
+mileage may vary).
+
+General Documentation---------------------------------------------------
+Commands and constants are prefixed with ::tclmpi:: to avoid clashes
+with existing programs. This may be expanded at a later point into a
+full fledged namespace, if the need arises. The overall philosophy of
+the bindings is to make the API similar to the MPI one, but do it the
+Tcl way wherever possible. Convenience and simplicity usually take
+precedence over performance. When sending data around, receive buffers
+will be automatically set up to handle the entire message, thus the
+typical "count" arguments of regular C/C++ or Fortran MPI bindings is
+not required.
+
+Data types--------------------------------------------------------------
+TclMPI currently supports three data types. The ::tclmpi::auto is
+usually recommended for convenience, ::tclmpi::int or ::tclmpi::double
+should only be needed for TclMPI calls that perform mathematical
+operation (like ::tclmpi::allreduce) or when large quantities of data
+have to be transferred and the time for serialization and data transfer
+becomes significant.
+
+::tclmpi::auto
+The Tcl object will be serialized (as a string) and then transferred and
+rebuilt. This data type can send any Tcl object that can be serialized
+(e.g. nested lists and mixed data types).
+
+::tclmpi::int
+The Tcl object (list or number) will be converted to integer and then
+transferred as integer array. This data type can send variable length
+lists of integers or single integers. All data will be converted to flat
+list of integers. List elements that cannot be directly converted into
+an integer (strings, lists) will be represented by 0.
+
+::tclmpi::double
+The Tcl object (list or number) will be converted to double precision
+floating point and then transferred as double precision floating point
+array. This data type can send variable length lists of doubles or
+single numbers. All data will be converted to flat list of floating
+point numbers and thus data that cannot be converted into floating point
+(strings, lists) will be represented by 0.0.
+
+Communicators-----------------------------------------------------------
+In TclMPI communicators are represented by string constants, which are
+converted inside the TclMPI code to match the specific representation of
+the MPI library. A the following communicators are predefined:
+
+::tclmpi::comm_world
+This is the equivalent of MPI_COMM_WORLD and is the communicator that
+contains all processes at the time of running ::tclmpi:init.
+
+::tclmpi::comm_self
+This is the equivalent of MPI_COMM_SELF and is the communicator that
+contains the current rank only.
+
+::tclmpi::comm_null
+This is the equivalent of MPI_COMM_NULL and is a communicator that
+contains no processes.
+
+TclMPI Command Reference------------------------------------------------
+
+::tclmpi::init <argv>
+
+This command initializes the MPI environment. Needs to be called before
+any other TclMPI commands. MPI can be initialized at most once, so
+calling ::tclmpi::init multiple times is an error. Argument is the
+content of the $argv variable, which is automatically created by
+Tcl. Return value is a modified version of $argv that is processed by
+the underlying MPI library to remove all MPI implementation specific
+entries.
+
+::tclmpi::finalize
+
+This command closes the MPI environment and cleans up all MPI
+states. After calling this function, no more TclMPI commands including
+::tclmpi::init may be used. All processes much call this routine before
+exiting. This command takes no arguments and has no return value.
+
+::tclmpi::comm_size <comm>
+
+This function returns the number of processes involved in a
+communicator.
+
+::tclmpi::comm_rank <comm>
+
+This command returns the unique rank of the current process in a
+particular communicator. Rank is an integer between 0 and the size of a
+communicator.
+
+::tclmpi::comm_split <comm> <color> <key>
+
+This function partitions the processes involved in the provided
+communicator into disjoint subgroups, one for each value of color. All
+processes with the same value of color will form a new communicator. The
+key value determines the relative ranks of the processes in the new
+communicator with the current rank on the original communicator being
+used as tiebreaker. color has to be a non-negative integer or
+::tclmpi::undefined. The function returns the new communicator, or
+::tclmpi::comm_null in case of a color value of
+::tclmpi::undefined. This is a collective call, i.e. all processes of
+the communicator have to call it.
+
+::tclmpi::barrier <comm>
+
+This command blocks the calling process until all members of the
+communicator have called it and thus synchronizes all processes. There
+is no return value.
+
+::tclmpi::bcast <data> <type> <root> <comm>
+
+This command broadcasts the provided data object (list or single number
+or string) from the process with rank root on the communicator comm to
+all processes. The data argument has to be present on all processes but
+will be ignored on all but the rank root process. The data resulting
+from the broadcast will be stored in the return value of the
+command. This is important when the data type is not ::tclmpi::auto,
+since using those data types may incur an irreversible conversion.
+
+::tclmpi::allreduce <data> <type> <op> <comm>
+
+This command performs a global reduction operation op on the provided
+data object across all processes participating in the communicator
+comm. If data is a list, then the reduction will be done across each
+respective entry of the same list index. The result is distributed to
+all processes and used as return value of the command. This command only
+supports the data types ::tclmpi::int and ::tclmpi::double. The
+following reduction operations are supported: ::tclmpi::max (maximum),
+::tclmpi::min (minimum), ::tclmpi::sum (sum), ::tclmpi::prod (product),
+::tclmpi::land (logical and), ::tclmpi::band (bitwise and),
+::tclmpi::lor (logical or), ::tclmpi::bor (bitwise or), ::tclmpi::lxor
+(logical exclusive or), ::tclmpi::bxor (bitwise exclusive or),
+::tclmpi::maxloc (max value and location), ::tclmpi::minloc (min value
+and location).
+
+::tclmpi::send <data> <type> <dest> <tag> <comm>
+
+This function performs a regular blocking send to process rank dest on
+communicator comm. The choice of data type determines how data is being
+sent (see above for details) and the corresponding receive has to use
+the exact same data type, or the transfer will fail.
+
+::tclmpi::recv <type> <source> <tag> <comm> ?<status>?
+
+This procedure provides a blocking receive operation, i.e. it only
+returns after the message is received in full. The received data will be
+passed as return value. The type argument has to match that of the
+corresponding send command. Instead of a specific source rank, the
+constant ::tclmpi::any_source can be used and similarly
+::tclmpi::any_tag as tag, to not select on source rank or tag,
+respectively. The (optional) status argument would be the name of a
+variable in which the resulting information will be stored in the form
+of an associative array. The associative array has the entries
+MPI_SOURCE (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size
+of message in bytes), COUNT_INT (size of message in ::tclmpi::int
+units), COUNT_DOUBLE (size of message in ::tclmpi::double units).
+
+::tclmpi::probe <source> <tag> <comm> ?<status>?
+
+This function allows to check for an incoming message on the
+communicator comm without actually receiving it. Nevertheless, this call
+is "blocking", i.e. it won't return unless there is a message pending
+that matches the requirements of source rank and message tag. Instead of
+a specific source rank, the constant ::tclmpi::any_source can be used
+and similarly ::tclmpi::any_tag as tag, to not select on source rank or
+tag, respectively. The (optional) status argument would be the name of a
+variable in which the resulting information will be stored in the form
+of an associative array. The associative array has the entries
+MPI_SOURCE (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size
+of message in bytes), COUNT_INT (size of message in ::tclmpi::int
+units), COUNT_DOUBLE (size of message in ::tclmpi::double units).
+
+Examples----------------------------------------------------------------
+The following section provides some simple examples using TclMPI to
+recreate common MPI example programs.
+
+This is the TclMPI version of "hello world".
+----------------------------- cut here ---------------------------------
+#!/usr/bin/tclsh
+# hello world a la TclMPI
+
+# point Tcl to the directory with pkgIndex.tcl
+# and load the TclMPI package.
+set auto_path [concat $env(PWD)/.. $auto_path]
+package require tclmpi 0.2
+
+# initialize TclMPI
+set argv [::tclmpi::init $argv]
+
+set comm ::tclmpi::comm_world
+set size [::tclmpi::comm_size $comm]
+set rank [::tclmpi::comm_rank $comm]
+
+puts "hello world, this is rank $rank of $size"
+
+# close out TclMPI
+::tclmpi::finalize
+exit 0
+----------------------------- cut here ---------------------------------
+
+Computation of Pi
+This script uses TclMPI to compute the value of Pi from numerical
+quadrature of the integral from zero to 1 over 4/(1+x*x).
+
+----------------------------- cut here ---------------------------------
+#!/usr/bin/tclsh
+# compute pi
+set auto_path [concat $env(PWD)/.. $auto_path]
+package require tclmpi 0.2
+
+# initialize MPI
+set argv [::tclmpi::init $argv]
+
+set comm ::tclmpi::comm_world
+set size [::tclmpi::comm_size $comm]
+set rank [::tclmpi::comm_rank $comm]
+set master 0
+
+set num [lindex $argv 0]
+# make sure all processes have the same interval parameter
+set num [::tclmpi::bcast $num ::tclmpi::int $master $comm]
+
+# run parallel calculation
+set h [expr {1.0/$num}]
+set sum 0.0
+for {set i 0} {$i < $num} {incr i $size} {
+  set x [expr {$h * ($i + 0.5)}]
+  set sum [expr {$sum + (4.0 / (1.0 + $x*$x))}]
+}
+set mypi [expr {$h * $sum}]
+
+# combine and print results
+set mypi [::tclmpi::allreduce $mypi ::tclmpi::double ::tclmpi::sum $comm]
+if {$rank == $master} {
+ set res [expr {abs(($mypi - 3.14159265358979)/3.14159265358979)}]
+ puts "result: $mypi. relative error: $res"
+}
+
+# close out TclMPI
+::tclmpi::finalize
+exit 0
+----------------------------- cut here ---------------------------------
+
+Version History---------------------------------------------------------
+Version 0.1:
+  Initial test version, unreleased
+Version 0.2
+  First public version. 
+Supported operations: init, finalize, comm_rank, comm_size, comm_split,
+barrier, bcast, allreduce, send, recv, and probe.
