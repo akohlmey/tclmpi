@@ -39,12 +39,11 @@ puts "after bcast/double on rank $rank: $res"
 if {$rank == 0} {
   set idata 0.0
 
-  set res [::tclmpi::probe ::tclmpi::any_source ::tclmpi::any_tag $comm]
-  array set status $res
+  ::tclmpi::probe ::tclmpi::any_source ::tclmpi::any_tag $comm status
   puts "pending message from rank $status(MPI_SOURCE) containing $status(COUNT_DOUBLE) doubles"
-  set res [::tclmpi::recv ::tclmpi::double ::tclmpi::any_source ::tclmpi::any_tag $comm]
-  array set status [lindex $res 1]
-  puts "received data [lindex $res 0] tag = $status(MPI_TAG) source = $status(MPI_SOURCE) error= $status(MPI_ERROR)"
+  ::tclmpi::recv ::tclmpi::double ::tclmpi::any_source ::tclmpi::any_tag $comm status
+  puts "received data $res tag = $status(MPI_TAG) source = $status(MPI_SOURCE) error= $status(MPI_ERROR)"
+  puts "[array get status]"
 }
 if {$rank == 1} {
   ::tclmpi::send $idata ::tclmpi::double 0 0 $comm

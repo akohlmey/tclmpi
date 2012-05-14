@@ -73,9 +73,10 @@ static const char *tclmpi_add_comm(MPI_Comm comm)
 {
     tclmpi_comm_t *next;
     char *label;
+    const char *oldlabel;
 
-    label = mpi2tcl_comm(comm);
-    if (label != NULL) return label;
+    oldlabel = mpi2tcl_comm(comm);
+    if (oldlabel != NULL) return oldlabel;
 
     next = (tclmpi_comm_t *)Tcl_Alloc(sizeof(tclmpi_comm_t));
     next->next = NULL;
@@ -191,6 +192,12 @@ int TclMPI_Comm_size(ClientData nodata, Tcl_Interp *interp,
 
     Tcl_IncrRefCount(objv[1]);
     comm = tcl2mpi_comm(Tcl_GetString(objv[1]));
+    if (comm == MPI_COMM_INVALID) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": unknown communicator: ",
+                         Tcl_GetString(objv[1]),NULL);
+        return TCL_ERROR;
+    }
 
     ierr = MPI_Comm_size(comm,&commsize);
 
@@ -225,6 +232,12 @@ int TclMPI_Comm_rank(ClientData nodata, Tcl_Interp *interp,
 
     Tcl_IncrRefCount(objv[1]);
     comm = tcl2mpi_comm(Tcl_GetString(objv[1]));
+    if (comm == MPI_COMM_INVALID) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": unknown communicator: ",
+                         Tcl_GetString(objv[1]),NULL);
+        return TCL_ERROR;
+    }
 
     ierr = MPI_Comm_rank(comm,&commrank);
 
@@ -262,6 +275,12 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
         color = MPI_UNDEFINED;
     else Tcl_GetIntFromObj(interp,objv[2],&color);
     Tcl_GetIntFromObj(interp,objv[3],&key);
+    if (comm == MPI_COMM_INVALID) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": unknown communicator: ",
+                         Tcl_GetString(objv[1]),NULL);
+        return TCL_ERROR;
+    }
 
     ierr = MPI_Comm_split(comm,color,key,&newcomm);
 
@@ -291,8 +310,13 @@ int TclMPI_Barrier(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    Tcl_IncrRefCount(objv[1]);
     comm = tcl2mpi_comm(Tcl_GetString(objv[1]));
+    if (comm == MPI_COMM_INVALID) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": unknown communicator: ",
+                         Tcl_GetString(objv[1]),NULL);
+        return TCL_ERROR;
+    }
 
     ierr = MPI_Barrier(comm);
 
@@ -300,11 +324,9 @@ int TclMPI_Barrier(ClientData nodata, Tcl_Interp *interp,
         MPI_Error_string(ierr,tclmpi_errmsg,&len);
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
                          tclmpi_errmsg,NULL);
-        Tcl_DecrRefCount(objv[1]);
         return TCL_ERROR;
     }
 
-    Tcl_DecrRefCount(objv[1]);
     return TCL_OK;
 }
 
@@ -327,20 +349,20 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
     type = tclmpi_datatype(Tcl_GetString(objv[2]));
     Tcl_GetIntFromObj(interp,objv[3],&root);
     comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
-    ierr = MPI_SUCCESS;
 
     if (type == TCLMPI_NONE) {
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
                          ": invalid data type: ",
                          Tcl_GetString(objv[2]),NULL);
         return TCL_ERROR;
-    } else if (comm == MPI_COMM_NULL) {
+    } else if (comm == MPI_COMM_INVALID) {
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": invalid communicator: ",
-                         Tcl_GetString(objv[4]),NULL);
+                         ": unknown communicator: ",
+                         Tcl_GetString(objv[2]),NULL);
         return TCL_ERROR;
     }
 
+    ierr = MPI_SUCCESS;
     Tcl_IncrRefCount(objv[1]);
     MPI_Comm_rank(comm,&rank);
 
@@ -418,7 +440,6 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
 int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
-    const char *tclcomm;
     void *data;
     MPI_Comm comm;
     int i,dest,tag,type,len,ierr;
@@ -489,16 +510,16 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
 int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
-    Tcl_Obj *list,*result,*mpistat;
-    const char *tclcomm;
-    char mpimsg[256];
+    Tcl_Obj *result;
+    const char *statvar;
     void *data;
     MPI_Comm comm;
     MPI_Status status;
     int i,source,tag,type,len,ierr;
 
-    if (objc != 5) {
-        Tcl_WrongNumArgs(interp,1,objv,"<type> <source> <tag> <comm>");
+    if ((objc < 5) || (objc > 6)) {
+        Tcl_WrongNumArgs(interp,1,objv,
+                         "<type> <source> <tag> <comm> ?status?");
         return TCL_ERROR;
     }
 
@@ -510,16 +531,19 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
         tag = MPI_ANY_TAG;
     else Tcl_GetIntFromObj(interp,objv[3],&tag);
     comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
+    if (objc > 5) statvar = Tcl_GetString(objv[5]);
+    else statvar = NULL;
     ierr = MPI_SUCCESS;
+    len = 0;
 
     if (type == TCLMPI_NONE) {
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
                          ": invalid data type: ",
                          Tcl_GetString(objv[1]),NULL);
         return TCL_ERROR;
-    } else if (comm == MPI_COMM_NULL) {
+    } else if (comm == MPI_COMM_INVALID) {
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": invalid communicator: ",
+                         ": unknown communicator: ",
                          Tcl_GetString(objv[4]),NULL);
         return TCL_ERROR;
     }
@@ -559,9 +583,28 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
     } else {
         result = Tcl_NewListObj(0,NULL);
     }
-    sprintf(mpimsg,"MPI_SOURCE %d MPI_TAG %d MPI_ERROR %d",
-            status.MPI_SOURCE,status.MPI_TAG,status.MPI_ERROR);
-    mpistat = Tcl_NewStringObj(mpimsg,-1);
+
+    if (statvar != NULL) {
+        Tcl_Obj *var;
+        int len_char,len_int,len_double;
+        MPI_Get_count(&status,MPI_CHAR,&len_char);
+        MPI_Get_count(&status,MPI_INT,&len_int);
+        MPI_Get_count(&status,MPI_DOUBLE,&len_double);
+        Tcl_UnsetVar(interp,statvar,0);
+        var = Tcl_NewStringObj(statvar,-1);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_SOURCE",-1),
+                       Tcl_NewIntObj(status.MPI_SOURCE),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_TAG",-1),
+                       Tcl_NewIntObj(status.MPI_TAG),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_ERROR",-1),
+                       Tcl_NewIntObj(status.MPI_ERROR),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_CHAR",-1),
+                      Tcl_NewIntObj(len_char),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_INT",-1),
+                      Tcl_NewIntObj(len_char),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_DOUBLE",-1),
+                      Tcl_NewIntObj(len_char),0);
+    }
 
     if (ierr != MPI_SUCCESS) {
         MPI_Error_string(ierr,tclmpi_errmsg,&len);
@@ -569,11 +612,7 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
                          tclmpi_errmsg,NULL);
         return TCL_ERROR;
     }
-
-    list = Tcl_NewListObj(0,NULL);
-    Tcl_ListObjAppendElement(interp,list,result);
-    Tcl_ListObjAppendElement(interp,list,mpistat);
-    Tcl_SetObjResult(interp,list);
+    Tcl_SetObjResult(interp,result);
     return TCL_OK;
 }
 
@@ -583,14 +622,13 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
 int TclMPI_Probe(ClientData nodata, Tcl_Interp *interp,
                  int objc, Tcl_Obj *const objv[])
 {
-    Tcl_Obj *result;
-    char mpimsg[384];
+    const char *statvar;
     MPI_Comm comm;
     MPI_Status status;
-    int source,tag,len,len_char,len_int,len_double,ierr;
+    int source,tag,len,ierr;
 
-    if (objc != 4) {
-        Tcl_WrongNumArgs(interp,1,objv,"<source> <tag> <comm>");
+    if ((objc < 4) || (objc > 5)) {
+        Tcl_WrongNumArgs(interp,1,objv,"<source> <tag> <comm> ?status?");
         return TCL_ERROR;
     }
 
@@ -601,6 +639,8 @@ int TclMPI_Probe(ClientData nodata, Tcl_Interp *interp,
         tag = MPI_ANY_TAG;
     else Tcl_GetIntFromObj(interp,objv[2],&tag);
     comm = tcl2mpi_comm(Tcl_GetString(objv[3]));
+    if (objc > 4) statvar = Tcl_GetString(objv[4]);
+    else statvar = NULL;
     ierr = MPI_SUCCESS;
 
     if (comm == MPI_COMM_NULL) {
@@ -611,21 +651,35 @@ int TclMPI_Probe(ClientData nodata, Tcl_Interp *interp,
     }
 
     ierr = MPI_Probe(source,tag,comm,&status);
+
+    if (statvar != NULL) {
+        Tcl_Obj *var;
+        int len_char,len_int,len_double;
+        MPI_Get_count(&status,MPI_CHAR,&len_char);
+        MPI_Get_count(&status,MPI_INT,&len_int);
+        MPI_Get_count(&status,MPI_DOUBLE,&len_double);
+        Tcl_UnsetVar(interp,statvar,0);
+        var = Tcl_NewStringObj(statvar,-1);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_SOURCE",-1),
+                       Tcl_NewIntObj(status.MPI_SOURCE),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_TAG",-1),
+                       Tcl_NewIntObj(status.MPI_TAG),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_ERROR",-1),
+                       Tcl_NewIntObj(status.MPI_ERROR),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_CHAR",-1),
+                      Tcl_NewIntObj(len_char),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_INT",-1),
+                      Tcl_NewIntObj(len_char),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_DOUBLE",-1),
+                      Tcl_NewIntObj(len_char),0);
+    }
+
     if (ierr != MPI_SUCCESS) {
         MPI_Error_string(ierr,tclmpi_errmsg,&len);
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
                          tclmpi_errmsg,NULL);
         return TCL_ERROR;
     }
-    MPI_Get_count(&status,MPI_CHAR,&len_char);
-    MPI_Get_count(&status,MPI_INT,&len_int);
-    MPI_Get_count(&status,MPI_DOUBLE,&len_double);
-    tag = status.MPI_TAG; source = status.MPI_SOURCE;
-    sprintf(mpimsg,"MPI_SOURCE %d MPI_TAG %d MPI_ERROR %d "
-            "COUNT_CHAR %d COUNT_INT %d COUNT_DOUBLE %d",
-            source,tag,status.MPI_ERROR,len_char,len_int,len_double);
-    result = Tcl_NewStringObj(mpimsg,-1);
-    Tcl_SetObjResult(interp,result);
     return TCL_OK;
 }
 
