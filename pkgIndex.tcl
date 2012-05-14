@@ -8,5 +8,5 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded tclmpi 0.1 [list load [file join $dir tclmpi.so]]
+package ifneeded tclmpi 0.2 [list load [file join $dir tclmpi.so]]
 
