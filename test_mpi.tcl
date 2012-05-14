@@ -1,10 +1,15 @@
 #!/usr/bin/tclsh
+#
+#rename puts puts_orig
+#proc puts_sync {arg} { puts_orig stderr $arg ; flush stderr }
+#interp alias {} ::puts {} ::puts_sync
+
 set auto_path [concat $env(PWD) $auto_path]
 package require tclmpi
 
 ::tclmpi::init $argv
-
 set comm ::tclmpi::comm_world
+
 
 set size [::tclmpi::comm_size $comm]
 set rank [::tclmpi::comm_rank $comm]
@@ -26,9 +31,18 @@ puts "before bcast/int on rank $rank: $idata"
 set res [::tclmpi::bcast $idata ::tclmpi::int 0 $comm]
 puts "after bcast/int on rank $rank: $res"
 
+puts "before allreduce/int on rank $rank: $res"
+set res [::tclmpi::allreduce $res ::tclmpi::int ::tclmpi::sum $comm]
+puts "after allreduce/int on rank $rank: $res"
+
 puts "before bcast/double on rank $rank: $idata"
 set res [::tclmpi::bcast $idata ::tclmpi::double 0 $comm]
 puts "after bcast/double on rank $rank: $res"
+
+puts "before allreduce/double on rank $rank: $res"
+set res [::tclmpi::allreduce $res ::tclmpi::double ::tclmpi::sum $comm]
+puts "after allreduce/double on rank $rank: $res"
+set res [::tclmpi::allreduce $res ::tclmpi::auto ::tclmpi::sum $comm]
 
 if {$rank == 1} { set idata 3.14 }
 puts "before bcast one on rank $rank: $idata"
