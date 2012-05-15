@@ -37,9 +37,8 @@ set tstart [clock microseconds]
 # run parallel calculation
 set h [expr {1.0/$num}]
 set sum 0.0
-for {set i 0} {$i < $num} {incr i $size} {
-  set x [expr {$h * ($i + 0.5)}]
-  set sum [expr {$sum + (4.0 / (1.0 + $x*$x))}]
+for {set i $rank} {$i < $num} {incr i $size} {
+  set sum [expr {$sum + 4.0/(1.0 + ($h*($i+0.5))**2)}]
 }
 set mypi [expr {$h * $sum}]
 if {$rank == $master} {puts "loop time:    [expr {([clock microseconds]-$tstart)/1000000.0}] seconds"}
