@@ -345,6 +345,10 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
     if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
 
+    /* change default error handler on new communicator, so that
+       we can convert MPI errors into 'catch'able Tcl errors */
+    MPI_Comm_set_errhandler(newcomm,MPI_ERRORS_RETURN);
+
     result = Tcl_NewStringObj(tclmpi_add_comm(newcomm),-1);
     Tcl_SetObjResult(interp,result);
     return TCL_OK;
@@ -840,7 +844,7 @@ int Tclmpi_Init(Tcl_Interp *interp)
     char *label;
     tclmpi_comm_t *comm;
 
-    if (Tcl_PkgProvide(interp,"tclmpi","0.3") != TCL_OK) {
+    if (Tcl_PkgProvide(interp,"tclmpi","0.4") != TCL_OK) {
         return TCL_ERROR;
     }
 

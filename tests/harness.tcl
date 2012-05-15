@@ -8,6 +8,13 @@ load ../tclmpi.so
 set pass 0
 set fail 0
 
+# the *very* first test: load the package
+if {[catch {package require tclmpi 0.4} res]} {
+    incr fail
+} else {
+    incr pass
+}
+
 # run command and expect Tcl error
 proc run_error {cmd errormsg} {
     global pass fail
