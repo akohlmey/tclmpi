@@ -22,16 +22,28 @@ MPI installation. Since this creates a dynamically loaded shared object
 libraries (this is the default for Tcl and OpenMPI on Linux, but your
 mileage may vary).
 
-General Documentation---------------------------------------------------
-Commands and constants are prefixed with ::tclmpi:: to avoid clashes
-with existing programs. This may be expanded at a later point into a
-full fledged namespace, if the need arises. The overall philosophy of
-the bindings is to make the API similar to the MPI one, but do it the
-Tcl way wherever possible. Convenience and simplicity usually take
-precedence over performance. When sending data around, receive buffers
-will be automatically set up to handle the entire message, thus the
-typical "count" arguments of regular C/C++ or Fortran MPI bindings is
-not required.
+Similarities and Differences to the MPI C-bindings----------------------
+Commands and constants are prefixed with ::tclmpi:: to reduce clashes
+with existing programs and all lowercase to stay consistent with normal
+Tcl commands. This may be expanded at a later point into a full fledged
+namespace, if the need arises. The overall philosophy of the bindings is
+to make the API similar to the MPI one, but don't stick to it slavishly
+and do things the Tcl way wherever possible and justified. Convenience
+and simplicity take precedence over performance. If performance matters
+that much, use the C/C++ or Fortran bindings but not Tcl. The biggest
+visible change is that sending data around, receive buffers will be
+automatically set up to handle the entire message, thus the typical
+"count" arguments of regular C/C++ or Fortran MPI bindings is not
+required and the received data will be the return value of the
+corresponding command. This convenience has consequences on the
+semantics, so calls to ::tclmpi::bcast will be converted to *two* calls
+to MPI_Bcast(): the first will broadcast the size of the data set being
+sent (so that sufficiently sized buffers can be allocated) and the
+second will actually send the data. Similarly, ::tclmpi::recv will be
+converted into calling MPI_Probe() and then MPI_Recv() for the same
+purpose, the latter call will also use the MPI_SOURCE and MPI_TAG flags
+from the MPI_Status object created for MPI_Probe(). For consistency
+with this only the ::tclmpi::allreduce reduction has been implemented.
 
 Data types--------------------------------------------------------------
 TclMPI currently supports three data types. The ::tclmpi::auto is
@@ -281,3 +293,6 @@ Version 0.3
   Added operation: abort. Added unit tests. Converted MPI errors into Tcl 
 errors (so they can be handled with catch), argument testing code refactoring.
 
+Version 0.4
+  Fixed several bugs, more unit tests, better checking of arguments and
+error reports for it. Update/bugifx to pi.tcl example.
