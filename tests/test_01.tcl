@@ -7,6 +7,10 @@ set self   ::tclmpi::comm_self
 set null   ::tclmpi::comm_null
 set split0 ::tclmpi::comm0
 set split1 ::tclmpi::comm1
+set master 0
+set auto   ::tclmpi::auto
+set int    ::tclmpi::int
+set double ::tclmpi::double
 
 # init
 run_error  [list ::tclmpi::init]       "wrong # args: should be \"::tclmpi::init <argv>\""
@@ -52,6 +56,62 @@ run_error  [list ::tclmpi::barrier comm0]   {::tclmpi::barrier: unknown communic
 run_return [list ::tclmpi::barrier $comm] {}
 run_return [list ::tclmpi::barrier $self] {}
 run_error  [list ::tclmpi::barrier $null]  {::tclmpi::barrier: MPI_ERR_COMM: invalid communicator}
+
+# bcast
+run_error  [list ::tclmpi::bcast]                  "wrong # args: should be \"::tclmpi::bcast <data> <type> <root> <comm>\""
+run_error  [list ::tclmpi::bcast {}]               "wrong # args: should be \"::tclmpi::bcast <data> <type> <root> <comm>\""
+run_error  [list ::tclmpi::bcast {} $auto]         "wrong # args: should be \"::tclmpi::bcast <data> <type> <root> <comm>\""
+run_error  [list ::tclmpi::bcast {} $auto $master] "wrong # args: should be \"::tclmpi::bcast <data> <type> <root> <comm>\""
+run_error  [list ::tclmpi::bcast {} $auto $master $comm xxx] \
+    "wrong # args: should be \"::tclmpi::bcast <data> <type> <root> <comm>\""
+run_error  [list ::tclmpi::bcast {} $auto $master comm0] {::tclmpi::bcast: unknown communicator: comm0}
+run_error  [list ::tclmpi::bcast {} ::tclmpi::real $master $comm] {::tclmpi::bcast: invalid data type: ::tclmpi::real}
+run_error  [list ::tclmpi::bcast {} $auto $master $null] {::tclmpi::bcast: MPI_ERR_COMM: invalid communicator}
+run_error  [list ::tclmpi::bcast {{xx 11} {1 2 3} {}} $auto 1 $comm] {::tclmpi::bcast: MPI_ERR_ROOT: invalid root}
+# check data type conversions
+run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} {}} $auto $master $comm] {{xx 11} {1 2 3} {}}
+run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} {}} $auto $master $self] {{xx 11} {1 2 3} {}}
+run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.0 7 0xff yy} $int $master $self] {0 0 0 7 255 0}
+run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.5 yy 1} $double $master $self] {0.0 0.0 2.5 0.0 1.0}
+run_return [list ::tclmpi::bcast {-1 2 +3 2.0 7 016} $int $master $comm] {-1 2 3 0 7 14}
+run_return [list ::tclmpi::bcast {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} $double $master $self] {-100000.0 1.1 0.0 0.02 6e+26 34.0}
+
+# allreduce
+run_error  [list ::tclmpi::allreduce]                  "wrong # args: should be \"::tclmpi::allreduce <data> <type> <op> <comm>\""
+run_error  [list ::tclmpi::allreduce {}]               "wrong # args: should be \"::tclmpi::allreduce <data> <type> <op> <comm>\""
+run_error  [list ::tclmpi::allreduce {} $auto]         "wrong # args: should be \"::tclmpi::allreduce <data> <type> <op> <comm>\""
+run_error  [list ::tclmpi::allreduce {} $auto ::tclmpi::sum] \
+    "wrong # args: should be \"::tclmpi::allreduce <data> <type> <op> <comm>\""
+run_error  [list ::tclmpi::allreduce {} $auto ::tclmpi::prod $comm xxx] \
+    "wrong # args: should be \"::tclmpi::allreduce <data> <type> <op> <comm>\""
+run_error  [list ::tclmpi::allreduce {} $auto ::tclmpi::max $comm] \
+    {::tclmpi::allreduce: does not support data type ::tclmpi::auto}
+run_error  [list ::tclmpi::allreduce {} $int ::tclmpi::max comm0] \
+    {::tclmpi::allreduce: unknown communicator: comm0}
+run_error  [list ::tclmpi::allreduce {} ::tclmpi::real ::tclmpi::min $comm] \
+    {::tclmpi::allreduce: invalid data type: ::tclmpi::real}
+run_error  [list ::tclmpi::allreduce {} $int ::tclmpi::land $null] {::tclmpi::allreduce: MPI_ERR_COMM: invalid communicator}
+run_error  [list ::tclmpi::allreduce {{xx 11} {1 2 3} {}} $int ::tclmpi::gamma $comm] \
+    {::tclmpi::allreduce: unknown reduction operator: ::tclmpi::gamma}
+run_error [list ::tclmpi::allreduce {-1e5 1.1 1.2e0 0.2e-1 0.06E+28 0x22} $double ::tclmpi::maxloc $comm] \
+    {::tclmpi::allreduce: MPI_ERR_OP: invalid reduce operation}
+
+# check some data type conversions
+run_return [list ::tclmpi::allreduce {{xx 11} {1 2 3} 2.0 7 0xff yy} $int ::tclmpi::max $self] {0 0 0 7 255 0}
+run_return [list ::tclmpi::allreduce {{xx 11} {1 2 3} 2.5 yy 1} $double ::tclmpi::sum $comm] {0.0 0.0 2.5 0.0 1.0}
+run_return [list ::tclmpi::allreduce {-1 2 +3 2.0 7 016} $int ::tclmpi::prod $comm] {-1 2 3 0 7 14}
+
+# probe
+run_error  [list ::tclmpi::probe]     "wrong # args: should be \"::tclmpi::probe <source> <tag> <comm> ?status?\""
+run_error  [list ::tclmpi::probe 0]   "wrong # args: should be \"::tclmpi::probe <source> <tag> <comm> ?status?\""
+run_error  [list ::tclmpi::probe 0 0] "wrong # args: should be \"::tclmpi::probe <source> <tag> <comm> ?status?\""
+run_error  [list ::tclmpi::probe 0 0 $comm status xxx] \
+    "wrong # args: should be \"::tclmpi::probe <source> <tag> <comm> ?status?\""
+run_error  [list ::tclmpi::probe 0 0 comm0] {::tclmpi::probe: unknown communicator: comm0}
+run_error  [list ::tclmpi::probe ::tclmpi::any_tag 0 $comm] {expected integer but got "::tclmpi::any_tag"}
+run_error  [list ::tclmpi::probe 0 ::tclmpi::any_source $comm] {expected integer but got "::tclmpi::any_source"}
+run_error  [list ::tclmpi::probe ::tclmpi::any_source ::tclmpi::any_tag $null] \
+    {::tclmpi::probe: invalid communicator: ::tclmpi::comm_null}
 
 # finalize
 run_error  [list ::tclmpi::finalize 0] "wrong # args: should be \"::tclmpi::finalize\""
