@@ -167,7 +167,7 @@ communicator comm. The choice of data type determines how data is being
 sent (see above for details) and the corresponding receive has to use
 the exact same data type, or the transfer will fail.
 
-::tclmpi::recv <type> <source> <tag> <comm> ?<status>?
+::tclmpi::recv <type> <source> <tag> <comm> ?status?
 
 This procedure provides a blocking receive operation, i.e. it only
 returns after the message is received in full. The received data will be
@@ -182,7 +182,7 @@ MPI_SOURCE (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size
 of message in bytes), COUNT_INT (size of message in ::tclmpi::int
 units), COUNT_DOUBLE (size of message in ::tclmpi::double units).
 
-::tclmpi::probe <source> <tag> <comm> ?<status>?
+::tclmpi::probe <source> <tag> <comm> ?status?
 
 This function allows to check for an incoming message on the
 communicator comm without actually receiving it. Nevertheless, this call
