@@ -50,6 +50,10 @@ default: tclmpi.so
 clean:
 	rm -f tclmpi.so *.o *~
 
+check:
+	(cd tests; ./test_01.tcl)
+#	(cd tests; mpirun -np 2 ./test_02.tcl)
+
 #############################################
 tclmpi.so:  tcl_mpi.o
 	$(LD) $(LDFLAGS) -o tclmpi.so $^ $(LIBS)
