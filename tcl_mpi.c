@@ -481,7 +481,6 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
                                      Tcl_NewDoubleObj(idata[i]));
         Tcl_Free((char *)idata);
     }
-    Tcl_DecrRefCount(objv[1]);
 
     if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
@@ -512,7 +511,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
 
     opstr = Tcl_GetString(objv[3]);
     comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
-    if (tclmpi_commcheck(interp,comm,objv[0],objv[3]) != TCL_OK)
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[4]) != TCL_OK)
         return TCL_ERROR;
 
     /* special case check for reduction */
@@ -691,11 +690,13 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
 
     if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::any_source") == 0)
         source = MPI_ANY_SOURCE;
-    else Tcl_GetIntFromObj(interp,objv[2],&source);
+    else if (Tcl_GetIntFromObj(interp,objv[2],&source) != TCL_OK)
+        return TCL_ERROR;
 
     if (strcmp(Tcl_GetString(objv[3]),"::tclmpi::any_tag") == 0)
         tag = MPI_ANY_TAG;
-    else Tcl_GetIntFromObj(interp,objv[3],&tag);
+    else if (Tcl_GetIntFromObj(interp,objv[3],&tag) != TCL_OK)
+        return TCL_ERROR;
 
     if (objc > 5) statvar = Tcl_GetString(objv[5]);
     else statvar = NULL;
@@ -804,10 +805,14 @@ int TclMPI_Probe(ClientData nodata, Tcl_Interp *interp,
 
     if (strcmp(Tcl_GetString(objv[1]),"::tclmpi::any_source") == 0)
         source = MPI_ANY_SOURCE;
-    else Tcl_GetIntFromObj(interp,objv[1],&source);
+    else if (Tcl_GetIntFromObj(interp,objv[1],&source) != TCL_OK)
+        return TCL_ERROR;
+
     if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::any_tag") == 0)
         tag = MPI_ANY_TAG;
-    else Tcl_GetIntFromObj(interp,objv[2],&tag);
+    else if (Tcl_GetIntFromObj(interp,objv[2],&tag) != TCL_OK)
+        return TCL_ERROR;
+
     comm = tcl2mpi_comm(Tcl_GetString(objv[3]));
     if (tclmpi_commcheck(interp,comm,objv[0],objv[3]) != TCL_OK)
         return TCL_ERROR;
