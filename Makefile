@@ -48,7 +48,7 @@ LIBS= $(TCLLIB) $(MPILIB)
 default: tclmpi.so
 
 clean:
-	rm -f tclmpi.so *.o *~
+	rm -f tclmpi.so *.o *~ tests/*~ examples/*~
 
 check:
 	(cd tests; ./test_01.tcl)
