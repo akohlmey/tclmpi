@@ -269,9 +269,15 @@ exit 0
 ----------------------------- cut here ---------------------------------
 
 Version History---------------------------------------------------------
+
 Version 0.1:
   Initial test version, unreleased
+
 Version 0.2
-  First public version. 
-Supported operations: init, finalize, comm_rank, comm_size, comm_split,
-barrier, bcast, allreduce, send, recv, and probe.
+  First public version. Supported operations: init, finalize, comm_rank,
+comm_size, comm_split, barrier, bcast, allreduce, send, recv, and probe.
+
+Version 0.3
+  Added operation: abort. Added unit tests. Converted MPI errors into Tcl 
+errors (so they can be handled with catch), argument testing code refactoring.
+
