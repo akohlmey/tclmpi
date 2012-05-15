@@ -27,6 +27,10 @@ struct  tclmpi_comm {
 static tclmpi_comm_t *first_comm = NULL;
 static tclmpi_comm_t *last_comm = NULL;
 static int tclmpi_comm_cntr = 0;
+
+/* is 1 after MPI_Init() and -1 after MPI_Finalize() */
+static int tclmpi_init_done = 0;
+
 /* we need this to detect unlisted communicators */
 static MPI_Comm MPI_COMM_INVALID;
 
@@ -91,6 +95,7 @@ static const char *tclmpi_add_comm(MPI_Comm comm)
     return next->label;
 }
 
+
 #define TCLMPI_NONE   0
 #define TCLMPI_INT    1
 #define TCLMPI_DOUBLE 2
@@ -108,13 +113,53 @@ static int tclmpi_datatype(const char *type)
     else return TCLMPI_NONE;
 }
 
+
+/* convert MPI error code to Tcl error */
+static int tclmpi_errcheck(Tcl_Interp *interp, int ierr, Tcl_Obj *obj)
+{
+    if (ierr != MPI_SUCCESS) {
+        int len;
+        MPI_Error_string(ierr,tclmpi_errmsg,&len);
+        Tcl_AppendResult(interp,Tcl_GetString(obj),": ",
+                         tclmpi_errmsg,NULL);
+        return TCL_ERROR;
+    } else return TCL_OK;
+}
+
+
+/* check for valid communicator */
+static int tclmpi_commcheck(Tcl_Interp *interp, MPI_Comm comm,
+                            Tcl_Obj *obj0, Tcl_Obj *obj1)
+{
+    if (comm == MPI_COMM_INVALID) {
+        Tcl_AppendResult(interp,Tcl_GetString(obj0),
+                         ": unknown communicator: ",
+                         Tcl_GetString(obj1),NULL);
+        return TCL_ERROR;
+    } else return TCL_OK;
+}
+
+
+/* check for valid data type */
+static int tclmpi_typecheck(Tcl_Interp *interp, int type,
+                            Tcl_Obj *obj0, Tcl_Obj *obj1)
+{
+    if (type == TCLMPI_NONE) {
+        Tcl_AppendResult(interp,Tcl_GetString(obj0),
+                         ": invalid data type: ",
+                         Tcl_GetString(obj1),NULL);
+        return TCL_ERROR;
+    } else return TCL_OK;
+}
+
+
 /* wrapper for MPI_Init() */
 
 int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
     Tcl_Obj *result,**args;
-    int argc,narg,i,j;
+    int argc,narg,i,j,ierr;
     char **argv;
 
     if (objc != 2) {
@@ -124,9 +169,7 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
 
     /* convert "command line arguments" back to standard C stuff. */
     Tcl_IncrRefCount(objv[1]);
-    if (Tcl_ListObjGetElements(interp,objv[1],&narg,&args) != TCL_OK) {
-        return TCL_ERROR;
-    }
+    Tcl_ListObjGetElements(interp,objv[1],&narg,&args);
 
     argv = (char **)Tcl_Alloc(narg*sizeof(char *));
     for (argc=0; argc < narg; ++argc) {
@@ -134,7 +177,20 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
         argv[argc] = Tcl_GetString(args[argc]);
     }
 
-    MPI_Init(&argc,&argv);
+    if (tclmpi_init_done != 0) {
+        Tcl_AppendResult(interp,"Calling ",Tcl_GetString(objv[0]),
+                         " twice is erroneous.",NULL);
+        return TCL_ERROR;
+    }
+    ierr = MPI_Init(&argc,&argv);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
+        return TCL_ERROR;
+    tclmpi_init_done=1;
+
+    /* change default error handler, so we can convert
+       MPI errors into 'catch'able Tcl errors */
+    MPI_Comm_set_errhandler(MPI_COMM_WORLD,MPI_ERRORS_RETURN);
+
     result = Tcl_NewListObj(0,NULL);
 
     /* check if results are changed */
@@ -154,6 +210,7 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
             }
         }
     }
+    Tcl_DecrRefCount(objv[1]);
     Tcl_Free((char *)argv);
     Tcl_SetObjResult(interp,result);
     return TCL_OK;
@@ -162,18 +219,45 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
 /* wrapper for MPI_Finalize() */
 
 int TclMPI_Finalize(ClientData nodata, Tcl_Interp *interp,
-                int objc, Tcl_Obj *const objv[])
+                    int objc, Tcl_Obj *const objv[])
 {
-    Tcl_Obj *result;
-
     if (objc != 1) {
+        Tcl_WrongNumArgs(interp,1,objv,NULL);
+        return TCL_ERROR;
+    }
+
+    if (tclmpi_init_done < 0) {
+        Tcl_AppendResult(interp,"Calling ",Tcl_GetString(objv[0]),
+                         " twice is erroneous.",NULL);
+        return TCL_ERROR;
+    }
+    MPI_Finalize();
+    tclmpi_init_done=-1;
+
+    return TCL_OK;
+}
+
+
+/* wrapper for MPI_Abort() */
+
+int TclMPI_Abort(ClientData nodata, Tcl_Interp *interp,
+                 int objc, Tcl_Obj *const objv[])
+{
+    MPI_Comm comm;
+    int ierr;
+
+    if (objc != 3) {
         Tcl_WrongNumArgs(interp,0,objv,NULL);
         return TCL_ERROR;
     }
 
-    MPI_Finalize();
-    result = Tcl_NewListObj(0,NULL);
-    Tcl_SetObjResult(interp,result);
+    if (Tcl_GetIntFromObj(interp,objv[1],&ierr) != TCL_OK)
+        ierr=0;
+    comm = tcl2mpi_comm(Tcl_GetString(objv[1]));
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[1]) != TCL_OK)
+        return TCL_ERROR;
+
+    MPI_Abort(comm,ierr);
     return TCL_OK;
 }
 
@@ -185,34 +269,22 @@ int TclMPI_Comm_size(ClientData nodata, Tcl_Interp *interp,
 {
     Tcl_Obj *result;
     MPI_Comm comm;
-    int commsize,ierr,len;
+    int commsize,ierr;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp,1,objv,"<comm>");
         return TCL_ERROR;
     }
 
-    Tcl_IncrRefCount(objv[1]);
     comm = tcl2mpi_comm(Tcl_GetString(objv[1]));
-    if (comm == MPI_COMM_INVALID) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": unknown communicator: ",
-                         Tcl_GetString(objv[1]),NULL);
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[1]) != TCL_OK)
         return TCL_ERROR;
-    }
 
     ierr = MPI_Comm_size(comm,&commsize);
-
-    if (ierr != MPI_SUCCESS) {
-        MPI_Error_string(ierr,tclmpi_errmsg,&len);
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
-                         tclmpi_errmsg,NULL);
-        Tcl_DecrRefCount(objv[1]);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
-    }
 
     result = Tcl_NewIntObj(commsize);
-    Tcl_DecrRefCount(objv[1]);
     Tcl_SetObjResult(interp,result);
     return TCL_OK;
 }
@@ -225,34 +297,22 @@ int TclMPI_Comm_rank(ClientData nodata, Tcl_Interp *interp,
 {
     Tcl_Obj *result;
     MPI_Comm comm;
-    int commrank,ierr,len;
+    int commrank,ierr;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp,1,objv,"<comm>");
         return TCL_ERROR;
     }
 
-    Tcl_IncrRefCount(objv[1]);
     comm = tcl2mpi_comm(Tcl_GetString(objv[1]));
-    if (comm == MPI_COMM_INVALID) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": unknown communicator: ",
-                         Tcl_GetString(objv[1]),NULL);
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[1]) != TCL_OK)
         return TCL_ERROR;
-    }
 
     ierr = MPI_Comm_rank(comm,&commrank);
-
-    if (ierr != MPI_SUCCESS) {
-        MPI_Error_string(ierr,tclmpi_errmsg,&len);
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
-                         tclmpi_errmsg,NULL);
-        Tcl_DecrRefCount(objv[1]);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
-    }
 
     result = Tcl_NewIntObj(commrank);
-    Tcl_DecrRefCount(objv[1]);
     Tcl_SetObjResult(interp,result);
     return TCL_OK;
 }
@@ -265,7 +325,7 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
 {
     Tcl_Obj *result;
     MPI_Comm comm,newcomm;
-    int color,key,len,ierr;
+    int color,key,ierr;
 
     if (objc != 4) {
         Tcl_WrongNumArgs(interp,1,objv,"<comm> <color> <key>");
@@ -273,25 +333,17 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
     }
 
     comm = tcl2mpi_comm(Tcl_GetString(objv[1]));
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[1]) != TCL_OK)
+        return TCL_ERROR;
+
     if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::undefined") == 0)
         color = MPI_UNDEFINED;
     else Tcl_GetIntFromObj(interp,objv[2],&color);
     Tcl_GetIntFromObj(interp,objv[3],&key);
-    if (comm == MPI_COMM_INVALID) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": unknown communicator: ",
-                         Tcl_GetString(objv[1]),NULL);
-        return TCL_ERROR;
-    }
 
     ierr = MPI_Comm_split(comm,color,key,&newcomm);
-
-    if (ierr != MPI_SUCCESS) {
-        MPI_Error_string(ierr,tclmpi_errmsg,&len);
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
-                         tclmpi_errmsg,NULL);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
-    }
 
     result = Tcl_NewStringObj(tclmpi_add_comm(newcomm),-1);
     Tcl_SetObjResult(interp,result);
@@ -305,7 +357,7 @@ int TclMPI_Barrier(ClientData nodata, Tcl_Interp *interp,
                      int objc, Tcl_Obj *const objv[])
 {
     MPI_Comm comm;
-    int ierr,len;
+    int ierr;
 
     if (objc != 2) {
         Tcl_WrongNumArgs(interp,1,objv,"<comm>");
@@ -313,21 +365,12 @@ int TclMPI_Barrier(ClientData nodata, Tcl_Interp *interp,
     }
 
     comm = tcl2mpi_comm(Tcl_GetString(objv[1]));
-    if (comm == MPI_COMM_INVALID) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": unknown communicator: ",
-                         Tcl_GetString(objv[1]),NULL);
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[1]) != TCL_OK)
         return TCL_ERROR;
-    }
 
     ierr = MPI_Barrier(comm);
-
-    if (ierr != MPI_SUCCESS) {
-        MPI_Error_string(ierr,tclmpi_errmsg,&len);
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
-                         tclmpi_errmsg,NULL);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
-    }
 
     return TCL_OK;
 }
@@ -348,23 +391,15 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
     }
 
     type = tclmpi_datatype(Tcl_GetString(objv[2]));
+    if (tclmpi_typecheck(interp,type,objv[0],objv[2]) != TCL_OK)
+        return TCL_ERROR;
+
     Tcl_GetIntFromObj(interp,objv[3],&root);
     comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
-
-    if (type == TCLMPI_NONE) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": invalid data type: ",
-                         Tcl_GetString(objv[2]),NULL);
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[4]) != TCL_OK)
         return TCL_ERROR;
-    } else if (comm == MPI_COMM_INVALID) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": unknown communicator: ",
-                         Tcl_GetString(objv[2]),NULL);
-        return TCL_ERROR;
-    }
 
     ierr = MPI_SUCCESS;
-    Tcl_IncrRefCount(objv[1]);
     MPI_Comm_rank(comm,&rank);
 
     if (type == TCLMPI_AUTO) {
@@ -428,12 +463,8 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
     }
     Tcl_DecrRefCount(objv[1]);
 
-    if (ierr != MPI_SUCCESS) {
-        MPI_Error_string(ierr,tclmpi_errmsg,&len);
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
-                         tclmpi_errmsg,NULL);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
-    }
 
     if (result) Tcl_SetObjResult(interp,result);
     return TCL_OK;
@@ -456,22 +487,18 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
     }
 
     type = tclmpi_datatype(Tcl_GetString(objv[2]));
+    if (tclmpi_typecheck(interp,type,objv[0],objv[2]) != TCL_OK)
+        return TCL_ERROR;
+
     opstr = Tcl_GetString(objv[3]);
     comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
-
-    if (type == TCLMPI_NONE) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": invalid data type: ",
-                         Tcl_GetString(objv[2]),NULL);
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[3]) != TCL_OK)
         return TCL_ERROR;
-    } else if (type == TCLMPI_AUTO) {
+
+    /* special case check for reduction */
+    if (type == TCLMPI_AUTO) {
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
                          ": does not support data type ",
-                         Tcl_GetString(objv[2]),NULL);
-        return TCL_ERROR;
-    } else if (comm == MPI_COMM_INVALID) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": unknown communicator: ",
                          Tcl_GetString(objv[2]),NULL);
         return TCL_ERROR;
     }
@@ -547,12 +574,8 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
     }
     Tcl_DecrRefCount(objv[1]);
 
-    if (ierr != MPI_SUCCESS) {
-        MPI_Error_string(ierr,tclmpi_errmsg,&len);
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
-                         tclmpi_errmsg,NULL);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
-    }
 
     if (result) Tcl_SetObjResult(interp,result);
     return TCL_OK;
@@ -572,22 +595,17 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
     }
 
     type = tclmpi_datatype(Tcl_GetString(objv[2]));
+    if (tclmpi_typecheck(interp,type,objv[0],objv[2]) != TCL_OK)
+        return TCL_ERROR;
+
+    comm = tcl2mpi_comm(Tcl_GetString(objv[5]));
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[5]) != TCL_OK)
+        return TCL_ERROR;
+
     Tcl_GetIntFromObj(interp,objv[3],&dest);
     Tcl_GetIntFromObj(interp,objv[4],&tag);
-    comm = tcl2mpi_comm(Tcl_GetString(objv[5]));
-    ierr = MPI_SUCCESS;
 
-    if (type == TCLMPI_NONE) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": invalid data type: ",
-                         Tcl_GetString(objv[2]),NULL);
-        return TCL_ERROR;
-    } else if (comm == MPI_COMM_NULL) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": invalid communicator: ",
-                         Tcl_GetString(objv[5]),NULL);
-        return TCL_ERROR;
-    }
+    ierr = MPI_SUCCESS;
 
     Tcl_IncrRefCount(objv[1]);
     if (type == TCLMPI_AUTO) {
@@ -619,12 +637,8 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
     }
     Tcl_DecrRefCount(objv[1]);
 
-    if (ierr != MPI_SUCCESS) {
-        MPI_Error_string(ierr,tclmpi_errmsg,&len);
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
-                         tclmpi_errmsg,NULL);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
-    }
 
     return TCL_OK;
 }
@@ -648,29 +662,26 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
     }
 
     type = tclmpi_datatype(Tcl_GetString(objv[1]));
+    if (tclmpi_typecheck(interp,type,objv[0],objv[1]) != TCL_OK)
+        return TCL_ERROR;
+
+    comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[4]) != TCL_OK)
+        return TCL_ERROR;
+
     if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::any_source") == 0)
         source = MPI_ANY_SOURCE;
     else Tcl_GetIntFromObj(interp,objv[2],&source);
+
     if (strcmp(Tcl_GetString(objv[3]),"::tclmpi::any_tag") == 0)
         tag = MPI_ANY_TAG;
     else Tcl_GetIntFromObj(interp,objv[3],&tag);
-    comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
+
     if (objc > 5) statvar = Tcl_GetString(objv[5]);
     else statvar = NULL;
+
     ierr = MPI_SUCCESS;
     len = 0;
-
-    if (type == TCLMPI_NONE) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": invalid data type: ",
-                         Tcl_GetString(objv[1]),NULL);
-        return TCL_ERROR;
-    } else if (comm == MPI_COMM_INVALID) {
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
-                         ": unknown communicator: ",
-                         Tcl_GetString(objv[4]),NULL);
-        return TCL_ERROR;
-    }
 
     if (type == TCLMPI_AUTO) {
         char *idata;
@@ -731,12 +742,9 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
                       Tcl_NewIntObj(len_char),0);
     }
 
-    if (ierr != MPI_SUCCESS) {
-        MPI_Error_string(ierr,tclmpi_errmsg,&len);
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
-                         tclmpi_errmsg,NULL);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
-    }
+
     Tcl_SetObjResult(interp,result);
     return TCL_OK;
 }
@@ -750,7 +758,7 @@ int TclMPI_Probe(ClientData nodata, Tcl_Interp *interp,
     const char *statvar;
     MPI_Comm comm;
     MPI_Status status;
-    int source,tag,len,ierr;
+    int source,tag,ierr;
 
     if ((objc < 4) || (objc > 5)) {
         Tcl_WrongNumArgs(interp,1,objv,"<source> <tag> <comm> ?status?");
@@ -799,12 +807,9 @@ int TclMPI_Probe(ClientData nodata, Tcl_Interp *interp,
                       Tcl_NewIntObj(len_char),0);
     }
 
-    if (ierr != MPI_SUCCESS) {
-        MPI_Error_string(ierr,tclmpi_errmsg,&len);
-        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),": ",
-                         tclmpi_errmsg,NULL);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
-    }
+
     return TCL_OK;
 }
 
@@ -835,7 +840,7 @@ int Tclmpi_Init(Tcl_Interp *interp)
     char *label;
     tclmpi_comm_t *comm;
 
-    if (Tcl_PkgProvide(interp,"tclmpi","0.2") != TCL_OK) {
+    if (Tcl_PkgProvide(interp,"tclmpi","0.3") != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -872,6 +877,8 @@ int Tclmpi_Init(Tcl_Interp *interp)
     Tcl_CreateObjCommand(interp,"::tclmpi::init",TclMPI_Init,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"::tclmpi::finalize",TclMPI_Finalize,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"::tclmpi::abort",TclMPI_Abort,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"::tclmpi::comm_size",TclMPI_Comm_size,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
