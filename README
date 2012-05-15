@@ -97,6 +97,13 @@ states. After calling this function, no more TclMPI commands including
 ::tclmpi::init may be used. All processes much call this routine before
 exiting. This command takes no arguments and has no return value.
 
+::tclmpi::abort <errorcode>
+
+This command makes a best attempt to abort all tasks sharing the
+communicator and exit with the provided error code. Only one task needs
+to call ::tclmpi::abort. This command terminates the program, so there
+can be no return value.
+
 ::tclmpi::comm_size <comm>
 
 This function returns the number of processes involved in a
