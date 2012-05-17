@@ -92,11 +92,13 @@ static const char *tclmpi_add_comm(MPI_Comm comm)
 
 /* some symbolic constants */
 
-#define TCLMPI_INVALID -1
-#define TCLMPI_NONE     0
-#define TCLMPI_INT      1
-#define TCLMPI_DOUBLE   2
-#define TCLMPI_AUTO     3
+#define TCLMPI_INVALID   -1
+#define TCLMPI_NONE       0
+#define TCLMPI_AUTO       1
+#define TCLMPI_INT        2
+#define TCLMPI_INT_INT    3
+#define TCLMPI_DOUBLE     4
+#define TCLMPI_DOUBLE_INT 5
 
 /* translate MPI requests to Tcl strings and back "::tclmpi::req%d" */
 
@@ -203,6 +205,10 @@ static int tclmpi_datatype(const char *type)
         return TCLMPI_INT;
     else if (strcmp(type,"::tclmpi::double") == 0)
         return TCLMPI_DOUBLE;
+    else if (strcmp(type,"::tclmpi::dblint") == 0)
+        return TCLMPI_DOUBLE_INT;
+    else if (strcmp(type,"::tclmpi::intint") == 0)
+        return TCLMPI_INT_INT;
     else if (strcmp(type,"::tclmpi::auto") == 0)
         return TCLMPI_AUTO;
     else return TCLMPI_NONE;
@@ -675,7 +681,25 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
                                      Tcl_NewDoubleObj(odata[i]));
         Tcl_Free((char *)idata);
         Tcl_Free((char *)odata);
+    } else if (type == TCLMPI_INT_INT) {
+        Tcl_Obj **ilist;
+        int *idata, *odata;
+        if (Tcl_ListObjGetElements(interp,objv[1],&len,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        idata = (int *)Tcl_Alloc(len*sizeof(int));
+        odata = (int *)Tcl_Alloc(len*sizeof(int));
+        for (i=0; i < len; ++i)
+            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK)
+                idata[i] = 0;
+        ierr = MPI_Allreduce(idata,odata,len/2,MPI_2INT,op,comm);
+        result = Tcl_NewListObj(0,NULL);
+        for (i=0; i < len; ++i)
+            Tcl_ListObjAppendElement(interp,result,
+                                     Tcl_NewIntObj(odata[i]));
+        Tcl_Free((char *)idata);
+        Tcl_Free((char *)odata);    
     }
+    
     Tcl_DecrRefCount(objv[1]);
 
     if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
