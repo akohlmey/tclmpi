@@ -52,7 +52,7 @@ clean:
 
 check: tclmpi.so
 	(cd tests; ./test_01.tcl)
-#	(cd tests; mpirun -np 2 ./test_02.tcl)
+	(cd tests; mpirun -np 2 ./test_02.tcl)
 
 #############################################
 tclmpi.so:  tcl_mpi.o
