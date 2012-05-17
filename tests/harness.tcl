@@ -104,6 +104,7 @@ proc par_return {cmd retval} {
         return {}
     }
 
+    ::tclmpi::barrier $comm
     set cmd [lindex $cmd $rank]
     set retval [lindex $retval $rank]
     set res [::tclmpi::allreduce [list [catch $cmd result] $rank] \
@@ -136,6 +137,7 @@ proc par_return {cmd retval} {
             puts "$fail/Error message $result on rank $rank"
         }
     }
+    ::tclmpi::barrier $comm
     flush stdout
     return {}
 }
@@ -162,6 +164,7 @@ proc par_error {cmd retval} {
         incr fail
         return {}
     }
+    ::tclmpi::barrier $comm
 
     set cmd [lindex $cmd $rank]
     set retval [lindex $retval $rank]
@@ -195,6 +198,7 @@ proc par_error {cmd retval} {
             puts "$fail/Error message $result on rank $rank"
         }
     }
+    ::tclmpi::barrier $comm
     flush stdout
     return {}
 }
