@@ -13,7 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 
-/* translate communicators to Tcl string references "::tclmpi::comm%d" */
+/* translate communicators to Tcl string references and back "::tclmpi::comm%d" */
 
 typedef struct tclmpi_comm tclmpi_comm_t;
 
@@ -89,27 +89,112 @@ static const char *tclmpi_add_comm(MPI_Comm comm)
     return next->label;
 }
 
-/* translate MPI requests to Tcl string references "::tclmpi::req%d" */
+
+/* some symbolic constants */
+
+#define TCLMPI_INVALID -1
+#define TCLMPI_NONE     0
+#define TCLMPI_INT      1
+#define TCLMPI_DOUBLE   2
+#define TCLMPI_AUTO     3
+
+/* translate MPI requests to Tcl strings and back "::tclmpi::req%d" */
 
 typedef struct tclmpi_req tclmpi_req_t;
 
 struct  tclmpi_req {
-    const char *label;
-    void *data;
-    int type;
-    MPI_Request req;
-    tclmpi_req_t *next;
+    const char *label;  /* identifier of this request */
+    void *data;         /* pointer to send data */
+    int len;            /* size of data block */
+    int type;           /* type of send data */
+    int source;         /* source selector of receive */
+    int tag;            /* tag selector of receive */
+    MPI_Request *req;   /* MPI request handle */
+    MPI_Comm comm;      /* communicator for receive */
+    tclmpi_req_t *next; /* pointer to next struct */
 };
 
 static tclmpi_req_t *first_req = NULL;
-static tclmpi_req_t *last_req = NULL;
 static int tclmpi_req_cntr = 0;
 
+/* allocate and add request struct to translation table */
+static const char *tclmpi_add_req()
+{
+    tclmpi_req_t *req, *next;
+    char *label;
 
-#define TCLMPI_NONE   0
-#define TCLMPI_INT    1
-#define TCLMPI_DOUBLE 2
-#define TCLMPI_AUTO   3
+    next = (tclmpi_req_t *)Tcl_Alloc(sizeof(tclmpi_req_t));
+    if (next == NULL) return NULL;
+    memset(req,0,sizeof(tclmpi_req_t));
+
+    next->req = (MPI_Request *)Tcl_Alloc(sizeof(MPI_Request));
+    if (next->req == NULL) {
+        Tcl_Free(next);
+        return NULL;
+    }
+    
+    label = (char *)Tcl_Alloc(32);
+    if (label == NULL) {
+        Tcl_Free(next->req);
+        Tcl_Free(next);
+        return NULL;
+    }
+
+    sprintf(label,"::tclmpi::req%d",tclmpi_req_cntr);
+    next->label = label;
+    next->type = TCLMPI_NONE;
+    next->len = TCLMPI_INVALID;
+    ++tclmpi_req_cntr;
+
+    if (first_req == NULL) {
+        first_req = next;
+    } else {
+        req = first_req;
+        while (req->next) req = req->next;
+        req->next = next;
+    }
+    
+    return next->label;
+}
+
+/* translate Tcl request label to request struct */
+static tclmpi_req_t *tclmpi_find_req(const char *label)
+{
+    tclmpi_req_t *req;
+
+    req = first_req;
+    while (req) {
+        if (strcmp(req->label,label) == 0)
+            return req;
+        else req = req->next;
+    }
+    return NULL;
+}
+
+/* remove request struct from translation table and deallocate memory */
+static int tclmpi_del_req(tclmpi_req_t *req)
+{
+    if (req == NULL) return TCL_ERROR;
+
+    if (req == first_req) {
+        first_req = req->next;
+        return TCL_OK;
+    } else {
+        tclmpi_req_t *prev = first_req;
+        while (prev->next) {
+            if (prev->next == req) {
+                prev->next = prev->next->next;
+                Tcl_Free(req->label);
+                Tcl_Free((char *) req->req);
+                Tcl_Free((char *) req);
+                return TCL_OK;
+            }
+            prev = prev->next;
+        }
+    }
+    return TCL_ERROR;
+}
+
 
 /* convert string to numeric type */
 static int tclmpi_datatype(const char *type)
@@ -663,6 +748,91 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
 }
 
 
+/* wrapper for MPI_Isend() */
+
+int TclMPI_Isend(ClientData nodata, Tcl_Interp *interp,
+                 int objc, Tcl_Obj *const objv[])
+{
+    tclmpi_req_t *req;
+    const char *reqlabel;
+    void *data;
+    MPI_Comm comm;
+    int i,dest,tag,type,len,ierr;
+
+    if (objc != 6) {
+        Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <dest> <tag> <comm>");
+        return TCL_ERROR;
+    }
+
+    type = tclmpi_datatype(Tcl_GetString(objv[2]));
+    if (tclmpi_typecheck(interp,type,objv[0],objv[2]) != TCL_OK)
+        return TCL_ERROR;
+
+    comm = tcl2mpi_comm(Tcl_GetString(objv[5]));
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[5]) != TCL_OK)
+        return TCL_ERROR;
+
+    Tcl_GetIntFromObj(interp,objv[3],&dest);
+    Tcl_GetIntFromObj(interp,objv[4],&tag);
+
+    reqlabel = tclmpi_add_req();
+    if (reqlabel == NULL) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": cannot create TclMPI request handle.",NULL);
+        return TCL_ERROR;
+    }
+    req = tclmpi_find_req(reqlabel);
+    req->type = type;
+    ierr = MPI_SUCCESS;
+
+    Tcl_IncrRefCount(objv[1]);
+    if (type == TCLMPI_AUTO) {
+        char *idata;
+        data = Tcl_GetStringFromObj(objv[1],&len);
+        idata = Tcl_Alloc(len);
+        memcpy(idata,data,len);
+        req->data = idata;
+        ierr = MPI_Isend(idata,len,MPI_CHAR,dest,tag,comm,req->req);
+        data = idata;
+    } else if (type == TCLMPI_INT) {
+        Tcl_Obj **ilist;
+        int *idata;
+        if (Tcl_ListObjGetElements(interp,objv[1],&len,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        idata = (int *)Tcl_Alloc(len*sizeof(int));
+        for (i=0; i < len; ++i)
+            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK)
+                idata[i] = 0;
+        req->data = idata;
+        ierr = MPI_Isend(idata,len,MPI_INT,dest,tag,comm,req->req);
+        data = idata;
+    } else if (type == TCLMPI_DOUBLE) {
+        Tcl_Obj **ilist;
+        double *idata;
+        if (Tcl_ListObjGetElements(interp,objv[1],&len,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        idata = (double *)Tcl_Alloc(len*sizeof(double));
+        for (i=0; i < len; ++i)
+            if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK)
+                idata[i]=0.0;
+        req->data = idata;
+        ierr = MPI_Isend(idata,len,MPI_DOUBLE,dest,tag,comm,req->req);
+        data = idata;
+    }
+    Tcl_DecrRefCount(objv[1]);
+
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK) {
+        Tcl_Free((char *)data);
+        tclmpi_del_req(req);
+        return TCL_ERROR;
+    }
+
+    /* return request handle */
+    Tcl_SetObjResult(interp,Tcl_NewStringObj(reqlabel,-1));
+    return TCL_OK;
+}
+
+
 /* wrapper for MPI_Recv() */
 
 int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
@@ -788,6 +958,109 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
 }
 
 
+/* wrapper for MPI_Iecv() */
+
+int TclMPI_Irecv(ClientData nodata, Tcl_Interp *interp,
+                 int objc, Tcl_Obj *const objv[])
+{
+    tclmpi_req_t *req;
+    const char *reqlabel;
+    void *data;
+    MPI_Comm comm;
+    MPI_Status status;
+    int source,tag,type,pending,len,ierr;
+
+    if ((objc < 4) || (objc > 5)) {
+        Tcl_WrongNumArgs(interp,1,objv,"<type> <source> <tag> <comm>");
+        return TCL_ERROR;
+    }
+
+    type = tclmpi_datatype(Tcl_GetString(objv[1]));
+    if (tclmpi_typecheck(interp,type,objv[0],objv[1]) != TCL_OK)
+        return TCL_ERROR;
+
+    comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[4]) != TCL_OK)
+        return TCL_ERROR;
+
+    if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::any_source") == 0)
+        source = MPI_ANY_SOURCE;
+    else if (Tcl_GetIntFromObj(interp,objv[2],&source) != TCL_OK)
+        return TCL_ERROR;
+
+    if (strcmp(Tcl_GetString(objv[3]),"::tclmpi::any_tag") == 0)
+        tag = MPI_ANY_TAG;
+    else if (Tcl_GetIntFromObj(interp,objv[3],&tag) != TCL_OK)
+        return TCL_ERROR;
+
+    reqlabel = tclmpi_add_req();
+    if (reqlabel == NULL) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": cannot create TclMPI request handle.",NULL);
+        return TCL_ERROR;
+    }
+    req = tclmpi_find_req(reqlabel);
+    req->type = type;
+    req->source = source;
+    req->tag = tag;
+    req->comm = comm;
+    req->data = NULL;
+    /* indicate receive */
+    req->len = TCLMPI_NONE;
+
+    ierr = MPI_SUCCESS;
+    pending = len = 0;
+
+    /* check if a matching send is already posted and ready to be received */
+    ierr = MPI_Iprobe(source,tag,comm,&pending,&status);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK) {
+        tclmpi_del_req(req);
+        return TCL_ERROR;
+    }
+
+    if (pending) {
+        if (type == TCLMPI_AUTO) {
+            char *idata;
+            MPI_Get_count(&status,MPI_CHAR,&len);
+            idata = Tcl_Alloc(len);
+            req->data = idata;
+            req->len = len;
+            tag = status.MPI_TAG; source = status.MPI_SOURCE;
+            ierr=MPI_Irecv(idata,len,MPI_CHAR,source,tag,comm,req->req);
+
+        } else if (type == TCLMPI_INT) {
+            int *idata;
+            MPI_Get_count(&status,MPI_INT,&len);
+            idata = (int *)Tcl_Alloc(len*sizeof(int));
+            req->data = idata;
+            req->len = len;
+            tag = status.MPI_TAG; source = status.MPI_SOURCE;
+            ierr = MPI_Irecv(idata,len,MPI_INT,source,tag,comm,req->req);
+
+        } else if (type == TCLMPI_DOUBLE) {
+            double *idata;
+            MPI_Get_count(&status,MPI_DOUBLE,&len);
+            idata = (double *)Tcl_Alloc(len*sizeof(double));
+            req->data = idata;
+            req->len = len;
+            tag = status.MPI_TAG; source = status.MPI_SOURCE;
+            ierr = MPI_Irecv(idata,len,MPI_DOUBLE,source,tag,comm,req->req);
+        }
+
+        /* posting the receive failed */
+        if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK) {
+            Tcl_Free((char *)data);
+            tclmpi_del_req(req);
+            return TCL_ERROR;
+        }
+    }
+    
+    /* return request handle */
+    Tcl_SetObjResult(interp,Tcl_NewStringObj(reqlabel,-1));
+    return TCL_OK;
+}
+
+
 /* wrapper for MPI_Probe() */
 
 int TclMPI_Probe(ClientData nodata, Tcl_Interp *interp,
@@ -857,6 +1130,281 @@ int TclMPI_Probe(ClientData nodata, Tcl_Interp *interp,
     return TCL_OK;
 }
 
+/* wrapper for MPI_Iprobe() */
+
+int TclMPI_Iprobe(ClientData nodata, Tcl_Interp *interp,
+                 int objc, Tcl_Obj *const objv[])
+{
+    const char *statvar;
+    MPI_Comm comm;
+    MPI_Status status;
+    int source,tag,ierr,pending;
+
+    if ((objc < 4) || (objc > 5)) {
+        Tcl_WrongNumArgs(interp,1,objv,"<source> <tag> <comm> ?status?");
+        return TCL_ERROR;
+    }
+
+    if (strcmp(Tcl_GetString(objv[1]),"::tclmpi::any_source") == 0)
+        source = MPI_ANY_SOURCE;
+    else if (Tcl_GetIntFromObj(interp,objv[1],&source) != TCL_OK)
+        return TCL_ERROR;
+
+    if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::any_tag") == 0)
+        tag = MPI_ANY_TAG;
+    else if (Tcl_GetIntFromObj(interp,objv[2],&tag) != TCL_OK)
+        return TCL_ERROR;
+
+    comm = tcl2mpi_comm(Tcl_GetString(objv[3]));
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[3]) != TCL_OK)
+        return TCL_ERROR;
+    if (comm == MPI_COMM_NULL) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": invalid communicator: ",
+                         Tcl_GetString(objv[3]),NULL);
+        return TCL_ERROR;
+    }
+
+    if (objc > 4) statvar = Tcl_GetString(objv[4]);
+    else statvar = NULL;
+    pending = 0;
+
+    if (statvar != NULL) {
+        Tcl_Obj *var;
+        int len_char,len_int,len_double;
+
+        ierr = MPI_Iprobe(source,tag,comm,&pending,&status);
+
+        MPI_Get_count(&status,MPI_CHAR,&len_char);
+        MPI_Get_count(&status,MPI_INT,&len_int);
+        MPI_Get_count(&status,MPI_DOUBLE,&len_double);
+        Tcl_UnsetVar(interp,statvar,0);
+        var = Tcl_NewStringObj(statvar,-1);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_SOURCE",-1),
+                       Tcl_NewIntObj(status.MPI_SOURCE),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_TAG",-1),
+                       Tcl_NewIntObj(status.MPI_TAG),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_ERROR",-1),
+                       Tcl_NewIntObj(status.MPI_ERROR),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_CHAR",-1),
+                      Tcl_NewIntObj(len_char),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_INT",-1),
+                      Tcl_NewIntObj(len_char),0);
+        Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_DOUBLE",-1),
+                      Tcl_NewIntObj(len_char),0);
+    } else ierr = MPI_Iprobe(source,tag,comm,&pending,MPI_STATUS_IGNORE);
+
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
+        return TCL_ERROR;
+
+    Tcl_SetObjResult(interp,Tcl_NewIntObj(pending));
+    return TCL_OK;
+}
+
+/* wrapper for MPI_Wait() */
+
+int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
+                int objc, Tcl_Obj *const objv[])
+{
+    Tcl_Obj *result;
+    const char *statvar;
+    tclmpi_req_t *req;
+    MPI_Status status;
+    int ierr;
+
+    if ((objc < 2) || (objc > 3)) {
+        Tcl_WrongNumArgs(interp,1,objv,"<request> ?status?");
+        return TCL_ERROR;
+    }
+
+    req = tclmpi_find_req(Tcl_GetString(objv[1]));
+    /* waiting on an illegal request returns immediately */
+    if (req == NULL) return TCL_OK;
+
+    if (objc > 4) statvar = Tcl_GetString(objv[4]);
+    else statvar = NULL;
+
+    /* handle non-blocking send requests */
+    if (req->len == TCLMPI_INVALID) {
+        if (statvar != NULL) {
+            Tcl_Obj *var;
+            int len_char,len_int,len_double;
+            ierr = MPI_Wait(req->req,&status);
+
+            MPI_Get_count(&status,MPI_CHAR,&len_char);
+            MPI_Get_count(&status,MPI_INT,&len_int);
+            MPI_Get_count(&status,MPI_DOUBLE,&len_double);
+            Tcl_UnsetVar(interp,statvar,0);
+            var = Tcl_NewStringObj(statvar,-1);
+            Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_SOURCE",-1),
+                           Tcl_NewIntObj(status.MPI_SOURCE),0);
+            Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_TAG",-1),
+                           Tcl_NewIntObj(status.MPI_TAG),0);
+            Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_ERROR",-1),
+                           Tcl_NewIntObj(status.MPI_ERROR),0);
+            Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_CHAR",-1),
+                           Tcl_NewIntObj(len_char),0);
+            Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_INT",-1),
+                           Tcl_NewIntObj(len_char),0);
+            Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_DOUBLE",-1),
+                           Tcl_NewIntObj(len_char),0);
+        } else ierr = MPI_Wait(req->req,MPI_STATUS_IGNORE);
+
+        if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
+            return TCL_ERROR;
+
+        /* success. clean up. */
+        Tcl_Free((char *) req->data);
+        tclmpi_del_req(req);
+        Tcl_SetResult(interp,NULL,NULL);
+        return TCL_OK;
+
+    } else {
+        /* handle receive */
+        int i,len,tag,source;
+
+        /* already posted non-blocking receive */
+        if (req->data != NULL) {
+            ierr = MPI_Wait(req->req,&status);
+            
+            if (statvar != NULL) {
+                Tcl_Obj *var;
+                int len_char,len_int,len_double;
+
+                MPI_Get_count(&status,MPI_CHAR,&len_char);
+                MPI_Get_count(&status,MPI_INT,&len_int);
+                MPI_Get_count(&status,MPI_DOUBLE,&len_double);
+                Tcl_UnsetVar(interp,statvar,0);
+                var = Tcl_NewStringObj(statvar,-1);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_SOURCE",-1),
+                               Tcl_NewIntObj(status.MPI_SOURCE),0);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_TAG",-1),
+                               Tcl_NewIntObj(status.MPI_TAG),0);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_ERROR",-1),
+                               Tcl_NewIntObj(status.MPI_ERROR),0);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_CHAR",-1),
+                               Tcl_NewIntObj(len_char),0);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_INT",-1),
+                               Tcl_NewIntObj(len_char),0);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_DOUBLE",-1),
+                               Tcl_NewIntObj(len_char),0);
+            } else ierr = MPI_Wait(req->req,MPI_STATUS_IGNORE);
+
+            if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
+                return TCL_ERROR;
+
+            if (req->type == TCLMPI_AUTO) {
+                result = Tcl_NewStringObj(req->data,req->len);
+
+            } else if (req->type == TCLMPI_INT) {
+                int *idata = (int *)req->data;
+                result = Tcl_NewListObj(0,NULL);
+                for (i=0; i < req->len; ++i)
+                    Tcl_ListObjAppendElement(interp,result,
+                                             Tcl_NewIntObj(idata[i]));
+            } else if (req->type == TCLMPI_DOUBLE) {
+                double *idata = (double *)req->data;
+                result = Tcl_NewListObj(0,NULL);
+                for (i=0; i < req->len; ++i)
+                    Tcl_ListObjAppendElement(interp,result,
+                                             Tcl_NewDoubleObj(idata[i]));
+            } else {
+                result = Tcl_NewListObj(0,NULL);
+            }
+        } else {
+
+            /* receive not posted so far, we can do a blocking receive now */
+            if (req->type == TCLMPI_AUTO) {
+                char *idata;
+                MPI_Probe(req->source,req->tag,req->comm,&status);
+                MPI_Get_count(&status,MPI_CHAR,&len);
+                idata = Tcl_Alloc(len);
+                tag = status.MPI_TAG; source = status.MPI_SOURCE;
+
+                if (statvar != NULL) 
+                    ierr=MPI_Recv(idata,len,MPI_CHAR,source,tag,req->comm,&status);
+                else 
+                    ierr=MPI_Recv(idata,len,MPI_CHAR,source,tag,req->comm,MPI_STATUS_IGNORE);
+
+                result = Tcl_NewStringObj(idata,len);
+                req->data = idata;
+
+            } else if (req->type == TCLMPI_INT) {
+                int *idata;
+                MPI_Probe(req->source,req->tag,req->comm,&status);
+                MPI_Get_count(&status,MPI_INT,&len);
+                idata = (int *)Tcl_Alloc(len*sizeof(int));
+                tag = status.MPI_TAG; source = status.MPI_SOURCE;
+
+                if (statvar != NULL)
+                    ierr = MPI_Recv(idata,len,MPI_INT,source,tag,req->comm,&status);
+                else
+                    ierr = MPI_Recv(idata,len,MPI_INT,source,tag,req->comm,MPI_STATUS_IGNORE);
+
+                result = Tcl_NewListObj(0,NULL);
+                for (i=0; i < len; ++i)
+                    Tcl_ListObjAppendElement(interp,result,
+                                             Tcl_NewIntObj(idata[i]));
+                req->data = idata;
+
+            } else if (req->type == TCLMPI_DOUBLE) {
+                double *idata;
+                MPI_Probe(req->source,req->tag,req->comm,&status);
+                MPI_Get_count(&status,MPI_DOUBLE,&len);
+                idata = (double *)Tcl_Alloc(len*sizeof(double));
+                tag = status.MPI_TAG; source = status.MPI_SOURCE;
+
+                if (statvar != NULL)
+                    ierr = MPI_Recv(idata,len,MPI_DOUBLE,source,tag,req->comm,&status);
+                else
+                    ierr = MPI_Recv(idata,len,MPI_DOUBLE,source,tag,req->comm,MPI_STATUS_IGNORE);
+
+                result = Tcl_NewListObj(0,NULL);
+                for (i=0; i < len; ++i)
+                    Tcl_ListObjAppendElement(interp,result,
+                                             Tcl_NewDoubleObj(idata[i]));
+                req->data = idata;
+            } else {
+                result = Tcl_NewListObj(0,NULL);
+            }
+
+            if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK) {
+                if (req->data) Tcl_Free((char *)req->data);
+                tclmpi_del_req(req);
+                return TCL_ERROR;
+            }
+
+            if (statvar != NULL) {
+                Tcl_Obj *var;
+                int len_char,len_int,len_double;
+                MPI_Get_count(&status,MPI_CHAR,&len_char);
+                MPI_Get_count(&status,MPI_INT,&len_int);
+                MPI_Get_count(&status,MPI_DOUBLE,&len_double);
+                Tcl_UnsetVar(interp,statvar,0);
+                var = Tcl_NewStringObj(statvar,-1);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_SOURCE",-1),
+                               Tcl_NewIntObj(status.MPI_SOURCE),0);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_TAG",-1),
+                               Tcl_NewIntObj(status.MPI_TAG),0);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("MPI_ERROR",-1),
+                               Tcl_NewIntObj(status.MPI_ERROR),0);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_CHAR",-1),
+                               Tcl_NewIntObj(len_char),0);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_INT",-1),
+                               Tcl_NewIntObj(len_char),0);
+                Tcl_ObjSetVar2(interp,var,Tcl_NewStringObj("COUNT_DOUBLE",-1),
+                               Tcl_NewIntObj(len_char),0);
+            }
+            Tcl_SetObjResult(interp,result);
+        }
+
+        /* success. clean up. */
+        Tcl_Free((char *) req->data);
+        tclmpi_del_req(req);
+        return TCL_OK;
+    }
+}
+
 
 /* register the plugin with the tcl interpreter */
 #if defined(MPIWRAPSTCLDLL_EXPORTS) && defined(_WIN32)
@@ -884,7 +1432,7 @@ int Tclmpi_Init(Tcl_Interp *interp)
     char *label;
     tclmpi_comm_t *comm;
 
-    if (Tcl_PkgProvide(interp,"tclmpi","0.4") != TCL_OK) {
+    if (Tcl_PkgProvide(interp,"tclmpi","0.5") != TCL_OK) {
         return TCL_ERROR;
     }
 
@@ -938,9 +1486,17 @@ int Tclmpi_Init(Tcl_Interp *interp)
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"::tclmpi::send",TclMPI_Send,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"::tclmpi::isend",TclMPI_Isend,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"::tclmpi::recv",TclMPI_Recv,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"::tclmpi::irecv",TclMPI_Irecv,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"::tclmpi::probe",TclMPI_Probe,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"::tclmpi::iprobe",TclMPI_Iprobe,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"::tclmpi::wait",TclMPI_Wait,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     return TCL_OK;
 }

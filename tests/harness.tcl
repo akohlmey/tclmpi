@@ -7,13 +7,7 @@ load ../tclmpi.so
 # count successful tests
 set pass 0
 set fail 0
-
-# the *very* first test: load the package
-if {[catch {package require tclmpi 0.4} res]} {
-    incr fail
-} else {
-    incr pass
-}
+set version 0.5
 
 # run command and expect Tcl error
 proc run_error {cmd errormsg} {
@@ -60,3 +54,7 @@ proc test_summary {section} {
     puts "test section $section | total pass: $pass | total fail: $fail"
     exit $fail
 }
+
+# the *very* first test: load the package and check version
+run_return "package require tclmpi $version" $version
+
