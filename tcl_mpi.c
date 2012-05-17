@@ -122,23 +122,23 @@ static int tclmpi_req_cntr = 0;
 /* allocate and add request struct to translation table */
 static const char *tclmpi_add_req()
 {
-    tclmpi_req_t *req, *next;
+    tclmpi_req_t *next;
     char *label;
 
     next = (tclmpi_req_t *)Tcl_Alloc(sizeof(tclmpi_req_t));
     if (next == NULL) return NULL;
-    memset(req,0,sizeof(tclmpi_req_t));
+    memset(next,0,sizeof(tclmpi_req_t));
 
     next->req = (MPI_Request *)Tcl_Alloc(sizeof(MPI_Request));
     if (next->req == NULL) {
-        Tcl_Free(next);
+        Tcl_Free((char *)next);
         return NULL;
     }
     
     label = (char *)Tcl_Alloc(32);
     if (label == NULL) {
-        Tcl_Free(next->req);
-        Tcl_Free(next);
+        Tcl_Free((char *)next->req);
+        Tcl_Free((char *)next);
         return NULL;
     }
 
@@ -151,6 +151,7 @@ static const char *tclmpi_add_req()
     if (first_req == NULL) {
         first_req = next;
     } else {
+        tclmpi_req_t *req;
         req = first_req;
         while (req->next) req = req->next;
         req->next = next;
@@ -186,9 +187,9 @@ static int tclmpi_del_req(tclmpi_req_t *req)
         while (prev->next) {
             if (prev->next == req) {
                 prev->next = prev->next->next;
-                Tcl_Free(req->label);
-                Tcl_Free((char *) req->req);
-                Tcl_Free((char *) req);
+                Tcl_Free((char *)req->label);
+                Tcl_Free((char *)req->req);
+                Tcl_Free((char *)req);
                 return TCL_OK;
             }
             prev = prev->next;
@@ -354,15 +355,17 @@ int TclMPI_Abort(ClientData nodata, Tcl_Interp *interp,
     int ierr;
 
     if (objc != 3) {
-        Tcl_WrongNumArgs(interp,0,objv,NULL);
+        Tcl_WrongNumArgs(interp,1,objv,"<comm> <errorcode>");
         return TCL_ERROR;
     }
 
-    if (Tcl_GetIntFromObj(interp,objv[1],&ierr) != TCL_OK)
-        ierr=0;
     comm = tcl2mpi_comm(Tcl_GetString(objv[1]));
     if (tclmpi_commcheck(interp,comm,objv[0],objv[1]) != TCL_OK)
         return TCL_ERROR;
+
+    if (Tcl_GetIntFromObj(interp,objv[2],&ierr) != TCL_OK) {
+        return TCL_ERROR;
+    }
 
     MPI_Abort(comm,ierr);
     return TCL_OK;
@@ -445,8 +448,12 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
 
     if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::undefined") == 0)
         color = MPI_UNDEFINED;
-    else Tcl_GetIntFromObj(interp,objv[2],&color);
-    Tcl_GetIntFromObj(interp,objv[3],&key);
+    else {
+        if (Tcl_GetIntFromObj(interp,objv[2],&color) != TCL_OK)
+            return TCL_ERROR;
+    }
+    if (Tcl_GetIntFromObj(interp,objv[3],&key) != TCL_OK)
+        return TCL_ERROR;
 
     ierr = MPI_Comm_split(comm,color,key,&newcomm);
     if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
@@ -505,7 +512,9 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
     if (tclmpi_typecheck(interp,type,objv[0],objv[2]) != TCL_OK)
         return TCL_ERROR;
 
-    Tcl_GetIntFromObj(interp,objv[3],&root);
+    if (Tcl_GetIntFromObj(interp,objv[3],&root) != TCL_OK)
+        return TCL_ERROR;
+
     comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
     if (tclmpi_commcheck(interp,comm,objv[0],objv[4]) != TCL_OK)
         return TCL_ERROR;
@@ -571,6 +580,11 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
             Tcl_ListObjAppendElement(interp,result,
                                      Tcl_NewDoubleObj(idata[i]));
         Tcl_Free((char *)idata);
+    } else {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": support for data type ", Tcl_GetString(objv[2]),
+                         " is not yet implemented.",NULL);
+        return TCL_ERROR;
     }
 
     if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
@@ -698,8 +712,13 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
                                      Tcl_NewIntObj(odata[i]));
         Tcl_Free((char *)idata);
         Tcl_Free((char *)odata);    
+    } else {
+        Tcl_DecrRefCount(objv[1]);
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": support for data type ", Tcl_GetString(objv[2]),
+                         " is not yet implemented.",NULL);
+        return TCL_ERROR;
     }
-    
     Tcl_DecrRefCount(objv[1]);
 
     if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
@@ -730,8 +749,10 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
     if (tclmpi_commcheck(interp,comm,objv[0],objv[5]) != TCL_OK)
         return TCL_ERROR;
 
-    Tcl_GetIntFromObj(interp,objv[3],&dest);
-    Tcl_GetIntFromObj(interp,objv[4],&tag);
+    if (Tcl_GetIntFromObj(interp,objv[3],&dest) != TCL_OK)
+        return TCL_ERROR;
+    if (Tcl_GetIntFromObj(interp,objv[4],&tag) != TCL_OK)
+        return TCL_ERROR;
 
     ierr = MPI_SUCCESS;
 
@@ -762,6 +783,12 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
                 idata[i]=0.0;
         ierr = MPI_Send(idata,len,MPI_DOUBLE,dest,tag,comm);
         Tcl_Free((char *)idata);
+    } else {
+        Tcl_DecrRefCount(objv[1]);
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": support for data type ", Tcl_GetString(objv[2]),
+                         " is not yet implemented.",NULL);
+        return TCL_ERROR;
     }
     Tcl_DecrRefCount(objv[1]);
 
@@ -796,8 +823,10 @@ int TclMPI_Isend(ClientData nodata, Tcl_Interp *interp,
     if (tclmpi_commcheck(interp,comm,objv[0],objv[5]) != TCL_OK)
         return TCL_ERROR;
 
-    Tcl_GetIntFromObj(interp,objv[3],&dest);
-    Tcl_GetIntFromObj(interp,objv[4],&tag);
+    if (Tcl_GetIntFromObj(interp,objv[3],&dest) != TCL_OK)
+        return TCL_ERROR;
+    if (Tcl_GetIntFromObj(interp,objv[4],&tag) != TCL_OK)
+        return TCL_ERROR;
 
     reqlabel = tclmpi_add_req();
     if (reqlabel == NULL) {
@@ -808,6 +837,7 @@ int TclMPI_Isend(ClientData nodata, Tcl_Interp *interp,
     req = tclmpi_find_req(reqlabel);
     req->type = type;
     ierr = MPI_SUCCESS;
+    data = NULL;
 
     Tcl_IncrRefCount(objv[1]);
     if (type == TCLMPI_AUTO) {
@@ -842,11 +872,17 @@ int TclMPI_Isend(ClientData nodata, Tcl_Interp *interp,
         req->data = idata;
         ierr = MPI_Isend(idata,len,MPI_DOUBLE,dest,tag,comm,req->req);
         data = idata;
+    } else {
+        Tcl_DecrRefCount(objv[1]);
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": support for data type ", Tcl_GetString(objv[2]),
+                         " is not yet implemented.",NULL);
+        return TCL_ERROR;
     }
     Tcl_DecrRefCount(objv[1]);
 
     if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK) {
-        Tcl_Free((char *)data);
+        if (data) Tcl_Free((char *)data);
         tclmpi_del_req(req);
         return TCL_ERROR;
     }
@@ -1247,6 +1283,7 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
 
     if (objc > 4) statvar = Tcl_GetString(objv[4]);
     else statvar = NULL;
+    ierr = MPI_SUCCESS;
 
     /* handle non-blocking send requests */
     if (req->len == TCLMPI_INVALID) {
@@ -1278,7 +1315,7 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
             return TCL_ERROR;
 
         /* success. clean up. */
-        Tcl_Free((char *) req->data);
+        Tcl_Free((char *)req->data);
         tclmpi_del_req(req);
         Tcl_SetResult(interp,NULL,NULL);
         return TCL_OK;
@@ -1423,7 +1460,7 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
         }
 
         /* success. clean up. */
-        Tcl_Free((char *) req->data);
+        Tcl_Free((char *)req->data);
         tclmpi_del_req(req);
         return TCL_OK;
     }
