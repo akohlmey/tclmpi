@@ -8,22 +8,12 @@ set null   ::tclmpi::comm_null
 set split0 ::tclmpi::comm0
 set split1 ::tclmpi::comm1
 
-# init
-run_error  [list ::tclmpi::init]       "wrong # args: should be \"::tclmpi::init <argv>\""
-run_error  [list ::tclmpi::init 0 0]   "wrong # args: should be \"::tclmpi::init <argv>\""
-run_return [list ::tclmpi::init $argv] $argv
-run_error  [list ::tclmpi::init $argv] {Calling ::tclmpi::init twice is erroneous.}
+# parallel init
+par_init
 
-# comm_size
-run_error  [list ::tclmpi::comm_size] "wrong # args: should be \"::tclmpi::comm_size <comm>\""
-run_error  [list ::tclmpi::comm_size comm0] {::tclmpi::comm_size: unknown communicator: comm0}
-run_return [list ::tclmpi::comm_size $comm] 1
-run_return [list ::tclmpi::comm_size $self] 1
-run_error  [list ::tclmpi::comm_size $null] {::tclmpi::comm_size: MPI_ERR_COMM: invalid communicator}
+par_return [list [list ::tclmpi::comm_size $comm] [list ::tclmpi::comm_size $comm]] [list 2 2]
 
-# comm_rank
-run_error  [list ::tclmpi::comm_rank] "wrong # args: should be \"::tclmpi::comm_rank <comm>\""
-run_error  [list ::tclmpi::comm_rank comm0] {::tclmpi::comm_rank: unknown communicator: comm0}
+if {0} {
 run_return [list ::tclmpi::comm_rank $comm] 0
 run_return [list ::tclmpi::comm_rank $self] 0
 run_error  [list ::tclmpi::comm_rank $null] {::tclmpi::comm_rank: MPI_ERR_COMM: invalid communicator}
@@ -55,9 +45,10 @@ run_error  [list ::tclmpi::barrier $null]  {::tclmpi::barrier: MPI_ERR_COMM: inv
 
 # finalize
 run_error  [list ::tclmpi::finalize 0] "wrong # args: should be \"::tclmpi::finalize\""
-run_return [list ::tclmpi::finalize] {}
 run_error  [list ::tclmpi::finalize] {Calling ::tclmpi::finalize twice is erroneous.}
+}
 
 # print results and exit
 test_summary 02
+::tclmpi::finalize
 

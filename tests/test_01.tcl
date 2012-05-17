@@ -2,15 +2,7 @@
 # tests that can be run with just one process
 source harness.tcl
 
-set comm   ::tclmpi::comm_world
-set self   ::tclmpi::comm_self
-set null   ::tclmpi::comm_null
-set split0 ::tclmpi::comm0
-set split1 ::tclmpi::comm1
-set master 0
-set auto   ::tclmpi::auto
-set int    ::tclmpi::int
-set double ::tclmpi::double
+ser_init
 
 # init
 run_error  [list ::tclmpi::init]       "wrong # args: should be \"::tclmpi::init <argv>\""
@@ -33,6 +25,8 @@ run_return [list ::tclmpi::comm_rank $self] 0
 run_error  [list ::tclmpi::comm_rank $null] {::tclmpi::comm_rank: MPI_ERR_COMM: invalid communicator}
 
 # comm_split
+set split0 ::tclmpi::comm0
+set split1 ::tclmpi::comm1
 run_error  [list ::tclmpi::comm_split] "wrong # args: should be \"::tclmpi::comm_split <comm> <color> <key>\""
 run_error  [list ::tclmpi::comm_split $comm 1] "wrong # args: should be \"::tclmpi::comm_split <comm> <color> <key>\""
 run_error  [list ::tclmpi::comm_split comm0 0 0]  {::tclmpi::comm_split: unknown communicator: comm0}
