@@ -23,6 +23,7 @@ set version 0.5
 proc ser_init {args} {
     global version rank master
     if {$rank == $master} {
+        puts {------------------------------------------------------------------------------}
         run_return "package require tclmpi $version" $version
     }
 }
