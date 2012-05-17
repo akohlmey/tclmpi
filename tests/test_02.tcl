@@ -11,7 +11,14 @@ set split1 ::tclmpi::comm1
 # parallel init
 par_init
 
-par_return [list [list ::tclmpi::comm_size $comm] [list ::tclmpi::comm_size $comm]] [list 2 2]
+par_return [list [list ::tclmpi::comm_size $comm] \
+                 [list ::tclmpi::comm_size $comm]] [list 2 2]
+par_return [list [list ::tclmpi::comm_rank $comm] \
+                 [list ::tclmpi::comm_rank $comm]] [list 0 1]
+par_return [list [list ::tclmpi::comm_size $self] \
+                 [list ::tclmpi::comm_size $self]] [list 1 1]
+par_return [list [list ::tclmpi::comm_rank $self] \
+                 [list ::tclmpi::comm_rank $self]] [list 0 0]
 
 if {0} {
 run_return [list ::tclmpi::comm_rank $comm] 0
