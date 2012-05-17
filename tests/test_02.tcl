@@ -1,5 +1,5 @@
 #!/usr/bin/tclsh
-# tests that can be run with just one process
+# non-destructive tests to be run with 2 MPI tasks.
 source harness.tcl
 
 set comm   ::tclmpi::comm_world
@@ -12,13 +12,17 @@ set split1 ::tclmpi::comm1
 par_init
 
 par_return [list [list ::tclmpi::comm_size $comm] \
-                 [list ::tclmpi::comm_size $comm]] [list 2 2]
+                [list ::tclmpi::comm_size $comm]] [list 2 2]
 par_return [list [list ::tclmpi::comm_rank $comm] \
-                 [list ::tclmpi::comm_rank $comm]] [list 0 1]
+                [list ::tclmpi::comm_rank $comm]] [list 0 1]
 par_return [list [list ::tclmpi::comm_size $self] \
-                 [list ::tclmpi::comm_size $self]] [list 1 1]
+                [list ::tclmpi::comm_size $self]] [list 1 1]
 par_return [list [list ::tclmpi::comm_rank $self] \
-                 [list ::tclmpi::comm_rank $self]] [list 0 0]
+                [list ::tclmpi::comm_rank $self]] [list 0 0]
+par_error  [list [list ::tclmpi::comm_rank $null] \
+                [list ::tclmpi::comm_rank $null]] \
+    [list {::tclmpi::comm_rank: MPI_ERR_COMM: invalid communicator} \
+         {::tclmpi::comm_rank: MPI_ERR_COMM: invalid communicator} ]
 
 if {0} {
 run_return [list ::tclmpi::comm_rank $comm] 0
@@ -56,6 +60,6 @@ run_error  [list ::tclmpi::finalize] {Calling ::tclmpi::finalize twice is errone
 }
 
 # print results and exit
-test_summary 02
 ::tclmpi::finalize
+test_summary 02
 

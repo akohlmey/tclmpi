@@ -102,20 +102,81 @@ proc par_return {cmd retval} {
         return {}
     }
 
-    set res [::tclmpi::allreduce [list [catch [lindex $cmd $rank] result] $rank] ::tclmpi::intint ::tclmpi::maxloc $comm]
+    set cmd [lindex $cmd $rank]
+    set retval [lindex $retval $rank]
+    set res [::tclmpi::allreduce [list [catch $cmd result] $rank] \
+                 ::tclmpi::intint ::tclmpi::maxloc $comm]
+
     # all parallel commands came through
     if {[lindex $res 0] == 0} {
-        set res [::tclmpi::allreduce [list [string equal [lindex $retval $rank] $result] $rank] ::tclmpi::intint ::tclmpi::minloc $comm] 
-       
+        set res [::tclmpi::allreduce \
+                     [list [string equal $retval $result] $rank] \
+                     ::tclmpi::intint ::tclmpi::minloc $comm]
         if {[lindex $res 0] != 0} {
             incr pass
             if {$rank == $master} {
-                puts [format "check/run  %-60s | PASS" [lindex $cmd $rank]]
+                puts [format "check/run  %-60s | PASS" $cmd]
             }
         } else {
             incr fail
             if {$rank == [lindex $res 1]} {
-                puts [format "check/run  %-60s | FAIL/retval" [lindex $cmd $rank]]
+                puts [format "check/run  %-60s | FAIL/noerr" $cmd]
+                puts "$fail/Result $result on rank $rank"
+            }
+        }
+
+    # at least one parallel command failed
+    } else {
+        incr fail
+        if {$rank == [lindex $res 1]} {
+            puts [format "check/run  %-60s | FAIL/retval" [lindex $cmd $rank]]
+            puts "$fail/Error message $result on rank $rank"
+        }
+    }
+    return {}
+}
+
+# run parallel commands and expect Tcl error
+proc par_error {cmd retval} {
+    global pass fail comm master int
+
+    set size [::tclmpi::comm_size $comm]
+    set rank [::tclmpi::comm_rank $comm]
+
+    if {[llength $cmd] != $size} {
+        if {$rank == $master} {
+            puts " FAIL/input number of commands != $size"
+        }
+        incr fail
+        return {}
+    }
+    if {[llength $retval] != $size} {
+        if {$rank == $master} {
+            puts " FAIL/input number of error messages != $size"
+        }
+        incr fail
+        return {}
+    }
+
+    set cmd [lindex $cmd $rank]
+    set retval [lindex $retval $rank]
+    set res [::tclmpi::allreduce [list [catch $cmd result] $rank] \
+                 ::tclmpi::intint ::tclmpi::maxloc $comm]
+
+    # at least one parallel command failed
+    if {[lindex $res 0] == 1} {
+        set res [::tclmpi::allreduce \
+                     [list [string equal $retval $result] $rank] \
+                     ::tclmpi::intint ::tclmpi::minloc $comm]
+        if {[lindex $res 0] != 0} {
+            incr pass
+            if {$rank == $master} {
+                puts [format "check/fail %-60s | PASS" $cmd]
+            }
+        } else {
+            incr fail
+            if {$rank == [lindex $res 1]} {
+                puts [format "check/fail  %-60s | FAIL/retval" $cmd]
                 puts "$fail/Expected [lindex $retval $rank]"
                 puts "$fail/Received $result on rank $rank"
             }
@@ -131,6 +192,7 @@ proc par_return {cmd retval} {
     }
     return {}
 }
+
 
 # print result summary
 proc test_summary {section} {
