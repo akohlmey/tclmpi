@@ -14,6 +14,8 @@ set size 0
 set auto   ::tclmpi::auto
 set int    ::tclmpi::int
 set double ::tclmpi::double
+set intint ::tclmpi::intint
+set dblint ::tclmpi::dblint
 
 # count successful tests
 set pass 0
@@ -129,7 +131,7 @@ proc test_summary {section} {
         puts "test section $section | total pass: $pass | total fail: $fail"
     }
     if {$fail > 0} {
-        ::tclmpi::abort $fail
+        exit $fail
     }
     return {}
 }
