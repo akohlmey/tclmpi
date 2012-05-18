@@ -222,19 +222,6 @@ par_return [list [list ::tclmpi::wait $req2] \
 par_return [list [list set i 0] [list ::tclmpi::wait $req2 status]] \
                 [list 0 {0 1 2 0 4 5 6} {}]
 
-if {0} {
-set idata [list 0 1 2 {3 4} 4 5 6]
-par_return [list [list ::tclmpi::send $idata $auto 1 666 $comm] \
-                [list ::tclmpi::irecv $auto 0 666 $comm] ] [list $req0 $idata]
-set rdata [list 0 1 2 0 4 5 6]
-par_return [list [list ::tclmpi::isend $idata $int 1 666 $comm] \
-                [list ::tclmpi::recv $int ::tclmpi::any_source 666 $comm] ] [list $req1 $rdata]
-set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
-par_return [list [list ::tclmpi::isend $idata $double 1 666 $comm] \
-                [list ::tclmpi::irecv $double 0 ::tclmpi::any_tag $comm] ] [list $req2 $req1]
-
-}
-
 # print results and exit
 ::tclmpi::finalize
 test_summary 02
