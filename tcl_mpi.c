@@ -1,12 +1,12 @@
 /***************************************************************************
 
- Tcl Interface to MPI
+Tcl Interface to MPI
 
- Copyright (c) 2012 Axel Kohlmeyer <akohlmey@gmail.com>
- All rights reserved.
+Copyright (c) 2012 Axel Kohlmeyer <akohlmey@gmail.com>
+All rights reserved.
 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
  - Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
  - Redistributions in binary form must reproduce the above copyright
@@ -16,16 +16,16 @@
    contributors may be used to endorse or promote products derived from
    this software without specific prior written permission.
 
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
- DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
- ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
  ***************************************************************************/
 
@@ -35,7 +35,7 @@
 #include <string.h>
 #include <stdio.h>
 
-/* translate communicators to Tcl string references and back "::tclmpi::comm%d" */
+/* translate communicators to Tcl strings and back "::tclmpi::comm%d" */
 
 typedef struct tclmpi_comm tclmpi_comm_t;
 
@@ -1533,9 +1533,12 @@ int Tclmpi_Init(Tcl_Interp *interp)
     char *label;
     tclmpi_comm_t *comm;
 
-    if (Tcl_PkgProvide(interp,"tclmpi","0.6") != TCL_OK) {
+    if (Tcl_InitStubs(interp, "8.5", 0) == NULL)
         return TCL_ERROR;
-    }
+    if (Tcl_PkgRequire(interp, "Tcl", "8.5", 0) == NULL)
+        return TCL_ERROR;
+    if (Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION) != TCL_OK)
+        return TCL_ERROR;
 
     /* add world, self, and null communicator to translation table */
     comm = (tclmpi_comm_t *)Tcl_Alloc(sizeof(tclmpi_comm_t));

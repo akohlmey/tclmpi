@@ -7,7 +7,7 @@
 # 
 # See the file LICENSE in the top level directory for
 # licensing conditions.
-# #########################################################
+###########################################################
 # Current version.
 set version 0.6
 
@@ -27,10 +27,13 @@ set double ::tclmpi::double
 set intint ::tclmpi::intint
 set dblint ::tclmpi::dblint
 
-# count successful tests
+# counters for successful and failed tests
 set pass 0
 set fail 0
 
+# format output.
+# if needed, the $cmd text is truncated
+# to not overflow the lines.
 proc test_format {kind cmd result} {
     global pass fail
     set num [expr {$pass + $fail}]
@@ -43,6 +46,8 @@ proc test_format {kind cmd result} {
     return $string
 }
 
+
+# serial init
 proc ser_init {args} {
     global version rank master
     if {$rank == $master} {
@@ -63,7 +68,7 @@ proc par_init {args} {
     ser_init
 }
 
-# run command and expect Tcl error
+# run serial command and expect Tcl error
 proc run_error {cmd errormsg} {
     global pass fail
     if {[catch $cmd result]} {
@@ -84,7 +89,7 @@ proc run_error {cmd errormsg} {
     return {}
 }
 
-# run command and check return value
+# run serial command and check return value
 proc run_return {cmd retval} {
     global pass fail
 
@@ -237,6 +242,7 @@ proc par_error {cmd retval} {
 }
 
 # set variable to different values on different ranks
+# (not yet used)
 proc par_set {name value} {
     global rank
     upvar $name var

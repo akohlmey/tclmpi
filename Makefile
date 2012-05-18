@@ -11,6 +11,9 @@ LD=$(CC)
 # set to empty if you don't want to include debug info
 #DEBUG=-g
 
+# defines
+DEFINE=-DUSE_TCL_STUBS -DPACKAGE_NAME=\"tclmpi\" -DPACKAGE_VERSION=\"0.6\"
+
 # platform specific compiler flags:
 ## Linux and multiple other platforms with GCC (generic)
 COMPILE=-fPIC  -O2 -Wall -W
@@ -33,9 +36,9 @@ LINK=-shared
 #LINK= -shared 
 
 # set, if needed to match Tcl installation
-#TCLINCLUDE=-I/usr/include
-#TCLLIBRARY=-L/usr/lib 
-#TCLLIB=-ltcl
+TCLINCLUDE=-I/usr/include
+TCLLIBRARY=-L/usr/lib64 -L/usr/lib
+TCLLIB=-ltclstub8.5
 
 # set, if needed, to match MPI installation
 # not needed if MPI compiler wrappers work
@@ -44,7 +47,7 @@ LINK=-shared
 #MPILIB=-lmpi
 ######## end of configuration section #######
 
-CFLAGS=$(COMPILE) $(DEBUG) $(TCLINCLUDE) $(MPIINCLUDE) 
+CFLAGS=$(COMPILE) $(DEBUG) $(DEFINE) $(TCLINCLUDE) $(MPIINCLUDE) 
 LDFLAGS=$(LINK) $(DEBUG) $(TCLLIBRARY) $(MPILIBRARY)
 LIBS= $(TCLLIB) $(MPILIB)
 
