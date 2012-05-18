@@ -20,15 +20,13 @@ set intint ::tclmpi::intint
 set dblint ::tclmpi::dblint
 
 # count successful tests
-set test 0
 set pass 0
 set fail 0
 
 proc test_format {kind cmd result} {
-    global test
-
-    incr test
-    set string [format "%03d %-10s | %-47s | " $test $kind $cmd]
+    global pass fail
+    set num [expr {$pass + $fail}]
+    set string [format "%03d %-10s | %-47s | " $num $kind $cmd]
     if {[string length $string] > 67} {
         set string [string range $string 0 60]
         append string {... | }
