@@ -37,9 +37,9 @@ set fail 0
 proc test_format {kind cmd result} {
     global pass fail
     set num [expr {$pass + $fail}]
-    set string [format "%03d %-10s | %-47s | " $num $kind $cmd]
-    if {[string length $string] > 67} {
-        set string [string range $string 0 60]
+    set string [format "%03d %-11s | %-46s | " $num $kind $cmd]
+    if {[string length $string] > 66} {
+        set string [string range $string 0 59]
         append string {... | }
     }
     append string $result
@@ -255,6 +255,7 @@ proc test_summary {section} {
     if {$rank == $master} {
         puts {------------------------------------------------------------------------------}
         puts [format {test section %02d | total pass: %03d | total fail: %03d} $section $pass $fail]
+        puts {------------------------------------------------------------------------------}
     }
     if {$fail > 0} {
         exit $fail
