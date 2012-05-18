@@ -9,15 +9,18 @@ CC=mpicc
 LD=$(CC)
 
 # set to empty if you don't want to include debug info
-DEBUG=-g
+#DEBUG=-g
 
 # platform specific compiler flags:
+## Linux and multiple other platforms with GCC (generic)
+COMPILE=-fPIC  -O2 -Wall -W
+LINK=-shared 
 ## Linux x86 32-bit:
 #COMPILE=-fPIC -m32 -O2 -Wall -W
 #LINK=-shared -m32
 ## Linux x86 64-bit:
-COMPILE=-fPIC -m64 -O2 -Wall -W
-LINK=-shared -m64
+#COMPILE=-fPIC -m64 -O2 -Wall -W
+#LINK=-shared -m64
 ## MacOSX x86 32-bit
 #COMPILE=-Os -Wall -m32 -fPIC -dynamic
 #LINK= -bundle -m32 -L/usr/X11R6/lib/
@@ -60,3 +63,7 @@ tclmpi.so:  tcl_mpi.o
 
 tcl_mpi.o: tcl_mpi.c
 	$(CC) $(CFLAGS) -c $<
+
+.PHONY: default clean check
+.SUFFIXES:
+
