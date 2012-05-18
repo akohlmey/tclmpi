@@ -1,0 +1,21 @@
+Compilation:
+The TclMPI package currently consist of a single C source file which
+needs to be compiled for dynamic linkage and a Tcl pkgIndex.tcl file
+that hooks it into the Tcl environment. You need a working Tcl and MPI
+development environment (C-only). Since compilataion will create a
+dynamical shared object (DSO), both Tcl and MPI have to be compiled
+and as shared libraries. This is the default for Tcl and OpenMPI on
+Linux, but your mileage may vary.
+
+To compile the package adjust the settings in the Makefile according to
+your platform, MPI and Tcl installation. Typical settings for Linux and
+MacOSX systems are included as comments in the provided makefile. Then
+type "make" to compile the tclmpi.so file. With "make check" you can run
+the integrated unittests to see if everything is working as expected.
+
+Installation:
+To install you can create a directory, e.g. /usr/local/libexec/tclmpi,
+and copy the files tclmpi.so and pkgIndex.tcl into it. If you then use
+the command 'set auto_path [concat /usr/local/libexec/tclmpi $auto_path]'
+in your .tclshrc or .vmdrc, you can load the tclmpi wrappers on demand
+simply by using the command 'package require tclmpi'.
