@@ -64,23 +64,30 @@ par_return [list [list ::tclmpi::comm_split $comm ::tclmpi::undefined 1] \
     [list {::tclmpi::comm_null} {::tclmpi::comm3}]
 
 # barrier
-par_return [list [list ::tclmpi::barrier $comm] \
-                [list ::tclmpi::barrier $comm] ]  [list {} {}]
-par_return [list [list ::tclmpi::barrier $self] \
-                [list ::tclmpi::barrier $self] ]  [list {} {}]
-par_return [list [list ::tclmpi::barrier $split0] \
-                [list ::tclmpi::barrier $split0] ]  [list {} {}]
-par_return [list [list ::tclmpi::barrier $split1] \
-                [list ::tclmpi::barrier $split1] ]  [list {} {}]
-par_return [list [list ::tclmpi::barrier $split2] \
-                [list ::tclmpi::barrier $split2] ]  [list {} {}]
+par_return [list [list ::tclmpi::barrier $comm]    \
+                [list ::tclmpi::barrier $comm] ]   \
+    [list {} {}]
+par_return [list [list ::tclmpi::barrier $self]    \
+                [list ::tclmpi::barrier $self] ]   \
+    [list {} {}]
+par_return [list [list ::tclmpi::barrier $split0]  \
+                [list ::tclmpi::barrier $split0] ] \
+    [list {} {}]
+par_return [list [list ::tclmpi::barrier $split1]  \
+                [list ::tclmpi::barrier $split1] ] \
+    [list {} {}]
+par_return [list [list ::tclmpi::barrier $split2]  \
+                [list ::tclmpi::barrier $split2] ] \
+    [list {} {}]
 
 # bcast
 set idata [list {xx 11} {1 2 3} {}]
 par_return [list [list ::tclmpi::bcast $idata $auto $master $comm] \
-                [list ::tclmpi::bcast {} $auto $master $comm]] [list $idata $idata]
-par_return [list [list ::tclmpi::bcast {} $auto $master $comm] \
-                [list ::tclmpi::bcast $idata $auto $master $comm]] [list {} {}]
+                [list ::tclmpi::bcast {} $auto $master $comm]]     \
+    [list $idata $idata]
+par_return [list [list ::tclmpi::bcast {} $auto $master $comm]     \
+                [list ::tclmpi::bcast $idata $auto $master $comm]] \
+    [list {} {}]
 
 set idata {016 {1 2 3} 2.0 7 0xff yy}
 set odata {14 0 0 7 255 0}
@@ -88,10 +95,11 @@ par_return [list [list ::tclmpi::bcast {} $int 1 $comm] \
                 [list ::tclmpi::bcast $idata $int 1 $comm]] [list $odata $odata]
 set odata {14.0 0.0 2.0 7.0 255.0 0.0}
 par_return [list [list ::tclmpi::bcast $idata $double $master $comm] \
-                [list ::tclmpi::bcast {} $double $master $comm]] [list $odata $odata]
+                [list ::tclmpi::bcast {} $double $master $comm]] \
+    [list $odata $odata]
 
-# when mixing $auto with other data types, we have mismatch or low-level MPI calls
-# which is indicated in the truncated error message.
+# when mixing $auto with other data types, we have mismatch or low-level
+# MPI calls which is indicated in the truncated error message.
 par_error  [list [list ::tclmpi::bcast $idata $double $master $comm] \
                 [list ::tclmpi::bcast {} $auto $master $comm]] \
     [list $odata {::tclmpi::bcast: MPI_ERR_TRUNCATE: message truncated}]
@@ -178,9 +186,6 @@ par_return [list [list ::tclmpi::send $idata $double 1 666 $comm] \
 set req0 ::tclmpi::req0
 set req1 ::tclmpi::req1
 set req2 ::tclmpi::req2
-set req3 ::tclmpi::req3
-set req4 ::tclmpi::req4
-set req5 ::tclmpi::req5
 set idata [list 0 1 2 {3 4} 4 5 6]
 par_return [list [list ::tclmpi::isend $idata $auto 1 666 $comm] \
                 [list ::tclmpi::recv $auto 0 666 $comm] ] [list $req0 $idata]
@@ -207,14 +212,18 @@ par_return [list [list ::tclmpi::wait $req2 status] \
 # blocking send / non-blocking recv
 set idata [list 0 1 2 {3 4} 4 5 6]
 par_return [list [list ::tclmpi::send $idata $auto 1 666 $comm] \
-                [list ::tclmpi::irecv $auto 0 666 $comm] ] [list {} $req1]
+                [list ::tclmpi::irecv $auto 0 666 $comm] ] \
+    [list {} $req1]
 
 set rdata [list 0 1 2 0 4 5 6]
 par_return [list [list ::tclmpi::send $idata $int 1 66 $comm] \
-                [list ::tclmpi::irecv $int ::tclmpi::any_source 66 $comm] ] [list {} $req2]
+                [list ::tclmpi::irecv $int ::tclmpi::any_source 66 $comm]] \
+    [list {} $req2]
+
 set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
 par_return [list [list ::tclmpi::irecv $double 1 ::tclmpi::any_tag $comm] \
-                [list ::tclmpi::send $idata $double 0 6 $comm] ] [list $req2 {}]
+                [list ::tclmpi::send $idata $double 0 6 $comm]] \
+    [list $req2 {}]
 
 # clear up all pending requests
 par_return [list [list ::tclmpi::wait $req2] \
