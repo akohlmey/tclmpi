@@ -1,7 +1,15 @@
 #!/usr/bin/tclsh
-# test harness for TclMPI
+###########################################################
+# Test harness for TclMPI
+#
 # Copyright (c) 2012 Axel Kohlmeyer <akohlmey@gmail.com>
-set version 0.5
+# All Rights Reserved.
+# 
+# See the file LICENSE in the top level directory for
+# licensing conditions.
+# #########################################################
+# Current version.
+set version 0.6
 
 # load extension
 load ../tclmpi.so
