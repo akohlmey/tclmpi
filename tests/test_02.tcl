@@ -210,11 +210,17 @@ par_return [list [list ::tclmpi::send $idata $auto 1 666 $comm] \
                 [list ::tclmpi::irecv $auto 0 666 $comm] ] [list {} $req1]
 
 set rdata [list 0 1 2 0 4 5 6]
-par_return [list [list ::tclmpi::send $idata $int 1 666 $comm] \
-                [list ::tclmpi::irecv $int ::tclmpi::any_source 666 $comm] ] [list $rdata $req2]
+par_return [list [list ::tclmpi::send $idata $int 1 66 $comm] \
+                [list ::tclmpi::irecv $int ::tclmpi::any_source 66 $comm] ] [list {} $req2]
 set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
 par_return [list [list ::tclmpi::irecv $double 1 ::tclmpi::any_tag $comm] \
-                [list ::tclmpi::send $idata $double 0 666 $comm] ] [list $req2 {}]
+                [list ::tclmpi::send $idata $double 0 6 $comm] ] [list $req2 {}]
+
+# clear up all pending requests
+par_return [list [list ::tclmpi::wait $req2] \
+                [list ::tclmpi::wait $req1]] [list $rdata $idata]
+par_return [list [list set i 0] [list ::tclmpi::wait $req2 status]] \
+                [list 0 {0 1 2 0 4 5 6} {}]
 
 if {0} {
 set idata [list 0 1 2 {3 4} 4 5 6]
