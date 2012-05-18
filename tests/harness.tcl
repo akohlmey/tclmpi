@@ -1,5 +1,7 @@
 #!/usr/bin/tclsh
-# tcl test script helpers
+# test harness for TclMPI
+# Copyright (c) 2012 Axel Kohlmeyer <akohlmey@gmail.com>
+set version 0.5
 
 # load extension
 load ../tclmpi.so
@@ -18,9 +20,22 @@ set intint ::tclmpi::intint
 set dblint ::tclmpi::dblint
 
 # count successful tests
+set test 0
 set pass 0
 set fail 0
-set version 0.5
+
+proc test_format {kind cmd result} {
+    global test
+
+    incr test
+    set string [format "%03d %-10s | %-47s | " $test $kind $cmd]
+    if {[string length $string] > 67} {
+        set string [string range $string 0 60]
+        append string {... | }
+    }
+    append string $result
+    return $string
+}
 
 proc ser_init {args} {
     global version rank master
@@ -45,17 +60,19 @@ proc par_init {args} {
 # run command and expect Tcl error
 proc run_error {cmd errormsg} {
     global pass fail
-    puts -nonewline [format "check/fail %-60s |" $cmd]
     if {[catch $cmd result]} {
         if {[string equal $result $errormsg]} {
-            puts " PASS"; incr pass
+            incr pass
+            puts [test_format {check/fail} $cmd PASS];
         } else {
-            puts " FAIL/errmsg"; incr fail
+            incr fail
+            puts [test_format {check/fail} $cmd {FAIL/errmsg}]
             puts "$fail/Expected $errormsg"
             puts "$fail/Received $result"
         }
     } else {
-        puts " FAIL/noerr"; incr fail
+        incr fail
+        puts [test_format {check/fail} $cmd {FAIL/noerr}]
         puts "$fail/Result $result"
     }
     return {}
@@ -65,15 +82,17 @@ proc run_error {cmd errormsg} {
 proc run_return {cmd retval} {
     global pass fail
 
-    puts -nonewline [format "check/run  %-60s |" $cmd]
     if {[catch $cmd result]} {
-        puts " FAIL/abort"; incr fail
+        incr fail
+        puts [test_format {check/run} $cmd {FAIL/abort}]
         puts "$fail/Error message $result"
     } else {
         if {[string equal $result $retval]} {
-            puts " PASS"; incr pass
+            incr pass
+            puts [test_format {check/run} $cmd PASS]
         } else {
-            puts " FAIL/retval"; incr fail
+            incr fail
+            puts [test_format {check/run} $cmd {FAIL/retval}]
             puts "$fail/Expected $retval"
             puts "$fail/Received $result"
         }
@@ -89,18 +108,22 @@ proc par_return {cmd retval} {
     set size [::tclmpi::comm_size $comm]
     set rank [::tclmpi::comm_rank $comm]
 
-    if {[llength $cmd] != $size} {
-        if {$rank == $master} {
-            puts " FAIL/input number of commands != $size"
-        }
+    set num [llength $cmd]
+    if {$num < $size} {
         incr fail
+        if {$rank == $master} {
+            puts [test_format {par/run} \
+                      "number of commands ($num) < $size" {FAIL/input}]
+        }
         return {}
     }
-    if {[llength $retval] != $size} {
-        if {$rank == $master} {
-            puts " FAIL/input number of return values != $size"
-        }
+    set num [llength $retval]
+    if {$num < $size} {
         incr fail
+        if {$rank == $master} {
+            puts [test_format {par/run} \
+                      "number of return values ($num) < $size" {FAIL/input}]
+        }
         return {}
     }
 
@@ -118,14 +141,14 @@ proc par_return {cmd retval} {
         if {[lindex $res 0] == 0} {
             incr fail
             if {$rank == [lindex $res 1]} {
-                puts [format "check/run  %-60s | FAIL/retval" $cmd]
+                puts [test_format {par/run} $cmd {FAIL/retval}]
                 puts "$fail/Expected $retval"
                 puts "$fail/Received $result on rank $rank"
             }
         } else {
             incr pass
             if {$rank == $master} {
-                puts [format "check/run  %-60s | PASS" $cmd]
+                puts [test_format {par/run} $cmd PASS]
             }
         }
 
@@ -133,7 +156,7 @@ proc par_return {cmd retval} {
     } else {
         incr fail
         if {$rank == [lindex $res 1]} {
-            puts [format "check/run  %-60s | FAIL/abort" $cmd]
+            puts [test_format {par/run} $cmd {FAIL/abort}]
             puts "$fail/Error message $result on rank $rank"
         }
     }
@@ -150,18 +173,22 @@ proc par_error {cmd retval} {
     set size [::tclmpi::comm_size $comm]
     set rank [::tclmpi::comm_rank $comm]
 
-    if {[llength $cmd] != $size} {
-        if {$rank == $master} {
-            puts " FAIL/input number of commands != $size"
-        }
+    set num [llength $cmd]
+    if {$num < $size} {
         incr fail
+        if {$rank == $master} {
+            puts [test_format {par/fail} \
+                      "number of commands ($num) < $size" {FAIL/input}]
+        }
         return {}
     }
-    if {[llength $retval] != $size} {
-        if {$rank == $master} {
-            puts " FAIL/input number of error messages != $size"
-        }
+    set num [llength $retval]
+    if {$num < $size} {
         incr fail
+        if {$rank == $master} {
+            puts [test_format {par/fail} \
+                      "number of return values ($num) < $size" {FAIL/input}]
+        }
         return {}
     }
     ::tclmpi::barrier $comm
@@ -179,12 +206,12 @@ proc par_error {cmd retval} {
         if {[lindex $res 0] > 0} {
             incr pass
             if {$rank == $master} {
-                puts [format "check/fail %-60s | PASS" $cmd]
+                puts [test_format {par/fail} $cmd PASS]
             }
         } else {
             incr fail
             if {$rank == [lindex $res 1]} {
-                puts [format "check/fail  %-60s | FAIL/retval" $cmd]
+                puts [test_format {par/fail} $cmd {FAIL/retval}]
                 puts "$fail/Expected $retval"
                 puts "$fail/Received $result on rank $rank"
             }
@@ -194,7 +221,7 @@ proc par_error {cmd retval} {
     } else {
         incr fail
         if {$rank != [lindex $res 1]} {
-            puts [format "check/fail  %-60s | FAIL/noer" $cmd]
+            puts [test_format {par/fail} $cmd {FAIL/noerr}]
             puts "$fail/Error message $result on rank $rank"
         }
     }
@@ -215,7 +242,7 @@ proc test_summary {section} {
     global pass fail rank master
     if {$rank == $master} {
         puts {------------------------------------------------------------------------------}
-        puts "test section $section | total pass: $pass | total fail: $fail"
+        puts [format {test section %02d | total pass: %03d | total fail: %03d} $section $pass $fail]
     }
     if {$fail > 0} {
         exit $fail
