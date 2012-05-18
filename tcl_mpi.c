@@ -39,7 +39,7 @@ static const char *mpi2tcl_comm(MPI_Comm comm)
     next = first_comm;
     while (next) {
         if (comm == next->comm) {
-            if (next->valid)
+            if (next->valid != 0)
                 return next->label;
             else
                 return NULL;
@@ -56,7 +56,7 @@ static MPI_Comm tcl2mpi_comm(const char *label)
     next = first_comm;
     while (next) {
         if (strcmp(next->label,label) == 0) {
-            if (next->valid)
+            if (next->valid != 0)
                 return next->comm;
             else
                 return MPI_COMM_INVALID;
@@ -1095,7 +1095,7 @@ int TclMPI_Irecv(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    if (pending) {
+    if (pending != 0) {
         if (type == TCLMPI_AUTO) {
             char *idata;
             MPI_Get_count(&status,MPI_CHAR,&len);
