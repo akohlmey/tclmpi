@@ -235,3 +235,4 @@ par_return [list [list set i 0] [list ::tclmpi::wait $req2 status]] \
 ::tclmpi::finalize
 test_summary 02
 
+exit 0

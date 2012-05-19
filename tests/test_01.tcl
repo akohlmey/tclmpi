@@ -182,3 +182,4 @@ run_error  [list ::tclmpi::finalize] \
 # print results and exit
 test_summary 01
 
+exit 0
