@@ -1,3 +1,5 @@
+/*! \file */
+
 /***************************************************************************
 
 Tcl Interface to MPI
@@ -35,26 +37,160 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <stdio.h>
 
-/* translate communicators to Tcl strings and back "::tclmpi::comm%d" */
+/*! \page userguide TclMPI User's Guide 
+ *
+ * This page describes Tcl bindings for MPI. This package provides a
+ * shared object that can be loaded into a Tcl interpreter to provide
+ * additional commands that act as an interface to an underlying MPI
+ * implementation. This allows to run Tcl scripts in parallel via
+ * mpirun or mpiexec similar to C, C++ or Fortran programs and
+ * communicate via wrappers to MPI function call.
+ *
+ * The original motivation for writing this package was to complement a
+ * Tcl wrapper for the LAMMPS molecular dynamics simulation software,
+ * but also allow using the VMD molecular visualization and analysis
+ * package in parallel without having to recompile VMD and using a
+ * convenient API to people that already know how to program parallel
+ * programs with MPI in C, C++ or Fortran.
+ *
+ * \section compile Compilation and Installation
+ *
+ * The package currently consist of a single C source file which needs
+ * to be compiled for dynamic linkage. The corresponding commands for
+ * Linux and MacOSX systems are included in the provided makefile. All
+ * that is required to compile the package is an installed Tcl
+ * development system and a working MPI installation. Since this
+ * creates a dynamically loaded shared object (DSO), both Tcl and MPI
+ * have to be compiled and linked as shared libraries (this is the
+ * default for Tcl and OpenMPI on Linux, but your mileage may
+ * vary). As of May 15 2012 the code has been tested only on 32-bit
+ * and 64-bit x86 Linux platforms with OpenMPI.
+ *
+ * To compile the package adjust the settings in the Makefile according
+ * to your platform, MPI and Tcl installation. For most Linux
+ * distributions, this requires installing not only an MPI and Tcl
+ * package, but also the corresponding development packages, e.g. on
+ * Fedora you need openmpi, openmpi-devel, tcl, and tcl-devel and their
+ * dependencies. Then type make to compile the tclmpi.so file. With make
+ * check you can run the integrated unittest package to see, if
+ * everything is working as expected.
+ *
+ * To install you can create a directory, e.g. /usr/local/libexec/tclmpi,
+ * and copy the files tclmpi.so and pkgIndex.tcl into it. If you then use
+ * the command set auto_path [concat /usr/local/libexec/tclmpi
+ * $auto_path] in your .tclshrc or .vmdrc, you can load the tclmpi
+ * wrappers on demand simply by using the command package require tclmpi.
+ *
+ * \section devel Software Development and Bug Reports
+ *
+ * The TclMPI code is maintained using git for source code management,
+ * and the project is hosted on github at
+ * https://github.com/akohlmey/tclmpi From there you can download
+ * snapshots of the development and releases, clode the repository to
+ * follow development, or work on your own branch through forking
+ * it. Bug reports and feature requests should also be filed on github
+ * at through the issue tracker at:
+ * https://github.com/akohlmey/tclmpi/issues.
+ */
 
+/*! \page devguide TclMPI Developer's Guide
+ * 
+ * This document explains the implementation of the Tcl bindings
+ * for MPI implemented in TclMPI. The following sections will
+ * document how and which MPI is mapped to Tcl and what design
+ * choices were made.
+ *
+ * \section design Overall Design and Differences to the MPI C-bindings
+ *
+ * To be consistent with typical Tcl conventions all commands and constants
+ * in lower case and prefixed with ::tclmpi::, so that clashes with existing
+ * programs are reduced.
+ * This is not yet set up to be a proper namespace, but that may happen at
+ * a later point, if the need arises. The overall philosophy of the bindings
+ * is to make the API similar to the MPI one (e.g. maintain the order of
+ * arguments), but don't stick to it slavishly and do things the Tcl way
+ * wherever justified. Convenience and simplicity take precedence over
+ * performance. If performance matters that much, one would write the entire
+ * code C/C++ or Fortran and not Tcl. The biggest visible change is that
+ * for sending data around, receive buffers will be automatically set up
+ * to handle the entire message. Thus the typical "count" arguments of the
+ * C/C++ or Fortran bindings for MPI is not required, and the received data
+ * will be the return value of the corresponding command. This is consistent
+ * with the automatic memory management in Tcl, but this convenience and
+ * consistency will affect performance and the semantics. For example calls
+ * to ::tclmpi::bcast will be converted into *two* calls to MPI_Bcast();
+ * the first will broadcast the size of the data set being sent (so that
+ * a sufficiently sized buffers can be allocated) and then the second call
+ * will finally send the data for real. Similarly, ::tclmpi::recv will be
+ * converted into calling MPI_Probe() and then MPI_Recv() for the purpose
+ * of determining the amount of temporary storage required. The second call
+ * will also use the MPI_SOURCE and MPI_TAG flags from the MPI_Status object
+ * created for MPI_Probe() to make certain, the correct data is received.
+ * 
+ * Things get even more complicated with with non-blocking receives. Since
+ * we need to know the size of the message to receive, a non-blocking receive
+ * can only be posted, if the corresponding send is already pending. This is
+ * being determined by calling MPI_Iprobe() and when this shows no (matching)
+ * pending message, the parameters for the receive will be cached and the 
+ * then MPI_Probe() followed by MPI_Recv() will be called as part of
+ * ::tclmpi::wait. The blocking/non-blocking behavior of the Tcl script
+ * should be very close to the corresponding C bindings, but probably not
+ * as efficient.
+ *
+ *
+ * \section Internal TclMPI Support Functions
+ * Several MPI entities like communicators, requests, status objects
+ * cannot be represented directly in Tcl. For TclMPI they need to be
+ * mapped to something else, for example a string that will uniquely
+ * identify this entity and then it will be translated into the real
+ * object it represents with the help of the following support functions.
+ *
+ * \subsection tclcomm Mapping Communicators
+ * MPI communicators are represented in TclMPI by strings of the form
+ * "::tclmpi::comm%d", with "%d" being replaced by a unique integer.
+ * In addition, a few string constants are mapped to the default
+ * communicators that are defined in MPI. These are ::tclmpi::comm_world,
+ * ::tclmpi::comm_self, and ::tclmpi::comm_null, which represent
+ * MPI_COMM_WORLD, MPI_COMM_SELF, and MPI_COMM_NULL, respectively.
+ *
+ * Internally the map is maintained in a simple linked list which
+ * is initialized with the three default communicators when the plugin
+ * is loaded and where new communicators are added at the end as needed.
+ * The functions mpi2tcl_comm and tcl2mpi_comm are then used to translate
+ * from one representation to the other while tclmpi_add_comm will 
+ * append a new communicator to the list.
+ */
+
+/*! Linked list entry type for managing MPI communicators */
 typedef struct tclmpi_comm tclmpi_comm_t;
 
+/*! Linked list entry to map MPI communicators to strings. */
 struct  tclmpi_comm {
-    const char *label;
-    MPI_Comm comm;
-    int valid;
-    tclmpi_comm_t *next;
+    const char *label;    /*!< String representing the communicator in Tcl */
+    MPI_Comm comm;        /*!< MPI communicator corresponding of this entry */
+    int valid;            /*!< Non-zero if communicator is valid */
+    tclmpi_comm_t *next;  /*!< Pointer to next element in linked list */
 };
 
+/*! First element of the communicator map list */
 static tclmpi_comm_t *first_comm = NULL;
+/*! Last element of the communicator map list */
 static tclmpi_comm_t *last_comm = NULL;
+/*! Communicator counter */
 static int tclmpi_comm_cntr = 0;
 
-/* we need this to detect unlisted communicators */
+/*! Additional global communicator to detect unlisted communicators */
 static MPI_Comm MPI_COMM_INVALID;
 
-/* translate MPI communicator to Tcl label */
-
+/*! Translate an MPI communicator to its Tcl label.
+ * \param comm an MPI communicator
+ * \return the corresponding string label or NULL.
+ *
+ * This function will search through the linked list of known communicators
+ * until it finds the (first) match and then returns the string label to
+ * the calling function. If a NULL is returned, the communicator does not
+ * yet exist in the linked list and a new entry will have to be added.
+ */
 static const char *mpi2tcl_comm(MPI_Comm comm)
 {
     tclmpi_comm_t *next;
@@ -71,7 +207,7 @@ static const char *mpi2tcl_comm(MPI_Comm comm)
     return NULL;
 }
 
-/* translate Tcl label to MPI communicator */
+/*! translate Tcl label to MPI communicator */
 static MPI_Comm tcl2mpi_comm(const char *label)
 {
     tclmpi_comm_t *next;
@@ -88,7 +224,7 @@ static MPI_Comm tcl2mpi_comm(const char *label)
     return MPI_COMM_INVALID;
 }
 
-/* add communicator to translation table, if not already present */
+/*! add communicator to translation table, if not already present */
 static const char *tclmpi_add_comm(MPI_Comm comm)
 {
     tclmpi_comm_t *next;

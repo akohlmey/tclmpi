@@ -67,6 +67,16 @@ tclmpi.so:  tcl_mpi.o
 tcl_mpi.o: tcl_mpi.c
 	$(CC) $(CFLAGS) -c $<
 
-.PHONY: default clean check
+#############################################
+
+doc: refman.pdf
+
+refman.pdf: Doxyfile tcl_mpi.c
+	doxygen || rm -f $@
+	make -C docs/latex || rm -f $@
+	cp -p docs/latex/refman.pdf $@ || rm -f $@
+
+#############################################
+.PHONY: default clean check doc
 .SUFFIXES:
 
