@@ -1,2 +1,5 @@
 .gdb_history
 tclmpi.so
+docs
+*~
+*.o
