@@ -1,4 +1,5 @@
 #!/usr/bin/tclsh
+## \file harness.tcl
 ###########################################################
 # Test harness for TclMPI
 #
@@ -8,6 +9,7 @@
 # See the file LICENSE in the top level directory for
 # licensing conditions.
 ###########################################################
+
 # Current version.
 set version 0.6
 
@@ -28,12 +30,21 @@ set intint ::tclmpi::intint
 set dblint ::tclmpi::dblint
 
 # counters for successful and failed tests
-set pass 0
-set fail 0
+set pass 0 ;##< counter for successful tests
+set fail 0 ;##< counter for failed tests
 
-# format output.
-# if needed, the $cmd text is truncated
-# to not overflow the lines.
+## format output
+# \param kind string representing the kind of test (max 11 chars).
+# \param cmd string representing the command. will be truncated as needed.
+# \param result string indicating the result (PASS or FAIL/reason)
+# \return the formatted string
+# 
+# This function will format a test summary message, so that it does
+# not break the output on a regular terminal screen. The first column
+# will be the total number of the test computed from the sum of passed
+# and failed tests, followed by a string describing the test type,
+# the command executed and a result string. The command string in the
+# middle will be truncated as needed to not break the format.
 proc test_format {kind cmd result} {
     global pass fail
     set num [expr {$pass + $fail}]
@@ -47,16 +58,30 @@ proc test_format {kind cmd result} {
 }
 
 
-# serial init
+## init for serial tests
+# \param args all parameters are ignored
+# \return empty
+#
+# This function will perform a simple init test requesting the tclmpi
+# package and matching it against the current verison number. If called
+# from a parallel environment, it will only execute and produce output
+# on the master process
 proc ser_init {args} {
     global version rank master
     if {$rank == $master} {
         puts {------------------------------------------------------------------------------}
         run_return "package require tclmpi $version" $version
     }
+    return {}
 }
 
-# parallel init
+## init for parallel tests
+# \param args all parameters are ignored
+# \return empty
+#
+# This function will perform an initialization of the parallel environment
+# for subsequent parallel tests. It also initializes the global variables
+# $rank and $size.
 proc par_init {args} {
     global argv comm rank size
 
@@ -68,28 +93,18 @@ proc par_init {args} {
     ser_init
 }
 
-# run serial command and expect Tcl error
-proc run_error {cmd errormsg} {
-    global pass fail
-    if {[catch $cmd result]} {
-        if {[string equal $result $errormsg]} {
-            incr pass
-            puts [test_format {check/fail} $cmd PASS];
-        } else {
-            incr fail
-            puts [test_format {check/fail} $cmd {FAIL/errmsg}]
-            puts "$fail/Expected $errormsg"
-            puts "$fail/Received $result"
-        }
-    } else {
-        incr fail
-        puts [test_format {check/fail} $cmd {FAIL/noerr}]
-        puts "$fail/Result $result"
-    }
-    return {}
-}
-
-# run serial command and check return value
+## run a serial test that is expected to succeed
+# \param cmd string or list with the command to execute
+# \param retval expected return value
+# \return empty
+#
+# This function executes the command line passed in $cmd and intercepts its
+# resulting return value using the 'catch' command. The actual return value is
+# then compared against the expected reference passed in $retval. The
+# test is passed if the two strings match, otherwise failure is reported
+# and both the expected and actual results are printed. Also an unexpectedly
+# failure of the command is reported as failure and the resulting error
+# message is reported for debugging.
 proc run_return {cmd retval} {
     global pass fail
 
@@ -111,9 +126,56 @@ proc run_return {cmd retval} {
     return {}
 }
 
-# run parallel commands and check return values
-proc par_return {cmd retval} {
-    global pass fail comm master int
+## run a serial test that is expected to fail
+# \param cmd string or list with the command to execute
+# \param errormsg expected error message
+# \return empty
+#
+# This function executes the command line passed in $cmd and intercepts its
+# resulting error using the 'catch' command. The actual error message is
+# then compared against the expected reference passed in $errormsg. The
+# test is passed if the two strings match, otherwise failure is reported
+# and both the expected and actual error messages are printed. Also an
+# unexpectedly successful execution is considered a failure and its result
+# reported for reference.
+proc run_error {cmd errormsg} {
+    global pass fail
+    if {[catch $cmd result]} {
+        if {[string equal $result $errormsg]} {
+            incr pass
+            puts [test_format {check/fail} $cmd PASS];
+        } else {
+            incr fail
+            puts [test_format {check/fail} $cmd {FAIL/errmsg}]
+            puts "$fail/Expected $errormsg"
+            puts "$fail/Received $result"
+        }
+    } else {
+        incr fail
+        puts [test_format {check/fail} $cmd {FAIL/noerr}]
+        puts "$fail/Result $result"
+    }
+    return {}
+}
+
+## run a parallel test that is expected to succeed
+# \param cmd list of strings or lists with the commands to execute
+# \param retval list of the expected return values
+# \param comm communicator. defaults to world communicator
+# \return empty
+#
+# This function executes the lists command lines passed in $cmd in parallel
+# each command taken from the list based on the rank of the individual MPI
+# task on the communicator and intercepts its resulting return value using
+# the 'catch' command. The actual return value is then compared against the
+# expected reference passed in the $retval list, similarly assigned to the
+# individual ranks as the commands. The result is compared on all ranks and
+# if one of the commands failed or the actual return value is not equal to the
+# expected one, failure is reported and both, expected and and actual results
+# are printed on one of the failing ranks. The error reporting expects that
+# the MPI communicator remains usable after failure.
+proc par_return {cmd retval {comm ::tclmpi::comm_world}} {
+    global pass fail master int
 
     flush stdout
     set size [::tclmpi::comm_size $comm]
@@ -176,9 +238,23 @@ proc par_return {cmd retval} {
     return {}
 }
 
-# run parallel commands and expect Tcl error
-proc par_error {cmd retval} {
-    global pass fail comm master int
+## run a parallel test that is expected to produce a Tcl error
+# \param cmd list of strings or lists with the commands to execute
+# \param retval list of the expected error message(s) or return values
+# \param comm communicator. defaults to world communicator
+# \return empty
+#
+# This function executes the lists command lines passed in $cmd in parallel
+# each command taken from the list based on the rank of the individual MPI
+# task on the communicator and intercepts its resulting error message or 
+# return value using the 'catch' command. It is then checked if one of the 
+# commands failed as expected and actual return value are then compared
+# against the expected reference passed in the $retval list with similar
+# assignments to the individual ranks as the commands.
+# If one of the strings does not match or all command unexpectedly succeeded
+# failure is reported otherwise success.
+proc par_error {cmd retval {comm ::tclmpi::comm_world}} {
+    global pass fail master int
     flush stdout
 
     set size [::tclmpi::comm_size $comm]
@@ -249,7 +325,14 @@ proc par_set {name value} {
     set var [lindex $value $rank]
 }
 
-# print result summary
+## print result summary
+# \parm section number of the test section
+# \return empty
+#
+# This function will print a nicely formatted summary
+# of the tests. If executed in parallel only the master
+# rank of the world communicator will produce output.
+# 
 proc test_summary {section} {
     global pass fail rank master
     if {$rank == $master} {
