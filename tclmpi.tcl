@@ -33,6 +33,114 @@ namespace eval tclmpi {
     # \return empty
     proc finalize {} {}
     rename finalize ""
+
+    ## Terminates the MPI environment from Tcl
+    # \return empty
+    proc abort {comm errorcode} {}
+    rename abort ""
+
+    ## Returns the number of processes involved in an MPI communicator
+    # \param[in] comm Tcl representation of the communicator
+    # \return number of MPI tasks
+    proc comm_size {comm} {}
+    rename comm_size ""
+
+    ## Returns the rank of the current process for the given MPI communicator
+    # \param comm Tcl representation of the communicator
+    # \return rank on the communicator (integer between 0 and size-1)
+    proc comm_rank {comm} {}
+    rename comm_rank ""
+
+    ## Creates new communicators based on "color" and "key" flags
+    # \return Tcl representation of the newly created MPI communicator
+    proc comm_split {comm color key} {}
+    rename comm_split ""
+
+    ## 
+    # \return empty
+    proc barrier {} {}
+    rename barrier ""
+
+    ## 
+    # \return Data that was broadcast
+    proc bcast {data type root comm} {}
+    rename bcast ""
+
+    ## 
+    # \return Data for the reduction operation
+    proc allreduce {data type op comm} {}
+    rename allreduce ""
+
+    ## Blocking send
+    # \return empty
+    proc send {data type dest tag comm} {}
+    rename send ""
+
+    ## Non-blocking send
+    # \return Tcl representation of generated MPI request
+    proc isend {data type dest tag comm} {}
+    rename isend ""
+
+    ## Blocking receive
+    # \return received data
+    proc recv {type source tag comm {status {}}} {}
+    rename recv ""
+
+    ## Non-blocking receive
+    # \return Tcl representation of generated MPI request
+    proc irecv {type source tag comm} {}
+    rename irecv ""
+
+    ## 
+    # \return empty
+    proc X {} {}
+    rename X ""
+
+    ## 
+    # \return empty
+    proc X {} {}
+    rename X ""
+
+    ## 
+    # \return empty
+    proc X {} {}
+    rename X ""
+
+    ## 
+    # \return empty
+    proc X {} {}
+    rename X ""
+
+    ## 
+    # \return empty
+    proc X {} {}
+    rename X ""
+
+    ## 
+    # \return empty
+    proc X {} {}
+    rename X ""
+
+    ## 
+    # \return empty
+    proc X {} {}
+    rename X ""
+
+    ## 
+    # \return empty
+    proc X {} {}
+    rename X ""
+
+    ## 
+    # \return empty
+    proc X {} {}
+    rename X ""
+
+    ## 
+    # \return empty
+    proc X {} {}
+    rename X ""
+
 }
 
 package provide tclmpi $tclmpi::version
