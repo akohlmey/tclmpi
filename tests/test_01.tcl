@@ -9,7 +9,7 @@ run_error  [list ::tclmpi::init 0] \
     "wrong # args: should be \"::tclmpi::init\""
 run_return [list ::tclmpi::init] {}
 run_error  [list ::tclmpi::init] \
-    {Calling ::tclmpi::init twice is erroneous.}
+    {Calling ::tclmpi::init multiple times is erroneous.}
 
 # comm_size
 set numargs "wrong # args: should be \"::tclmpi::comm_size <comm>\""
