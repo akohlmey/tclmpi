@@ -5,12 +5,10 @@ source harness.tcl
 ser_init
 
 # init
-set numargs "wrong # args: should be \"::tclmpi::init <argv>\""
-run_error  [list ::tclmpi::init] $numargs
-    
-run_error  [list ::tclmpi::init 0 0] $numargs
-run_return [list ::tclmpi::init $argv] $argv
-run_error  [list ::tclmpi::init $argv] \
+run_error  [list ::tclmpi::init 0] \
+    "wrong # args: should be \"::tclmpi::init\""
+run_return [list ::tclmpi::init] {}
+run_error  [list ::tclmpi::init] \
     {Calling ::tclmpi::init twice is erroneous.}
 
 # comm_size

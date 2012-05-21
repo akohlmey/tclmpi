@@ -16,7 +16,7 @@ proc abend {test rank msg} {
 }
 
 # initialize MPI
-set argv [::tclmpi::init $argv]
+::tclmpi::init
 
 set comm ::tclmpi::comm_world
 set size [::tclmpi::comm_size $comm]

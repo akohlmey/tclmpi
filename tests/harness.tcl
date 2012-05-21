@@ -83,10 +83,10 @@ proc ser_init {args} {
 # for subsequent parallel tests. It also initializes the global variables
 # $rank and $size.
 proc par_init {args} {
-    global argv comm rank size
+    global comm rank size
 
     package require tclmpi
-    ::tclmpi::init $argv
+    ::tclmpi::init
     set rank [::tclmpi::comm_rank $comm]
     set size [::tclmpi::comm_size $comm]
 

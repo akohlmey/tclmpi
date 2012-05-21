@@ -7,7 +7,7 @@ set auto_path [concat $env(PWD)/.. $auto_path]
 package require tclmpi 0.2
 
 # initialize TclMPI
-set argv [::tclmpi::init $argv]
+::tclmpi::init
 
 set comm ::tclmpi::comm_world
 set size [::tclmpi::comm_size $comm]
