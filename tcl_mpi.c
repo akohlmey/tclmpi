@@ -504,24 +504,28 @@ static int tclmpi_init_done = 0;
 int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
-    Tcl_Obj *result,**args;
+    Tcl_Obj *result,*argobj,**args;
     int argc,narg,i,j,ierr;
     char **argv;
 
-    if (objc != 2) {
-        Tcl_WrongNumArgs(interp,1,objv,"<argv>");
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp,1,objv,NULL);
         return TCL_ERROR;
     }
 
     /* convert "command line arguments" back to standard C stuff. */
-    Tcl_IncrRefCount(objv[1]);
-    Tcl_ListObjGetElements(interp,objv[1],&narg,&args);
+    argobj = Tcl_GetVar2Ex(interp,"argv",NULL,TCL_GLOBAL_ONLY);
+    Tcl_ListObjGetElements(interp,argobj,&narg,&args);
 
-    argv = (char **)Tcl_Alloc(narg*sizeof(char *));
-    for (argc=0; argc < narg; ++argc) {
-        Tcl_IncrRefCount(args[argc]);
-        argv[argc] = Tcl_GetString(args[argc]);
+    argv = (char **)Tcl_Alloc((narg+1)*sizeof(char *));
+    for (argc=1; argc <= narg; ++argc) {
+        Tcl_IncrRefCount(args[argc-1]);
+        argv[argc] = Tcl_GetString(args[argc-1]);
     }
+
+    argobj = Tcl_GetVar2Ex(interp,"argv0",NULL,TCL_GLOBAL_ONLY);
+    Tcl_IncrRefCount(argobj);
+    argv[0] = Tcl_GetString(argobj);
 
     if (tclmpi_init_done != 0) {
         Tcl_AppendResult(interp,"Calling ",Tcl_GetString(objv[0]),
@@ -537,28 +541,21 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
        MPI errors into 'catch'able Tcl errors */
     MPI_Comm_set_errhandler(MPI_COMM_WORLD,MPI_ERRORS_RETURN);
 
+    /* build new argv list */
     result = Tcl_NewListObj(0,NULL);
-
-    /* check if results are changed */
-    if (argc == narg) {
-        for (i=0; i < narg; ++i) {
-            Tcl_ListObjAppendElement(interp,result,args[i]);
-            Tcl_DecrRefCount(args[i]);
-        }
-    } else {
-        for (i=0, j=0; (i < argc) && (i+j < narg); ++i) {
-            if (argv[i] == Tcl_GetString(args[i+j])) {
-                Tcl_ListObjAppendElement(interp,result,args[i+j]);
-                Tcl_DecrRefCount(args[i+j]);
-            } else {
-                Tcl_DecrRefCount(args[i+j]);
-                ++j;
-            }
-        }
+    for (i=1; i < argc; ++i) {
+        Tcl_ListObjAppendElement(interp,result,Tcl_NewStringObj(argv[i],-1));
     }
+    Tcl_SetVar2Ex(interp,"argv",NULL,result,TCL_GLOBAL_ONLY);
+    Tcl_SetVar2Ex(interp,"argc",NULL,Tcl_NewIntObj(argc-1),TCL_GLOBAL_ONLY);
+
+    Tcl_DecrRefCount(argobj);
+    for (i=0; i < narg; ++i)
+        Tcl_DecrRefCount(args[i]);
+
     Tcl_DecrRefCount(objv[1]);
     Tcl_Free((char *)argv);
-    Tcl_SetObjResult(interp,result);
+    Tcl_ResetResult(interp);
     return TCL_OK;
 }
 
