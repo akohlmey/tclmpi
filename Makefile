@@ -53,8 +53,11 @@ LIBS= $(TCLLIB) $(MPILIB)
 
 default: tclmpi.so
 
+all: tclmpi.so refman.pdf check
+
 clean:
 	rm -f tclmpi.so *.o *~ tests/*~ examples/*~
+	rm -rf docs/*
 
 check: tclmpi.so
 	(cd tests; ./test_01.tcl)
@@ -71,12 +74,15 @@ tcl_mpi.o: tcl_mpi.c
 
 doc: refman.pdf
 
-refman.pdf: Doxyfile tcl_mpi.c
+refman.pdf: Doxyfile tcl_mpi.c tests/harness.tcl docs
 	doxygen || rm -f $@
 	make -C docs/latex || rm -f $@
 	cp -p docs/latex/refman.pdf $@ || rm -f $@
 
+docs:
+	mkdir docs
+
 #############################################
-.PHONY: default clean check doc
+.PHONY: default clean check doc all
 .SUFFIXES:
 
