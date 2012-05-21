@@ -18,17 +18,17 @@ global env
 set auto_path [concat [file normalize ..] $auto_path]
 
 # some convenience variables
-set comm   ::tclmpi::comm_world
-set self   ::tclmpi::comm_self
-set null   ::tclmpi::comm_null
+set comm   tclmpi::comm_world
+set self   tclmpi::comm_self
+set null   tclmpi::comm_null
 set master 0
 set rank 0
 set size 0
-set auto   ::tclmpi::auto
-set int    ::tclmpi::int
-set double ::tclmpi::double
-set intint ::tclmpi::intint
-set dblint ::tclmpi::dblint
+set auto   tclmpi::auto
+set int    tclmpi::int
+set double tclmpi::double
+set intint tclmpi::intint
+set dblint tclmpi::dblint
 
 # counters for successful and failed tests
 set pass 0 ;##< counter for successful tests
@@ -175,7 +175,7 @@ proc run_error {cmd errormsg} {
 # expected one, failure is reported and both, expected and and actual results
 # are printed on one of the failing ranks. The error reporting expects that
 # the MPI communicator remains usable after failure.
-proc par_return {cmd retval {comm ::tclmpi::comm_world}} {
+proc par_return {cmd retval {comm tclmpi::comm_world}} {
     global pass fail master int
 
     flush stdout
@@ -205,13 +205,13 @@ proc par_return {cmd retval {comm ::tclmpi::comm_world}} {
     set cmd [lindex $cmd $rank]
     set retval [lindex $retval $rank]
     set res [::tclmpi::allreduce [list [catch $cmd result] $rank] \
-                 ::tclmpi::intint ::tclmpi::maxloc $comm]
+                 tclmpi::intint tclmpi::maxloc $comm]
 
     # all parallel commands came through
     if {[lindex $res 0] == 0} {
         set res [::tclmpi::allreduce \
                      [list [string equal $retval $result] $rank] \
-                     ::tclmpi::intint ::tclmpi::minloc $comm]
+                     tclmpi::intint tclmpi::minloc $comm]
         if {[lindex $res 0] == 0} {
             incr fail
             if {$rank == [lindex $res 1]} {
@@ -254,7 +254,7 @@ proc par_return {cmd retval {comm ::tclmpi::comm_world}} {
 # assignments to the individual ranks as the commands.
 # If one of the strings does not match or all command unexpectedly succeeded
 # failure is reported otherwise success.
-proc par_error {cmd retval {comm ::tclmpi::comm_world}} {
+proc par_error {cmd retval {comm tclmpi::comm_world}} {
     global pass fail master int
     flush stdout
 
@@ -284,13 +284,13 @@ proc par_error {cmd retval {comm ::tclmpi::comm_world}} {
     set cmd [lindex $cmd $rank]
     set retval [lindex $retval $rank]
     set res [::tclmpi::allreduce [list [catch $cmd result] $rank] \
-                 ::tclmpi::intint ::tclmpi::maxloc $comm]
+                 tclmpi::intint tclmpi::maxloc $comm]
 
     # at least one parallel command failed
     if {[lindex $res 0] == 1} {
         set res [::tclmpi::allreduce \
                      [list [string equal $retval $result] $rank] \
-                     ::tclmpi::intint ::tclmpi::minloc $comm]
+                     tclmpi::intint tclmpi::minloc $comm]
         if {[lindex $res 0] > 0} {
             incr pass
             if {$rank == $master} {
@@ -323,7 +323,7 @@ proc par_error {cmd retval {comm ::tclmpi::comm_world}} {
 # \param value list of values, one per rank
 # \param comm communicator
 # \return empty
-proc par_set {name value {comm ::tclmpi::comm_world}} {
+proc par_set {name value {comm tclmpi::comm_world}} {
     upvar $name var
 
     set size [::tclmpi::comm_size $comm]

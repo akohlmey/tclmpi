@@ -103,7 +103,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * \section design Overall Design and Differences to the MPI C-bindings
  *
  * To be consistent with typical Tcl conventions all commands and constants
- * in lower case and prefixed with ::tclmpi::, so that clashes with existing
+ * in lower case and prefixed with tclmpi, so that clashes with existing
  * programs are reduced.
  * This is not yet set up to be a proper namespace, but that may happen at
  * a later point, if the need arises. The overall philosophy of the bindings
@@ -118,10 +118,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * will be the return value of the corresponding command. This is consistent
  * with the automatic memory management in Tcl, but this convenience and
  * consistency will affect performance and the semantics. For example calls
- * to ::tclmpi::bcast will be converted into *two* calls to MPI_Bcast();
+ * to tclmpi::bcast will be converted into *two* calls to MPI_Bcast();
  * the first will broadcast the size of the data set being sent (so that
  * a sufficiently sized buffers can be allocated) and then the second call
- * will finally send the data for real. Similarly, ::tclmpi::recv will be
+ * will finally send the data for real. Similarly, tclmpi::recv will be
  * converted into calling MPI_Probe() and then MPI_Recv() for the purpose
  * of determining the amount of temporary storage required. The second call
  * will also use the MPI_SOURCE and MPI_TAG flags from the MPI_Status object
@@ -133,7 +133,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * being determined by calling MPI_Iprobe() and when this shows no (matching)
  * pending message, the parameters for the receive will be cached and the 
  * then MPI_Probe() followed by MPI_Recv() will be called as part of
- * ::tclmpi::wait. The blocking/non-blocking behavior of the Tcl script
+ * tclmpi::wait. The blocking/non-blocking behavior of the Tcl script
  * should be very close to the corresponding C bindings, but probably not
  * as efficient.
  *
@@ -147,10 +147,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * \subsection tclcomm Mapping Communicators
  * MPI communicators are represented in TclMPI by strings of the form
- * "::tclmpi::comm%d", with "%d" being replaced by a unique integer.
+ * "tclmpi::comm%d", with "%d" being replaced by a unique integer.
  * In addition, a few string constants are mapped to the default
- * communicators that are defined in MPI. These are ::tclmpi::comm_world,
- * ::tclmpi::comm_self, and ::tclmpi::comm_null, which represent
+ * communicators that are defined in MPI. These are tclmpi::comm_world,
+ * tclmpi::comm_self, and tclmpi::comm_null, which represent
  * MPI_COMM_WORLD, MPI_COMM_SELF, and MPI_COMM_NULL, respectively.
  *
  * Internally the map is maintained in a simple linked list which
@@ -257,7 +257,7 @@ static const char *tclmpi_add_comm(MPI_Comm comm)
     next->comm = comm;
     next->valid = 1;
     label = (char *)Tcl_Alloc(32);
-    sprintf(label,"::tclmpi::comm%d",tclmpi_comm_cntr);
+    sprintf(label,"tclmpi::comm%d",tclmpi_comm_cntr);
     next->label = label;
     ++tclmpi_comm_cntr;
     last_comm->next = next;
@@ -275,12 +275,12 @@ static const char *tclmpi_add_comm(MPI_Comm comm)
 #define TCLMPI_DOUBLE     4  /*!< floating point data type */
 #define TCLMPI_DOUBLE_INT 5  /*!< data type for double/integer pair */
 
-/* translate MPI requests to Tcl strings and back "::tclmpi::req%d" */
+/* translate MPI requests to Tcl strings and back "tclmpi::req%d" */
 
 /*! Linked list entry type for managing MPI requests */
 typedef struct tclmpi_req tclmpi_req_t;
 
-/*! Linked list entry to map MPI requests to "::tclmpi::req%d" strings. */
+/*! Linked list entry to map MPI requests to "tclmpi::req%d" strings. */
 struct  tclmpi_req {
     const char *label;  /*!< identifier of this request */
     void *data;         /*!< pointer to send or receive data buffer */
@@ -330,7 +330,7 @@ static const char *tclmpi_add_req()
         return NULL;
     }
 
-    sprintf(label,"::tclmpi::req%d",tclmpi_req_cntr);
+    sprintf(label,"tclmpi::req%d",tclmpi_req_cntr);
     next->label = label;
     next->type = TCLMPI_NONE;
     next->len = TCLMPI_INVALID;
@@ -405,15 +405,15 @@ static int tclmpi_del_req(tclmpi_req_t *req)
 /*! convert a string describing a data type to a numeric representation */
 static int tclmpi_datatype(const char *type)
 {
-    if (strcmp(type,"::tclmpi::int") == 0)
+    if (strcmp(type,"tclmpi::int") == 0)
         return TCLMPI_INT;
-    else if (strcmp(type,"::tclmpi::double") == 0)
+    else if (strcmp(type,"tclmpi::double") == 0)
         return TCLMPI_DOUBLE;
-    else if (strcmp(type,"::tclmpi::dblint") == 0)
+    else if (strcmp(type,"tclmpi::dblint") == 0)
         return TCLMPI_DOUBLE_INT;
-    else if (strcmp(type,"::tclmpi::intint") == 0)
+    else if (strcmp(type,"tclmpi::intint") == 0)
         return TCLMPI_INT_INT;
-    else if (strcmp(type,"::tclmpi::auto") == 0)
+    else if (strcmp(type,"tclmpi::auto") == 0)
         return TCLMPI_AUTO;
     else return TCLMPI_NONE;
 }
@@ -586,7 +586,7 @@ int TclMPI_Finalize(ClientData nodata, Tcl_Interp *interp,
 
     if (tclmpi_init_done == 0) {
         Tcl_AppendResult(interp,"Calling ",Tcl_GetString(objv[0]),
-                         " before ::tclmpi::init is erroneous.",NULL);
+                         " before tclmpi::init is erroneous.",NULL);
         return TCL_ERROR;
     }
 
@@ -737,7 +737,7 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
     if (tclmpi_commcheck(interp,comm,objv[0],objv[1]) != TCL_OK)
         return TCL_ERROR;
 
-    if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::undefined") == 0)
+    if (strcmp(Tcl_GetString(objv[2]),"tclmpi::undefined") == 0)
         color = MPI_UNDEFINED;
     else {
         if (Tcl_GetIntFromObj(interp,objv[2],&color) != TCL_OK)
@@ -805,7 +805,7 @@ int TclMPI_Barrier(ClientData nodata, Tcl_Interp *interp,
  * C bindings, the length of the data is inferred from the data object
  * passed to this function and thus a 'count' argument is not needed.
  * Only a limited number of data types are currently supported, since 
- * Tcl has a limited number of "native" data types. The ::tclmpi::auto
+ * Tcl has a limited number of "native" data types. The tclmpi::auto
  * data type transfers the internal string representation of an object,
  * while the other data types convert data to native data types as needed,
  * with all non-representable data translated into either 0 or 0.0.
@@ -927,8 +927,8 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
  * \return TCL_OK or TCL_ERROR
  *
  * This function implements a reduction plus broadcast function for TclMPI.
- * This operation does not accept the ::tclmpi::auto data type, also support
- * for types outside of ::tclmpi::int and ::tclmpi::double is incomplete.
+ * This operation does not accept the tclmpi::auto data type, also support
+ * for types outside of tclmpi::int and tclmpi::double is incomplete.
  * The length of the data is inferred from the data object passed to this 
  * function and thus a 'count' argument is not needed.
  * 
@@ -967,29 +967,29 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    if (strcmp(opstr,"::tclmpi::max") == 0)
+    if (strcmp(opstr,"tclmpi::max") == 0)
         op = MPI_MAX;
-    else if (strcmp(opstr,"::tclmpi::min") == 0)
+    else if (strcmp(opstr,"tclmpi::min") == 0)
         op = MPI_MIN;
-    else if (strcmp(opstr,"::tclmpi::sum") == 0)
+    else if (strcmp(opstr,"tclmpi::sum") == 0)
         op = MPI_SUM;
-    else if (strcmp(opstr,"::tclmpi::prod") == 0)
+    else if (strcmp(opstr,"tclmpi::prod") == 0)
         op = MPI_PROD;
-    else if (strcmp(opstr,"::tclmpi::land") == 0)
+    else if (strcmp(opstr,"tclmpi::land") == 0)
         op = MPI_LAND;
-    else if (strcmp(opstr,"::tclmpi::band") == 0)
+    else if (strcmp(opstr,"tclmpi::band") == 0)
         op = MPI_BAND;
-    else if (strcmp(opstr,"::tclmpi::lor") == 0)
+    else if (strcmp(opstr,"tclmpi::lor") == 0)
         op = MPI_LOR;
-    else if (strcmp(opstr,"::tclmpi::bor") == 0)
+    else if (strcmp(opstr,"tclmpi::bor") == 0)
         op = MPI_BOR;
-    else if (strcmp(opstr,"::tclmpi::lxor") == 0)
+    else if (strcmp(opstr,"tclmpi::lxor") == 0)
         op = MPI_LXOR;
-    else if (strcmp(opstr,"::tclmpi::bxor") == 0)
+    else if (strcmp(opstr,"tclmpi::bxor") == 0)
         op = MPI_BXOR;
-    else if (strcmp(opstr,"::tclmpi::maxloc") == 0)
+    else if (strcmp(opstr,"tclmpi::maxloc") == 0)
         op = MPI_MAXLOC;
-    else if (strcmp(opstr,"::tclmpi::minloc") == 0)
+    else if (strcmp(opstr,"tclmpi::minloc") == 0)
         op = MPI_MINLOC;
     else {
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
@@ -1084,7 +1084,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
  * This function implements a blocking send operation for TclMPI.
  * The length of the data is inferred from the data object passed to this 
  * function and thus a 'count' argument is not needed.
- * In the case of ::tclmpi::auto, the string representation of the send data
+ * In the case of tclmpi::auto, the string representation of the send data
  * is directly passed to MPI_Send() otherwise a copy is made and data converted.
  * 
  * If the MPI call failed, an MPI error message is passed up as result
@@ -1174,7 +1174,7 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
  * This function implements a non-blocking send operation for TclMPI.
  * The length of the data is inferred from the data object passed to
  * this function and thus a 'count' argument is not needed.  Unlike for
- * the blocking TclMPI_Send, in the case of ::tclmpi::auto as data a
+ * the blocking TclMPI_Send, in the case of tclmpi::auto as data a
  * copy has to be made since the string representation of the send data
  * might be invalidated during the send. The command generates a new
  * tclmpi_req_t communication request via tclmpi_add_req and the
@@ -1323,12 +1323,12 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
     if (tclmpi_commcheck(interp,comm,objv[0],objv[4]) != TCL_OK)
         return TCL_ERROR;
 
-    if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::any_source") == 0)
+    if (strcmp(Tcl_GetString(objv[2]),"tclmpi::any_source") == 0)
         source = MPI_ANY_SOURCE;
     else if (Tcl_GetIntFromObj(interp,objv[2],&source) != TCL_OK)
         return TCL_ERROR;
 
-    if (strcmp(Tcl_GetString(objv[3]),"::tclmpi::any_tag") == 0)
+    if (strcmp(Tcl_GetString(objv[3]),"tclmpi::any_tag") == 0)
         tag = MPI_ANY_TAG;
     else if (Tcl_GetIntFromObj(interp,objv[3],&tag) != TCL_OK)
         return TCL_ERROR;
@@ -1470,12 +1470,12 @@ int TclMPI_Irecv(ClientData nodata, Tcl_Interp *interp,
     if (tclmpi_commcheck(interp,comm,objv[0],objv[4]) != TCL_OK)
         return TCL_ERROR;
 
-    if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::any_source") == 0)
+    if (strcmp(Tcl_GetString(objv[2]),"tclmpi::any_source") == 0)
         source = MPI_ANY_SOURCE;
     else if (Tcl_GetIntFromObj(interp,objv[2],&source) != TCL_OK)
         return TCL_ERROR;
 
-    if (strcmp(Tcl_GetString(objv[3]),"::tclmpi::any_tag") == 0)
+    if (strcmp(Tcl_GetString(objv[3]),"tclmpi::any_tag") == 0)
         tag = MPI_ANY_TAG;
     else if (Tcl_GetIntFromObj(interp,objv[3],&tag) != TCL_OK)
         return TCL_ERROR;
@@ -1580,12 +1580,12 @@ int TclMPI_Probe(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    if (strcmp(Tcl_GetString(objv[1]),"::tclmpi::any_source") == 0)
+    if (strcmp(Tcl_GetString(objv[1]),"tclmpi::any_source") == 0)
         source = MPI_ANY_SOURCE;
     else if (Tcl_GetIntFromObj(interp,objv[1],&source) != TCL_OK)
         return TCL_ERROR;
 
-    if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::any_tag") == 0)
+    if (strcmp(Tcl_GetString(objv[2]),"tclmpi::any_tag") == 0)
         tag = MPI_ANY_TAG;
     else if (Tcl_GetIntFromObj(interp,objv[2],&tag) != TCL_OK)
         return TCL_ERROR;
@@ -1669,12 +1669,12 @@ int TclMPI_Iprobe(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    if (strcmp(Tcl_GetString(objv[1]),"::tclmpi::any_source") == 0)
+    if (strcmp(Tcl_GetString(objv[1]),"tclmpi::any_source") == 0)
         source = MPI_ANY_SOURCE;
     else if (Tcl_GetIntFromObj(interp,objv[1],&source) != TCL_OK)
         return TCL_ERROR;
 
-    if (strcmp(Tcl_GetString(objv[2]),"::tclmpi::any_tag") == 0)
+    if (strcmp(Tcl_GetString(objv[2]),"tclmpi::any_tag") == 0)
         tag = MPI_ANY_TAG;
     else if (Tcl_GetIntFromObj(interp,objv[2],&tag) != TCL_OK)
         return TCL_ERROR;
@@ -1970,8 +1970,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
  * and plugins from different Tcl versions.
  *
  * In addition the linked list for translating MPI communicators is 
- * initialized for the predefined communicators ::tclmpi::comm_world,
- * ::tclmpi::comm_self, and ::tclmpi::comm_null and its corresponding MPI
+ * initialized for the predefined communicators tclmpi::comm_world,
+ * tclmpi::comm_self, and tclmpi::comm_null and its corresponding MPI
  * counterparts.
  */
 
@@ -2015,7 +2015,7 @@ int _tclmpi_Init(Tcl_Interp *interp)
     comm->valid = 1;
     comm->comm = MPI_COMM_WORLD;
     label = (char *)Tcl_Alloc(32);
-    strcpy(label,"::tclmpi::comm_world");
+    strcpy(label,"tclmpi::comm_world");
     comm->label = label;
     first_comm = comm;
 
@@ -2024,7 +2024,7 @@ int _tclmpi_Init(Tcl_Interp *interp)
     comm->valid = 1;
     comm->comm = MPI_COMM_SELF;
     label = (char *)Tcl_Alloc(32);
-    strcpy(label,"::tclmpi::comm_self");
+    strcpy(label,"tclmpi::comm_self");
     comm->label = label;
     first_comm->next = comm;
 
@@ -2033,43 +2033,43 @@ int _tclmpi_Init(Tcl_Interp *interp)
     comm->valid = 1;
     comm->comm = MPI_COMM_NULL;
     label = (char *)Tcl_Alloc(32);
-    strcpy(label,"::tclmpi::comm_null");
+    strcpy(label,"tclmpi::comm_null");
     comm->label = label;
     first_comm->next->next = comm;
     last_comm = comm;
     memset(&MPI_COMM_INVALID,255,sizeof(MPI_Comm));
 
-    Tcl_CreateObjCommand(interp,"::tclmpi::init",TclMPI_Init,
+    Tcl_CreateObjCommand(interp,"tclmpi::init",TclMPI_Init,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::finalize",TclMPI_Finalize,
+    Tcl_CreateObjCommand(interp,"tclmpi::finalize",TclMPI_Finalize,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::abort",TclMPI_Abort,
+    Tcl_CreateObjCommand(interp,"tclmpi::abort",TclMPI_Abort,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::comm_size",TclMPI_Comm_size,
+    Tcl_CreateObjCommand(interp,"tclmpi::comm_size",TclMPI_Comm_size,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::comm_rank",TclMPI_Comm_rank,
+    Tcl_CreateObjCommand(interp,"tclmpi::comm_rank",TclMPI_Comm_rank,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::comm_split",TclMPI_Comm_split,
+    Tcl_CreateObjCommand(interp,"tclmpi::comm_split",TclMPI_Comm_split,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::barrier",TclMPI_Barrier,
+    Tcl_CreateObjCommand(interp,"tclmpi::barrier",TclMPI_Barrier,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::bcast",TclMPI_Bcast,
+    Tcl_CreateObjCommand(interp,"tclmpi::bcast",TclMPI_Bcast,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::allreduce",TclMPI_Allreduce,
+    Tcl_CreateObjCommand(interp,"tclmpi::allreduce",TclMPI_Allreduce,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::send",TclMPI_Send,
+    Tcl_CreateObjCommand(interp,"tclmpi::send",TclMPI_Send,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::isend",TclMPI_Isend,
+    Tcl_CreateObjCommand(interp,"tclmpi::isend",TclMPI_Isend,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::recv",TclMPI_Recv,
+    Tcl_CreateObjCommand(interp,"tclmpi::recv",TclMPI_Recv,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::irecv",TclMPI_Irecv,
+    Tcl_CreateObjCommand(interp,"tclmpi::irecv",TclMPI_Irecv,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::probe",TclMPI_Probe,
+    Tcl_CreateObjCommand(interp,"tclmpi::probe",TclMPI_Probe,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::iprobe",TclMPI_Iprobe,
+    Tcl_CreateObjCommand(interp,"tclmpi::iprobe",TclMPI_Iprobe,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
-    Tcl_CreateObjCommand(interp,"::tclmpi::wait",TclMPI_Wait,
+    Tcl_CreateObjCommand(interp,"tclmpi::wait",TclMPI_Wait,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     return TCL_OK;
 }

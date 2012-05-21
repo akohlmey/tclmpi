@@ -1,7 +1,7 @@
 #!/usr/bin/tclsh
 # compute pi
-set auto_path [concat $env(PWD)/.. $auto_path]
-package require tclmpi 0.2
+set auto_path [concat [file normalize ..] $auto_path]
+package require tclmpi 0.6
 set master 0
 set tstart [clock microseconds]
 

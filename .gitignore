@@ -1,5 +1,5 @@
 .gdb_history
-tclmpi.so
+_tclmpi.so
 docs
 *~
 *.o
