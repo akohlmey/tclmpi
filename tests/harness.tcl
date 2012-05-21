@@ -317,16 +317,23 @@ proc par_error {cmd retval {comm ::tclmpi::comm_world}} {
     return {}
 }
 
-# set variable to different values on different ranks
-# (not yet used)
-proc par_set {name value} {
-    global rank
+## set variable to different values on different ranks
+# \param name name of variable
+# \param value list of values, one per rank
+# \param comm communicator
+# \return empty
+proc par_set {name value {comm ::tclmpi::comm_world}} {
     upvar $name var
+
+    set size [::tclmpi::comm_size $comm]
+    set rank [::tclmpi::comm_rank $comm]
+
     set var [lindex $value $rank]
+    return {}
 }
 
 ## print result summary
-# \parm section number of the test section
+# \param section number of the test section
 # \return empty
 #
 # This function will print a nicely formatted summary
