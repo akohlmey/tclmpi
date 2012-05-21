@@ -3,3 +3,4 @@ tclmpi.so
 docs
 *~
 *.o
+doxygen.log
