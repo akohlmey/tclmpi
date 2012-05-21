@@ -12,9 +12,10 @@
 
 # Current version.
 set version 0.6
+global env
 
-# load extension
-load ../tclmpi.so
+# add path to extension
+set auto_path [concat [file normalize ..] $auto_path]
 
 # some convenience variables
 set comm   ::tclmpi::comm_world

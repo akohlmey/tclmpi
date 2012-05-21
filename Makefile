@@ -9,10 +9,10 @@ CC=mpicc
 LD=$(CC)
 
 # set to empty if you don't want to include debug info
-#DEBUG=-g
+DEBUG=-g
 
 # defines
-DEFINE=-DUSE_TCL_STUBS -DPACKAGE_NAME=\"tclmpi\" -DPACKAGE_VERSION=\"0.6\"
+DEFINE=-DUSE_TCL_STUBS -DPACKAGE_NAME=\"_tclmpi\" -DPACKAGE_VERSION=\"0.6\"
 
 # platform specific compiler flags:
 ## Linux and multiple other platforms with GCC (generic)
@@ -51,30 +51,30 @@ CFLAGS=$(COMPILE) $(DEBUG) $(DEFINE) $(TCLINCLUDE) $(MPIINCLUDE)
 LDFLAGS=$(LINK) $(DEBUG) $(TCLLIBRARY) $(MPILIBRARY)
 LIBS= $(TCLLIB) $(MPILIB)
 
-default: tclmpi.so
+default: _tclmpi.so
 
-all: tclmpi.so refman.pdf check
+all: _tclmpi.so refman.pdf check
 
 clean:
-	rm -f tclmpi.so *.o *~ tests/*~ examples/*~
+	rm -f _tclmpi.so *.o *~ tests/*~ examples/*~
 	rm -rf docs/*
 
-check: tclmpi.so
+check: _tclmpi.so
 	(cd tests; ./test_01.tcl)
 	(cd tests; mpirun -np 2 ./test_02.tcl)
 
 #############################################
-tclmpi.so:  tcl_mpi.o
-	$(LD) $(LDFLAGS) -o tclmpi.so $^ $(LIBS)
+_tclmpi.so:  _tclmpi.o
+	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
 
-tcl_mpi.o: tcl_mpi.c
+_tclmpi.o: _tclmpi.c
 	$(CC) $(CFLAGS) -c $<
 
 #############################################
 
 doc: refman.pdf
 
-refman.pdf: Doxyfile tcl_mpi.c tests/harness.tcl docs
+refman.pdf: Doxyfile _tclmpi.c tests/harness.tcl tclmpi.tcl docs
 	doxygen || rm -f $@
 	make -C docs/latex || rm -f $@
 	cp -p docs/latex/refman.pdf $@ || rm -f $@

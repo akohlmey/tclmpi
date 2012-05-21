@@ -529,7 +529,7 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
 
     if (tclmpi_init_done != 0) {
         Tcl_AppendResult(interp,"Calling ",Tcl_GetString(objv[0]),
-                         " twice is erroneous.",NULL);
+                         " multiple times is erroneous.",NULL);
         return TCL_ERROR;
     }
     ierr = MPI_Init(&argc,&argv);
@@ -553,7 +553,6 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
     for (i=0; i < narg; ++i)
         Tcl_DecrRefCount(args[i]);
 
-    Tcl_DecrRefCount(objv[1]);
     Tcl_Free((char *)argv);
     Tcl_ResetResult(interp);
     return TCL_OK;
@@ -1990,11 +1989,11 @@ BOOL APIENTRY DllMain( HANDLE hModule,
     return TRUE;
 }
 
-EXTERN int Tclmpi_Init(Tcl_Interp *interp)
+EXTERN int _tclmpi_Init(Tcl_Interp *interp)
 
 #else
 
-int Tclmpi_Init(Tcl_Interp *interp)
+int _tclmpi_Init(Tcl_Interp *interp)
 
 #endif
 {
