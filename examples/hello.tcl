@@ -9,7 +9,7 @@ package require tclmpi 0.6
 # initialize TclMPI
 ::tclmpi::init
 
-set comm ::tclmpi::comm_world
+set comm tclmpi::comm_world
 set size [::tclmpi::comm_size $comm]
 set rank [::tclmpi::comm_rank $comm]
 

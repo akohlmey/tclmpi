@@ -18,7 +18,7 @@ proc abend {test rank msg} {
 # initialize MPI
 ::tclmpi::init
 
-set comm ::tclmpi::comm_world
+set comm tclmpi::comm_world
 set size [::tclmpi::comm_size $comm]
 set rank [::tclmpi::comm_rank $comm]
 
@@ -30,7 +30,7 @@ abend [expr {![string is integer $num]}] $rank {usage: pi.tcl <*num* intervals>}
 abend [expr {int($num) < $size}] $rank "need at least $size intervals"
 
 # make sure all processes have the same interval parameter
-set num [::tclmpi::bcast $num ::tclmpi::int $master $comm]
+set num [::tclmpi::bcast $num tclmpi::int $master $comm]
 if {$rank == $master} {puts "startup time: [expr {([clock microseconds]-$tstart)/1000000.0}] seconds"}
 set tstart [clock microseconds]
 
@@ -45,7 +45,7 @@ if {$rank == $master} {puts "loop time:    [expr {([clock microseconds]-$tstart)
 set tstart [clock microseconds]
 
 # combine results
-set mypi [::tclmpi::allreduce $mypi ::tclmpi::double ::tclmpi::sum $comm]
+set mypi [::tclmpi::allreduce $mypi tclmpi::double tclmpi::sum $comm]
 if {$rank == $master} {puts "result: $mypi. relative error: [expr {abs(($mypi - 3.14159265358979)/3.14159265358979)}]"}
 if {$rank == $master} {puts "result time:  [expr {([clock microseconds]-$tstart)/1000000.0}] seconds"}
 
