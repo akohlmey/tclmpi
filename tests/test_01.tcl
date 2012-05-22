@@ -88,8 +88,8 @@ run_error  [list ::tclmpi::bcast {} $auto $master $null] \
     {::tclmpi::bcast: MPI_ERR_COMM: invalid communicator}
 run_error  [list ::tclmpi::bcast {{xx 11} {1 2 3} {}} $auto 1 $comm] \
     {::tclmpi::bcast: MPI_ERR_ROOT: invalid root}
-run_error  [list ::tclmpi::bcast {} ::tclmpi::real $master $comm]    \
-    {::tclmpi::bcast: invalid data type: ::tclmpi::real}
+run_error  [list ::tclmpi::bcast {} tclmpi::real $master $comm]    \
+    {::tclmpi::bcast: invalid data type: tclmpi::real}
 
 # check data type conversions
 run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} {}}            \

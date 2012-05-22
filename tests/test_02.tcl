@@ -1,232 +1,199 @@
 #!/usr/bin/tclsh
-# non-destructive tests to be run with 2 MPI tasks.
+# tests that can be run with just one process
 source harness.tcl
 
-# parallel init
-par_init
+ser_init
 
-# size/rank checks
-par_return [list [list ::tclmpi::comm_size $comm] \
-                [list ::tclmpi::comm_size $comm]] [list 2 2]
-par_return [list [list ::tclmpi::comm_rank $comm] \
-                [list ::tclmpi::comm_rank $comm]] [list 0 1]
-par_return [list [list ::tclmpi::comm_size $self] \
-                [list ::tclmpi::comm_size $self]] [list 1 1]
-par_return [list [list ::tclmpi::comm_rank $self] \
-                [list ::tclmpi::comm_rank $self]] [list 0 0]
-par_error  [list [list ::tclmpi::comm_size $null] \
-                [list ::tclmpi::comm_size $null] ] \
-    [list {::tclmpi::comm_size: MPI_ERR_COMM: invalid communicator} \
-         {::tclmpi::comm_size: MPI_ERR_COMM: invalid communicator} ]
-par_error  [list [list ::tclmpi::comm_rank $null] \
-                [list ::tclmpi::comm_rank $null] ] \
-    [list {::tclmpi::comm_rank: MPI_ERR_COMM: invalid communicator} \
-         {::tclmpi::comm_rank: MPI_ERR_COMM: invalid communicator} ]
+# import all API from namespace
+namespace import tclmpi::*
+# use aliases instead of predefined variables
+unset comm self null
+namespace upvar tclmpi comm_world comm
+namespace upvar tclmpi comm_self self
+namespace upvar tclmpi comm_null null
+namespace upvar tclmpi sum    mpi_sum
+namespace upvar tclmpi prod   mpi_prod
+namespace upvar tclmpi max    mpi_max
+namespace upvar tclmpi min    mpi_min
+namespace upvar tclmpi land   mpi_land
+namespace upvar tclmpi auto   mpi_auto
+namespace upvar tclmpi double mpi_double
+namespace upvar tclmpi int    mpi_int
+namespace upvar tclmpi minloc minloc
+namespace upvar tclmpi maxloc maxloc
+namespace upvar tclmpi undefined undefined
 
+# init
+run_error  [list init 0] \
+    "wrong # args: should be \"init\""
+run_return [list init] {}
+run_error  [list init] \
+    {Calling init multiple times is erroneous.}
+
+# comm_size
+set numargs "wrong # args: should be \"comm_size <comm>\""
+run_error  [list comm_size]  $numargs
+run_error  [list comm_size $comm $self] $numargs
+run_error  [list comm_size comm0] \
+    {comm_size: unknown communicator: comm0}
+run_return [list comm_size $comm] 1
+run_return [list comm_size $self] 1
+run_error  [list comm_size $null] \
+    {comm_size: MPI_ERR_COMM: invalid communicator}
+
+# comm_rank
+set numargs "wrong # args: should be \"comm_rank <comm>\""
+run_error  [list comm_rank] $numargs
+run_error  [list comm_rank $comm $self] $numargs
+run_error  [list comm_rank comm0] \
+    {comm_rank: unknown communicator: comm0}
+run_return [list comm_rank $comm] 0
+run_return [list comm_rank $self] 0
+run_error  [list comm_rank $null] \
+    {comm_rank: MPI_ERR_COMM: invalid communicator}
+
+# comm_split
 set split0 tclmpi::comm0
 set split1 tclmpi::comm1
 set split2 tclmpi::comm2
+set numargs \
+    "wrong # args: should be \"comm_split <comm> <color> <key>\""
+run_error  [list comm_split] $numargs
+run_error  [list comm_split $comm 1] $numargs
+run_error  [list comm_split $comm 1 1 1] $numargs
+run_error  [list comm_split comm0 0 0]  \
+    {comm_split: unknown communicator: comm0}
+run_return [list comm_split $comm 5 -1] [list $split0]
+run_return [list comm_split $comm 0 0]  [list $split1]
+run_return [list comm_split $self 4 -1] [list $split2]
+run_return [list comm_split $self $undefined -1] [list $null]
+run_error  [list comm_split $comm -1 0] \
+    {comm_split: MPI_ERR_ARG: invalid argument of some other kind}
+run_error  [list comm_split $null 5 0]  \
+    {comm_split: MPI_ERR_COMM: invalid communicator}
+run_error  [list comm_split $comm x 0]  \
+    {expected integer but got "x"}
+run_error  [list comm_split $comm 0 x]  \
+    {expected integer but got "x"}
 
-# new "world" communicator with ranking reversed
-par_return [list [list ::tclmpi::comm_split $comm 5 1] \
-                [list ::tclmpi::comm_split $comm 5 -1] ] \
-    [list {tclmpi::comm0} {tclmpi::comm0}]
-par_return [list [list ::tclmpi::comm_size $split0] \
-                [list ::tclmpi::comm_size $split0]] [list 2 2]
-par_return [list [list ::tclmpi::comm_rank $split0] \
-                [list ::tclmpi::comm_rank $split0]] [list 1 0]
-
-# two "self" communicators with rank 0
-par_return [list [list ::tclmpi::comm_split $comm 3 1] \
-                [list ::tclmpi::comm_split $comm 1 -1] ] \
-    [list {tclmpi::comm1} {tclmpi::comm1}]
-par_return [list [list ::tclmpi::comm_size $split1] \
-                [list ::tclmpi::comm_size $split1]] [list 1 1]
-par_return [list [list ::tclmpi::comm_rank $split1] \
-                [list ::tclmpi::comm_rank $split1]] [list 0 0]
-
-# new world communicator with rank retained
-par_return [list [list ::tclmpi::comm_split $comm 0 0] \
-                [list ::tclmpi::comm_split $comm 0 0] ] \
-    [list {tclmpi::comm2} {tclmpi::comm2}]
-par_return [list [list ::tclmpi::comm_rank $split2] \
-                [list ::tclmpi::comm_rank $split2]] [list 0 1]
-
-# one real and one "null" communicator
-par_return [list [list ::tclmpi::comm_split $comm tclmpi::undefined 1] \
-                [list ::tclmpi::comm_split $comm 1 -1] ] \
-    [list {tclmpi::comm_null} {tclmpi::comm3}]
+# check size and rank on generated communicators
+run_return [list comm_size $split0] 1
+run_return [list comm_size $split1] 1
+run_return [list comm_rank $split0] 0
+run_return [list comm_rank $split1] 0
 
 # barrier
-par_return [list [list ::tclmpi::barrier $comm]    \
-                [list ::tclmpi::barrier $comm] ]   \
-    [list {} {}]
-par_return [list [list ::tclmpi::barrier $self]    \
-                [list ::tclmpi::barrier $self] ]   \
-    [list {} {}]
-par_return [list [list ::tclmpi::barrier $split0]  \
-                [list ::tclmpi::barrier $split0] ] \
-    [list {} {}]
-par_return [list [list ::tclmpi::barrier $split1]  \
-                [list ::tclmpi::barrier $split1] ] \
-    [list {} {}]
-par_return [list [list ::tclmpi::barrier $split2]  \
-                [list ::tclmpi::barrier $split2] ] \
-    [list {} {}]
+set numargs "wrong # args: should be \"barrier <comm>\""
+run_error  [list barrier] $numargs
+run_error  [list barrier $comm 1] $numargs
+run_error  [list barrier comm0]   \
+    {barrier: unknown communicator: comm0}
+run_error  [list barrier $null]   \
+    {barrier: MPI_ERR_COMM: invalid communicator}
+run_return [list barrier $comm] {}
+run_return [list barrier $self] {}
 
 # bcast
-set idata [list {xx 11} {1 2 3} {}]
-par_return [list [list ::tclmpi::bcast $idata $auto $master $comm] \
-                [list ::tclmpi::bcast {} $auto $master $comm]]     \
-    [list $idata $idata]
-par_return [list [list ::tclmpi::bcast {} $auto $master $comm]     \
-                [list ::tclmpi::bcast $idata $auto $master $comm]] \
-    [list {} {}]
+set numargs \
+    "wrong # args: should be \"bcast <data> <type> <root> <comm>\""
+run_error  [list bcast] $numargs
+run_error  [list bcast {}] $numargs
+run_error  [list bcast {} $auto] $numargs
+run_error  [list bcast {} $auto $master] $numargs
+run_error  [list bcast {} $auto $master $comm xxx] $numargs
+run_error  [list bcast {} $auto $master comm0] \
+    {bcast: unknown communicator: comm0}
+run_error  [list bcast {} $auto $master $null] \
+    {bcast: MPI_ERR_COMM: invalid communicator}
+run_error  [list bcast {{xx 11} {1 2 3} {}} $auto 1 $comm] \
+    {bcast: MPI_ERR_ROOT: invalid root}
 
-set idata {016 {1 2 3} 2.0 7 0xff yy}
-set odata {14 0 0 7 255 0}
-par_return [list [list ::tclmpi::bcast {} $int 1 $comm] \
-                [list ::tclmpi::bcast $idata $int 1 $comm]] [list $odata $odata]
-set odata {14.0 0.0 2.0 7.0 255.0 0.0}
-par_return [list [list ::tclmpi::bcast $idata $double $master $comm] \
-                [list ::tclmpi::bcast {} $double $master $comm]] \
-    [list $odata $odata]
-
-# when mixing $auto with other data types, we have mismatch or low-level
-# MPI calls which is indicated in the truncated error message.
-par_error  [list [list ::tclmpi::bcast $idata $double $master $comm] \
-                [list ::tclmpi::bcast {} $auto $master $comm]] \
-    [list $odata {::tclmpi::bcast: MPI_ERR_TRUNCATE: message truncated}]
+# check data type conversions
+run_return [list bcast {{xx 11} {1 2 3} {}}            \
+                $auto $master $comm] {{xx 11} {1 2 3} {}}
+run_return [list bcast {{xx 11} {1 2 3} {}}            \
+                $auto $master $self] {{xx 11} {1 2 3} {}}
+run_return [list bcast {{xx 11} {1 2 3} 2.0 7 0xff yy} \
+                $int $master $self] {0 0 0 7 255 0}
+run_return [list bcast {{xx 11} {1 2 3} 2.5 yy 1}      \
+                $double $master $self] {0.0 0.0 2.5 0.0 1.0}
+run_return [list bcast {-1 2 +3 2.0 7 016}             \
+                $int $master $comm] {-1 2 3 0 7 14}
+run_return [list bcast {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
+                $double $master $self] {-100000.0 1.1 0.0 0.02 6e+26 34.0}
 
 # allreduce
-set idata {0 1 3 0 1 10}
-set odata {1 -1 0 0 1 18}
+set numargs \
+    "wrong # args: should be \"allreduce <data> <type> <op> <comm>\""
+run_error  [list allreduce] $numargs
+run_error  [list allreduce {}] $numargs
+run_error  [list allreduce {} $auto] $numargs
+run_error  [list allreduce {} $auto $mpi_sum] $numargs
+run_error  [list allreduce {} $auto $mpi_prod $comm xxx] $numargs
+run_error  [list allreduce {} $auto $mpi_max $comm]      \
+    {allreduce: does not support data type tclmpi::auto}
+run_error  [list allreduce {} $int $mpi_max comm0]       \
+    {allreduce: unknown communicator: comm0}
+run_error  [list allreduce {} $int $maxloc $comm]    \
+    {allreduce: MPI_ERR_OP: invalid reduce operation}
+run_error  [list allreduce {} $double $minloc $comm] \
+    {allreduce: MPI_ERR_OP: invalid reduce operation}
+run_error [list allreduce {1 0 2 1 4 3} $intint \
+               tclmpi::max $comm] \
+    {allreduce: MPI_ERR_OP: invalid reduce operation}
+run_error  [list allreduce {} tclmpi::real $mpi_min $comm] \
+    {allreduce: invalid data type: tclmpi::real}
+run_error  [list allreduce {} $int $mpi_land $null]          \
+    {allreduce: MPI_ERR_COMM: invalid communicator}
+run_error  [list allreduce {{}} $int tclmpi::gamma $comm]       \
+    {allreduce: unknown reduction operator: tclmpi::gamma}
+run_return [list allreduce {2 0 1 1} $intint $maxloc $comm] {2 0 1 1}
+#run_return [list allreduce {1.0 0 2.0 1} $dblint \
+tclmpi::minloc $comm] {1.0 0 2.0 1}
 
-# logical operators
-set rdata {0 1 0 0 1 1}
-par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::land $comm] \
-                [list ::tclmpi::allreduce $odata $int tclmpi::land $comm]] \
-    [list $rdata $rdata]
-set rdata {1 1 1 0 1 1}
-par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::lor $comm] \
-                [list ::tclmpi::allreduce $odata $int tclmpi::lor $comm]] \
-    [list $rdata $rdata]
-set rdata {1 0 1 0 0 0}
-par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::lxor $comm] \
-                [list ::tclmpi::allreduce $odata $int tclmpi::lxor $comm]] \
-    [list $rdata $rdata]
-set rdata {0 1 0 0 1 2}
-par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::band $comm] \
-                [list ::tclmpi::allreduce $odata $int tclmpi::band $comm]] \
-    [list $rdata $rdata]
-set rdata {1 -1 3 0 1 26}
-par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::bor $comm] \
-                [list ::tclmpi::allreduce $odata $int tclmpi::bor $comm]] \
-    [list $rdata $rdata]
-set rdata {1 -2 3 0 0 24}
-par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::bxor $comm] \
-                [list ::tclmpi::allreduce $odata $int tclmpi::bxor $comm]] \
-    [list $rdata $rdata]
+# check some data type conversions
+run_return [list allreduce {{xx 11} {1 2 3} 2.0 7 0xff yy} \
+                $int tclmpi::max $self] {0 0 0 7 255 0}
+run_return [list allreduce {{xx 11} {1 2 3} 2.5 yy 1}      \
+                $double tclmpi::sum $comm] {0.0 0.0 2.5 0.0 1.0}
+run_return [list allreduce {-1 2 +3 2.0 7 016}             \
+                $int tclmpi::prod $comm] {-1 2 3 0 7 14}
 
-# integer
-set rdata {1 1 3 0 1 18}
-par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::max $comm] \
-                [list ::tclmpi::allreduce $odata $int tclmpi::max $comm]] \
-    [list $rdata $rdata]
-set rdata {0 -1 0 0 1 10}
-par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::min $comm] \
-                [list ::tclmpi::allreduce $odata $int tclmpi::min $comm]] \
-    [list $rdata $rdata]
-set rdata {1 0 3 0 2 28}
-par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::sum $comm] \
-                [list ::tclmpi::allreduce $odata $int tclmpi::sum $comm]] \
-    [list $rdata $rdata]
-set rdata {0 -1 0 0 1 180}
-par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::prod $comm] \
-                [list ::tclmpi::allreduce $odata $int tclmpi::prod $comm]] \
-    [list $rdata $rdata]
+# probe
+set numargs \
+    "wrong # args: should be \"probe <source> <tag> <comm> ?status?\""
+run_error  [list probe] $numargs
+run_error  [list probe 0] $numargs
+run_error  [list probe 0 0] $numargs
+run_error  [list probe 0 0 $comm status xxx] $numargs
+run_error  [list probe 0 0 comm0]                    \
+    {probe: unknown communicator: comm0}
+run_error  [list probe tclmpi::any_tag 0 $comm]    \
+    {expected integer but got "tclmpi::any_tag"}
+run_error  [list probe 0 tclmpi::any_source $comm] \
+    {expected integer but got "tclmpi::any_source"}
+run_error  [list probe tclmpi::any_source \
+                tclmpi::any_tag $null] \
+    {probe: invalid communicator: tclmpi::comm_null}
 
-# floating point
-set idata {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22}
-set rdata {1.0 1.1 0.0 0.02 6e+26 34.0}
-par_return [list [list ::tclmpi::allreduce $idata $double tclmpi::max $comm] \
-                [list ::tclmpi::allreduce $odata $double tclmpi::max $comm]] \
-    [list $rdata $rdata]
-set rdata {-100000.0 -1.0 0.0 0.0 1.0 18.0}
-par_return [list [list ::tclmpi::allreduce $idata $double tclmpi::min $comm] \
-                [list ::tclmpi::allreduce $odata $double tclmpi::min $comm]] \
-    [list $rdata $rdata]
-set rdata {-99999.0 0.10000000000000009 0.0 0.02 6e+26 52.0}
-par_return [list [list ::tclmpi::allreduce $idata $double tclmpi::sum $comm] \
-                [list ::tclmpi::allreduce $odata $double tclmpi::sum $comm]] \
-    [list $rdata $rdata]
-set rdata {-100000.0 -1.1 0.0 0.0 6e+26 612.0}
-par_return [list [list ::tclmpi::allreduce $idata $double tclmpi::prod $comm] \
-                [list ::tclmpi::allreduce $odata $double tclmpi::prod $comm]] \
-    [list $rdata $rdata]
+# abort (non-destructive tests only)
+set numargs "wrong # args: should be \"abort <comm> <errorcode>\""
+run_error  [list abort] $numargs
+run_error  [list abort $comm] $numargs
+run_error  [list abort $comm 1 2] $numargs
+run_error  [list abort comm0 1] \
+    {abort: unknown communicator: comm0}
+run_error  [list abort $comm comm0] \
+    {expected integer but got "comm0"}
 
-# send/recv both blocking
-set idata [list 0 1 2 {3 4} 4 5 6]
-par_return [list [list ::tclmpi::send $idata $auto 1 666 $comm] \
-                [list ::tclmpi::recv $auto 0 666 $comm] ] [list {} $idata]
-set rdata [list 0 1 2 0 4 5 6]
-par_return [list [list ::tclmpi::send $idata $int 1 666 $comm] \
-                [list ::tclmpi::recv $int tclmpi::any_source 666 $comm] ] [list {} $rdata]
-set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
-par_return [list [list ::tclmpi::send $idata $double 1 666 $comm] \
-                [list ::tclmpi::recv $double 0 tclmpi::any_tag $comm] ] [list {} $rdata]
-
-# non-blocking send / blocking recv
-set req0 tclmpi::req0
-set req1 tclmpi::req1
-set req2 tclmpi::req2
-set idata [list 0 1 2 {3 4} 4 5 6]
-par_return [list [list ::tclmpi::isend $idata $auto 1 666 $comm] \
-                [list ::tclmpi::recv $auto 0 666 $comm] ] [list $req0 $idata]
-set rdata [list 0 1 2 0 4 5 6]
-par_return [list [list ::tclmpi::isend $idata $int 1 666 $comm] \
-                [list ::tclmpi::recv $int tclmpi::any_source 666 $comm status] ] [list $req1 $rdata]
-set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
-par_return [list [list ::tclmpi::recv $double 1 tclmpi::any_tag $comm status] \
-                [list ::tclmpi::isend $idata $double 0 666 $comm] ] [list $rdata $req0]
-
-# clear up all pending requests
-par_return [list [list ::tclmpi::wait $req0] \
-                [list set i 0] ] [list {} 0]
-par_return [list [list ::tclmpi::wait $req1 status] \
-                [list set i 0] ] [list {} 0]
-
-# it is no error to wait for a non-existing request
-# or twice for the same request. wait returns immediately
-par_return [list [list ::tclmpi::wait $req0] \
-                [list set i 0] ] [list {} 0]
-par_return [list [list ::tclmpi::wait $req2 status] \
-                [list set i 0] ] [list {} 0]
-
-# blocking send / non-blocking recv
-set idata [list 0 1 2 {3 4} 4 5 6]
-par_return [list [list ::tclmpi::send $idata $auto 1 666 $comm] \
-                [list ::tclmpi::irecv $auto 0 666 $comm] ] \
-    [list {} $req1]
-
-set rdata [list 0 1 2 0 4 5 6]
-par_return [list [list ::tclmpi::send $idata $int 1 66 $comm] \
-                [list ::tclmpi::irecv $int tclmpi::any_source 66 $comm]] \
-    [list {} $req2]
-
-set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
-par_return [list [list ::tclmpi::irecv $double 1 tclmpi::any_tag $comm] \
-                [list ::tclmpi::send $idata $double 0 6 $comm]] \
-    [list $req2 {}]
-
-# clear up all pending requests
-par_return [list [list ::tclmpi::wait $req2] \
-                [list ::tclmpi::wait $req1]] [list $rdata $idata]
-par_return [list [list set i 0] [list ::tclmpi::wait $req2 status]] \
-                [list 0 {0 1 2 0 4 5 6} {}]
+# finalize
+run_error  [list finalize 0] \
+    "wrong # args: should be \"finalize\""
+run_return [list finalize] {}
+run_error  [list finalize] \
+    {Calling finalize twice is erroneous.}
 
 # print results and exit
-::tclmpi::finalize
 test_summary 02
 
 exit 0
