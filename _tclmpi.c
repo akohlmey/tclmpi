@@ -120,7 +120,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * \subsection mypi Computation of Pi
  * This script uses TclMPI to compute the value of Pi from
- * numerical quadrature of the integral from zero to 1 over 4/(1+x*x).
+ * numerical quadrature of the integral: 
+   \f[ 
+      \pi = \int^1_0 {\frac{4}{1 + x^2}} dx
+   \f]
  * \code {.tcl}
  #!/bin/sh \
  exec tclsh "$0" "$@"
