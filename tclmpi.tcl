@@ -18,13 +18,32 @@ namespace eval tclmpi {
     variable any_source tclmpi::any_source ;#< constant to accept messages from any source rank
     variable any_tag    tclmpi::any_tag    ;#< constant to accept messages with any tag
 
+    variable sum     tclmpi::sum     ;#< summation operation
+    variable prod    tclmpi::prod    ;#< product operation
+    variable max     tclmpi::max     ;#< maximum operation
+    variable min     tclmpi::min     ;#< minimum operation
+    variable land    tclmpi::land    ;#< logical and operation
+    variable band    tclmpi::band    ;#< bitwise and operation
+    variable lor     tclmpi::lor     ;#< logical or operation
+    variable bor     tclmpi::bor     ;#< bitwise or operation
+    variable lxor    tclmpi::lxor    ;#< logical xor operation
+    variable bxor    tclmpi::bxor    ;#< bitwise xor operation
+    variable maxloc  tclmpi::maxloc  ;#< maximum and location operation
+    variable minloc  tclmpi::minloc  ;#< minimum and location operation
+
     variable undefined  tclmpi::undefined  ;#< constant to indicate an undefined number
 
     variable version "0.6"  ;#< version number of this package
 
-    # NOTE: the following section is to trick doxygen into documenting
-    # the Tcl API of TclMPI. The since the actual functions are provided
-    # as compiled C code in _tclmpi.c, we immediately delete them again.
+    # export all API functions
+    namespace export \
+        init finalize abort comm_size comm_rank comm_split barrier bcast \
+        allreduce send isend recv irecv probe iprobe wait
+
+    # The following section is to trick doxygen into documenting the Tcl API
+    # of TclMPI. The since the actual functions are provided as compiled C 
+    # code in _tclmpi.c, we define dummy versions of them and then immediately
+    # delete them again.
 
     ## Initialize the MPI environment from Tcl
     #
