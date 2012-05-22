@@ -12,7 +12,7 @@ LD=$(CC)
 DEBUG=-g
 
 # defines
-DEFINE=-DUSE_TCL_STUBS -DPACKAGE_NAME=\"_tclmpi\" -DPACKAGE_VERSION=\"0.6\"
+DEFINE=-DUSE_TCL_STUBS -DPACKAGE_NAME=\"_tclmpi\" -DPACKAGE_VERSION=\"0.7\"
 
 # platform specific compiler flags:
 ## Linux and multiple other platforms with GCC (generic)

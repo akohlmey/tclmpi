@@ -33,7 +33,7 @@ namespace eval tclmpi {
 
     variable undefined  tclmpi::undefined  ;#< constant to indicate an undefined number
 
-    variable version "0.6"  ;#< version number of this package
+    variable version "0.7"  ;#< version number of this package
 
     # export all API functions
     namespace export \

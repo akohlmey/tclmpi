@@ -30,8 +30,10 @@ Version 0.5
   Fixed a few bugs and significantly cleaned up the argument
 handling. Added some non-blocking operations: isend, irecv, iprobe and
 wait. Added parallel unit tests and wrote a simple test harness for
-it. This version will be considered feature complete unless specific
-needs arise or requests are being made. For the foreseeable time, only
-bugfixes, documentation updates, and text & example programs will be
-added.
-
+it. 
+Version 0.6
+  Made the package a full namespace written in Tcl. Adapted code to use
+Doxygen for generating detailed documentation. Prefixes changed to remove
+leading :: from string constants. Added modified BSD-style license, bundle
+documentation pdf, added examples and unit tests that use namespace import.
+tclmpi::init now manipulates argv and argc directly.
