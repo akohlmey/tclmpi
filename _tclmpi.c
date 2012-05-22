@@ -91,6 +91,73 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * it. Bug reports and feature requests should also be filed on github
  * at through the issue tracker at:
  * https://github.com/akohlmey/tclmpi/issues.
+ *
+ * \section examples Example Programs
+ * The following section provides some simple examples using TclMPI
+ * to recreate some common MPI example programs in Tcl.
+ *
+ * \subsection hello Hello World
+ * This is the TclMPI version of "hello world".
+ * \code {.tcl}
+ #!/bin/sh \
+ exec tclsh "$0" "$@"
+ package require tclmpi 0.6
+
+ # initialize MPI
+ ::tclmpi::init
+
+ # get size of communicator and rank of process
+ set comm tclmpi::comm_world
+ set size [::tclmpi::comm_size $comm]
+ set rank [::tclmpi::comm_rank $comm]
+
+ puts "hello world, this is rank $rank of $size"
+
+ # shut down MPI
+ ::tclmpi::finalize
+ exit 0
+ * \endcode
+ *
+ * \subsection mypi Computation of Pi
+ * This script uses TclMPI to compute the value of Pi from
+ * numerical quadrature of the integral from zero to 1 over 4/(1+x*x).
+ * \code {.tcl}
+ #!/bin/sh \
+ exec tclsh "$0" "$@"
+ package require tclmpi 0.6
+
+ # initialize MPI
+ ::tclmpi::init
+
+ set comm tclmpi::comm_world
+ set size [::tclmpi::comm_size $comm]
+ set rank [::tclmpi::comm_rank $comm]
+ set master 0
+
+ set num [lindex $argv 0]
+ # make sure all processes have the same interval parameter
+ set num [::tclmpi::bcast $num ::tclmpi::int $master $comm]
+
+ # run parallel calculation
+ set h [expr {1.0/$num}]
+ set sum 0.0
+ for {set i $rank} {$i < $num} {incr i $size} {
+     set sum [expr {$sum + 4.0/(1.0 + ($h*($i+0.5))**2)}]
+ }
+ set mypi [expr {$h * $sum}]
+
+ # combine and print results
+ set mypi [::tclmpi::allreduce $mypi tclmpi::double \
+             tclmpi::sum $comm]
+ if {$rank == $master} {
+     set rel [expr {abs(($mypi - 3.14159265358979)/3.14159265358979)}]
+     puts "result: $mypi. relative error: $rel"
+ }
+
+ # shut down MPI
+ ::tclmpi::finalize
+ exit 0
+ * \endcode
  */
 
 /*! \page devguide TclMPI Developer's Guide
