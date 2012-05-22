@@ -61,7 +61,9 @@ clean:
 
 check: _tclmpi.so
 	(cd tests; ./test_01.tcl)
-	(cd tests; mpirun -np 2 ./test_02.tcl)
+	(cd tests; ./test_02.tcl)
+	(cd tests; mpirun -np 2 ./test_03.tcl)
+	(cd tests; mpirun -np 2 ./test_04.tcl)
 
 #############################################
 _tclmpi.so:  _tclmpi.o
