@@ -38,7 +38,7 @@ namespace eval tclmpi {
     # export all API functions
     namespace export \
         init finalize abort comm_size comm_rank comm_split barrier bcast \
-        allreduce send isend recv irecv probe iprobe wait
+        scatter gather reduce allreduce send isend recv irecv probe iprobe wait
 
     # The following section is to trick doxygen into documenting the Tcl API
     # of TclMPI. The since the actual functions are provided as compiled C 
@@ -160,7 +160,7 @@ namespace eval tclmpi {
     proc barrier {comm} {}
     rename barrier ""
 
-    ## Broadcasts data from one process to all other processes on the communicator
+    ## Broadcasts data from one process to all processes on the communicator
     # \param data data to be broadcast (Tcl data object)
     # \param type data type to be used (string constant)
     # \param root rank of process that is providing the data (integer)
@@ -181,6 +181,48 @@ namespace eval tclmpi {
     # For implementation details see TclMPI_Bcast().
     proc bcast {data type root comm} {}
     rename bcast ""
+
+    ## Distributes data from one process to all processes on the communicator
+    # \param data data to be distributed (Tcl data object)
+    # \param type data type to be used (string constant)
+    # \param root rank of process that is providing the data (integer)
+    # \param comm Tcl representation of an MPI communicator
+    # \return data that was distributed
+    #
+    # This command distributes the provided list of data from the process
+    # with rank root on the communicator comm to all processes sharing
+    # the communicator. The data argument has to be present on all
+    # processes but will be ignored on all but the root process.
+    # The data resulting from the scatter will be stored in the 
+    # return value of the command. The data will be distributed evenly,
+    # so the length of the list has to be divisible by the number of
+    # processes on the communicator.
+    # This procedure is the reverse operation of tclmpi::gather.
+    # This function call is an implicit synchronization.
+    #
+    # For implementation details see TclMPI_Scatter().
+    proc scatter {data type root comm} {}
+    rename scatter ""
+
+    ## Collects data from all processes on the communicator
+    # \param data data to be distributed (Tcl data object)
+    # \param type data type to be used (string constant)
+    # \param root rank of process that will receive the data (integer)
+    # \param comm Tcl representation of an MPI communicator
+    # \return data that was collected or empty
+    #
+    # This command collects data the provided list from the process
+    # with rank root on the communicator comm to all processes sharing
+    # the communicator. The data argument has to be present on all
+    # processes and has to be of the same length.
+    # The data resulting from the gather will be stored in the 
+    # return value of the command on the root process.
+    # This function call is an implicit synchronization.
+    # This procedure is the reverse operation of tclmpi::scatter.
+    #
+    # For implementation details see TclMPI_Gather().
+    proc gather {data type root comm} {}
+    rename gather ""
 
     ## Combines data from all processes and distributes the result back to them
     # \param data data to be reduced (Tcl data object)
@@ -204,11 +246,41 @@ namespace eval tclmpi {
     # tclmpi::lxor (logical exclusive or), tclmpi::bxor (bitwise
     # exclusive or), tclmpi::maxloc (max value and location),
     # tclmpi::minloc (min value and location).
-    # This function call is an implicity synchronization.
+    # This function call is an implicit synchronization.
     #
     # For implementation details see TclMPI_Allreduce().
     proc allreduce {data type op comm} {}
     rename allreduce ""
+
+    ## Combines data from all processes on one process
+    # \param data data to be reduced (Tcl data object)
+    # \param type data type to be used (string constant)
+    # \param op reduction operation (string constant)
+    # \param root rank of process that is receiving the result (integer)
+    # \param comm Tcl representation of an MPI communicator
+    # \return data resulting from the reduction operation
+    #
+    # This command performs a global reduction operation op on the
+    # provided data object across all processes participating in the
+    # communicator comm. If data is a list, then the reduction will be
+    # done across each respective entry of the same list index. The
+    # result is collect on the process with rank root and used as
+    # return value of the command. For all other processes the return
+    # value is empty. This command only supports the data types
+    # tclmpi::int and tclmpi::double and tclmpi::intint for operations
+    # tclmpi::maxloc and tclmpi::minloc. The following reduction
+    # operations are supported: tclmpi::max (maximum), tclmpi::min
+    # (minimum), tclmpi::sum (sum), tclmpi::prod (product),
+    # tclmpi::land (logical and), tclmpi::band (bitwise and),
+    # tclmpi::lor (logical or), tclmpi::bor (bitwise or),
+    # tclmpi::lxor (logical exclusive or), tclmpi::bxor (bitwise
+    # exclusive or), tclmpi::maxloc (max value and location),
+    # tclmpi::minloc (min value and location).
+    # This function call is an implicit synchronization.
+    #
+    # For implementation details see TclMPI_Reduce().
+    proc reduce {data type op root comm} {}
+    rename reduce ""
 
     ## Perform a blocking send
     # \param data data to be sent (Tcl data object)
