@@ -126,6 +126,42 @@ par_error  [list [list bcast $idata $double $master $comm] \
                 [list bcast {} $auto $master $comm]] \
     [list $odata {bcast: MPI_ERR_TRUNCATE: message truncated}]
 
+# scatter
+set idata {016 {1 2 3} 2.0 7 0xff yy}
+par_return [list [list scatter {} $int 1 $comm] \
+                [list scatter $idata $int 1 $comm]] \
+    [list {14 0 0} {7 255 0}]
+par_return [list [list scatter $idata $double $master $comm] \
+                [list scatter {} $double $master $comm]] \
+    [list {14.0 0.0 2.0} {7.0 255.0 0.0}]
+
+set idata {016 {1 2 3} 2.0 7 0xff}
+set odata {scatter: number of data items must be divisible by the number of processes}
+par_error [list [list scatter {} $int 1 $comm] \
+                [list scatter $idata $int 1 $comm]] \
+    [list $odata $odata]
+par_error [list [list scatter $idata $double $master $comm] \
+                [list scatter {} $double $master $comm]] \
+    [list $odata $odata]
+
+# gather
+set odata {14 0 0 7 255 0}
+par_return [list [list gather {016 {1 2 3} 2.0} $int 1 $comm] \
+                [list gather {7 0xff yy} $int 1 $comm]] \
+    [list {} $odata]
+set odata {14.0 0.0 2.0 7.0 255.0 0.0}
+par_return [list [list gather {016 {1 2 3} 2.0} $double 0 $comm] \
+                [list gather {7 0xff yy} $double 0 $comm]] \
+    [list $odata {}]
+
+set odata {gather: number of data items must be the same on all processes}
+par_error [list [list gather {016 {1 2 3}} $int 1 $comm] \
+                [list gather {7 0xff yy} $int 1 $comm]] \
+    [list $odata $odata]
+par_error [list [list gather {016 {1 2 3} 2.0} $double 0 $comm] \
+                [list gather {2.0 7 0xff yy} $double 0 $comm]] \
+    [list $odata $odata]
+
 # allreduce
 set idata {0 1 3 0 1 10}
 set odata {1 -1 0 0 1 18}
@@ -203,6 +239,73 @@ par_return [list [list send $idata $int 1 666 $comm] \
 set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
 par_return [list [list send $idata $double 1 666 $comm] \
                 [list recv $double 0 $any_tag $comm] ] [list {} $rdata]
+
+# reduce
+set idata {0 1 3 0 1 10}
+set odata {1 -1 0 0 1 18}
+
+# logical operators
+set rdata {0 1 0 0 1 1}
+par_return [list [list reduce $idata $int $mpi_land 0 $comm] \
+                [list reduce $odata $int $mpi_land 0 $comm]] \
+    [list $rdata {}]
+set rdata {1 1 1 0 1 1}
+par_return [list [list reduce $idata $int $mpi_lor 1 $comm] \
+                [list reduce $odata $int $mpi_lor 1 $comm]] \
+    [list {} $rdata]
+set rdata {1 0 1 0 0 0}
+par_return [list [list reduce $idata $int $mpi_lxor 1 $comm] \
+                [list reduce $odata $int $mpi_lxor 1 $comm]] \
+    [list {} $rdata]
+set rdata {0 1 0 0 1 2}
+par_return [list [list reduce $idata $int $mpi_band 0 $comm] \
+                [list reduce $odata $int $mpi_band 0 $comm]] \
+    [list $rdata {}]
+set rdata {1 -1 3 0 1 26}
+par_return [list [list reduce $idata $int $mpi_bor 0 $comm] \
+                [list reduce $odata $int $mpi_bor 0 $comm]] \
+    [list $rdata {}]
+set rdata {1 -2 3 0 0 24}
+par_return [list [list reduce $idata $int $mpi_bxor 1 $comm] \
+                [list reduce $odata $int $mpi_bxor 1 $comm]] \
+    [list {} $rdata]
+
+# integer
+set rdata {1 1 3 0 1 18}
+par_return [list [list reduce $idata $int $mpi_max 1 $comm] \
+                [list reduce $odata $int $mpi_max 1 $comm]] \
+    [list {} $rdata]
+set rdata {0 -1 0 0 1 10}
+par_return [list [list reduce $idata $int $mpi_min 1 $comm] \
+                [list reduce $odata $int $mpi_min 1 $comm]] \
+    [list {} $rdata]
+set rdata {1 0 3 0 2 28}
+par_return [list [list reduce $idata $int $mpi_sum 0 $comm] \
+                [list reduce $odata $int $mpi_sum 0 $comm]] \
+    [list $rdata {}]
+set rdata {0 -1 0 0 1 180}
+par_return [list [list reduce $idata $int $mpi_prod 1 $comm] \
+                [list reduce $odata $int $mpi_prod 1 $comm]] \
+    [list {} $rdata]
+
+# floating point
+set idata {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22}
+set rdata {1.0 1.1 0.0 0.02 6e+26 34.0}
+par_return [list [list reduce $idata $double $mpi_max 0 $comm] \
+                [list reduce $odata $double $mpi_max 0 $comm]] \
+    [list $rdata {}]
+set rdata {-100000.0 -1.0 0.0 0.0 1.0 18.0}
+par_return [list [list reduce $idata $double $mpi_min 0 $comm] \
+                [list reduce $odata $double $mpi_min 0 $comm]] \
+    [list $rdata {}]
+set rdata {-99999.0 0.10000000000000009 0.0 0.02 6e+26 52.0}
+par_return [list [list reduce $idata $double $mpi_sum 0 $comm] \
+                [list reduce $odata $double $mpi_sum 0 $comm]] \
+    [list $rdata {}]
+set rdata {-100000.0 -1.1 0.0 0.0 6e+26 612.0}
+par_return [list [list reduce $idata $double $mpi_prod 1 $comm] \
+                [list reduce $odata $double $mpi_prod 1 $comm]] \
+    [list {} $rdata]
 
 # non-blocking send / blocking recv
 set req0 tclmpi::req0

@@ -575,7 +575,7 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
     Tcl_Obj *result,*argobj,**args;
-    int argc,narg,i,j,ierr;
+    int argc,narg,i,ierr;
     char **argv;
 
     if (objc != 1) {
@@ -988,6 +988,292 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
     return TCL_OK;
 }
 
+/*! wrapper for MPI_Scatter() 
+ * \param nodata ignored
+ * \param interp current Tcl interpreter
+ * \param objc number of argument objects
+ * \param objv list of argument object
+ * \return TCL_OK or TCL_ERROR
+ *
+ * This function implements a scatter operation that distributes 
+ * data for TclMPI.
+ * This operation does not accept the tclmpi::auto data type, also support
+ * for types outside of tclmpi::int and tclmpi::double is incomplete.
+ * The length of the data is inferred from the data object passed to this 
+ * function and thus a 'count' argument is not needed. The number of data
+ * items has to be divisible by the number of processes on the communicator.
+ * 
+ * The result is converted back into Tcl objects and passed up as result
+ * value to the calling Tcl code. If the MPI call failed an MPI error
+ * message is passed up as result instead.
+ */
+int TclMPI_Scatter(ClientData nodata, Tcl_Interp *interp,
+                   int objc, Tcl_Obj *const objv[])
+{
+    Tcl_Obj *result = NULL;
+    MPI_Comm comm;
+    int i,type,root,size,rank,ilen,olen,ierr;
+
+    if (objc != 5) {
+        Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <root> <comm>");
+        return TCL_ERROR;
+    }
+
+    type = tclmpi_datatype(Tcl_GetString(objv[2]));
+    if (tclmpi_typecheck(interp,type,objv[0],objv[2]) != TCL_OK)
+        return TCL_ERROR;
+
+    if (Tcl_GetIntFromObj(interp,objv[3],&root) != TCL_OK)
+        return TCL_ERROR;
+
+    comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[4]) != TCL_OK)
+        return TCL_ERROR;
+
+    /* special case check for reduction */
+    if (type == TCLMPI_AUTO) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": does not support data type ",
+                         Tcl_GetString(objv[2]),NULL);
+        return TCL_ERROR;
+    }
+    MPI_Comm_size(comm,&size);
+    MPI_Comm_rank(comm,&rank);
+    ierr = MPI_SUCCESS;
+    Tcl_IncrRefCount(objv[1]);
+
+    if (type == TCLMPI_INT) {
+        Tcl_Obj **ilist;
+        int *idata, *odata;
+        if (Tcl_ListObjGetElements(interp,objv[1],&ilen,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        MPI_Bcast(&ilen,1,MPI_INT,root,comm);
+        olen = ilen / size;
+        if (olen*size != ilen) {
+            Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                             ": number of data items must be divisible"
+                             " by the number of processes",NULL);
+            Tcl_DecrRefCount(objv[1]);
+            return TCL_ERROR;
+        }
+        
+        odata = (int *)Tcl_Alloc(olen*sizeof(int));
+        result = Tcl_NewListObj(0,NULL);
+        if (rank == root) {
+            idata = (int *)Tcl_Alloc(ilen*sizeof(int));
+            for (i=0; i < ilen; ++i)
+                if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
+                    Tcl_ResetResult(interp);
+                    idata[i]=0; /* this is non-fatal by choice */
+                }
+            ierr=MPI_Scatter(idata,olen,MPI_INT,odata,olen,MPI_INT,root,comm);
+            Tcl_Free((char *)idata);
+        } else {
+            idata=NULL;
+            ierr=MPI_Scatter(idata,olen,MPI_INT,odata,olen,MPI_INT,root,comm);
+        }
+        for (i=0; i < olen; ++i)
+            Tcl_ListObjAppendElement(interp,result,
+                                     Tcl_NewIntObj(odata[i]));
+        Tcl_Free((char *)odata);
+
+    } else if (type == TCLMPI_DOUBLE) {
+        Tcl_Obj **ilist;
+        double *idata, *odata;
+        if (Tcl_ListObjGetElements(interp,objv[1],&ilen,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        MPI_Bcast(&ilen,1,MPI_INT,root,comm);
+        olen = ilen / size;
+        if (olen*size != ilen) {
+            Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                             ": number of data items must be divisible"
+                             " by the number of processes",NULL);
+            Tcl_DecrRefCount(objv[1]);
+            return TCL_ERROR;
+        }
+        
+        odata = (double *)Tcl_Alloc(olen*sizeof(double));
+        result = Tcl_NewListObj(0,NULL);
+        if (rank == root) {
+            idata = (double *)Tcl_Alloc(ilen*sizeof(double));
+            for (i=0; i < ilen; ++i)
+                if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
+                    Tcl_ResetResult(interp);
+                    idata[i]=0.0; /* this is non-fatal by choice */
+                }
+            ierr=MPI_Scatter(idata,olen,MPI_DOUBLE,
+                             odata,olen,MPI_DOUBLE,root,comm);
+            Tcl_Free((char *)idata);
+        } else {
+            idata=NULL;
+            ierr=MPI_Scatter(idata,olen,MPI_DOUBLE,
+                             odata,olen,MPI_DOUBLE,root,comm);
+        }
+        for (i=0; i < olen; ++i)
+            Tcl_ListObjAppendElement(interp,result,
+                                     Tcl_NewDoubleObj(odata[i]));
+        Tcl_Free((char *)odata);
+
+    } else {
+        Tcl_DecrRefCount(objv[1]);
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": support for data type ", Tcl_GetString(objv[2]),
+                         " is not yet implemented.",NULL);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(objv[1]);
+
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
+        return TCL_ERROR;
+
+    if (result) Tcl_SetObjResult(interp,result);
+    return TCL_OK;
+}
+
+/*! wrapper for MPI_Gather() 
+ * \param nodata ignored
+ * \param interp current Tcl interpreter
+ * \param objc number of argument objects
+ * \param objv list of argument object
+ * \return TCL_OK or TCL_ERROR
+ *
+ * This function implements a gather operation that collects data for TclMPI.
+ * This operation does not accept the tclmpi::auto data type, also support
+ * for types outside of tclmpi::int and tclmpi::double is incomplete.
+ * The length of the data is inferred from the data object passed to this 
+ * function and thus a 'count' argument is not needed. The number of data
+ * items has to be the same on all processes on the communicator.
+ * 
+ * The result is converted back into Tcl objects and passed up as result
+ * value to the calling Tcl code. If the MPI call failed an MPI error
+ * message is passed up as result instead.
+ */
+int TclMPI_Gather(ClientData nodata, Tcl_Interp *interp,
+                  int objc, Tcl_Obj *const objv[])
+{
+    Tcl_Obj *result = NULL;
+    MPI_Comm comm;
+    int i,type,root,size,rank,ilen,olen,mlen,ierr;
+
+    if (objc != 5) {
+        Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <root> <comm>");
+        return TCL_ERROR;
+    }
+
+    type = tclmpi_datatype(Tcl_GetString(objv[2]));
+    if (tclmpi_typecheck(interp,type,objv[0],objv[2]) != TCL_OK)
+        return TCL_ERROR;
+
+    if (Tcl_GetIntFromObj(interp,objv[3],&root) != TCL_OK)
+        return TCL_ERROR;
+
+    comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[4]) != TCL_OK)
+        return TCL_ERROR;
+
+    /* special case check for reduction */
+    if (type == TCLMPI_AUTO) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": does not support data type ",
+                         Tcl_GetString(objv[2]),NULL);
+        return TCL_ERROR;
+    }
+
+    MPI_Comm_size(comm,&size);
+    MPI_Comm_rank(comm,&rank);
+    ierr = MPI_SUCCESS;
+    Tcl_IncrRefCount(objv[1]);
+
+    if (type == TCLMPI_INT) {
+        Tcl_Obj **ilist;
+        int *idata, *odata;
+        if (Tcl_ListObjGetElements(interp,objv[1],&ilen,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        MPI_Allreduce(&ilen,&olen,1,MPI_INT,MPI_MAX,comm);
+        MPI_Allreduce(&ilen,&mlen,1,MPI_INT,MPI_MIN,comm);
+        if (olen != mlen) {
+            Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                             ": number of data items must be the same"
+                             " on all processes",NULL);
+            Tcl_DecrRefCount(objv[1]);
+            return TCL_ERROR;
+        }
+        
+        mlen = olen*size;
+        idata = (int *)Tcl_Alloc(ilen*sizeof(int));
+        for (i=0; i < ilen; ++i)
+            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
+                Tcl_ResetResult(interp);
+                idata[i]=0; /* this is non-fatal by choice */
+            }
+        result = Tcl_NewListObj(0,NULL);
+        if (rank == root) {
+            odata = (int *)Tcl_Alloc(olen*size*sizeof(int));
+            ierr=MPI_Gather(idata,ilen,MPI_INT,odata,olen,MPI_INT,root,comm);
+            for (i=0; i < mlen; ++i)
+                Tcl_ListObjAppendElement(interp,result,
+                                         Tcl_NewIntObj(odata[i]));
+            Tcl_Free((char *)odata);
+        } else {
+            odata=NULL;
+            ierr=MPI_Gather(idata,ilen,MPI_INT,odata,olen,MPI_INT,root,comm);
+        }
+        Tcl_Free((char *)idata);
+
+    } else if (type == TCLMPI_DOUBLE) {
+        Tcl_Obj **ilist;
+        double *idata, *odata;
+        if (Tcl_ListObjGetElements(interp,objv[1],&ilen,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        MPI_Allreduce(&ilen,&olen,1,MPI_INT,MPI_MAX,comm);
+        MPI_Allreduce(&ilen,&mlen,1,MPI_INT,MPI_MIN,comm);
+        if (olen != mlen) {
+            Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                             ": number of data items must be the same"
+                             " on all processes",NULL);
+            Tcl_DecrRefCount(objv[1]);
+            return TCL_ERROR;
+        }
+        
+        mlen = olen*size;
+        idata = (double *)Tcl_Alloc(ilen*sizeof(double));
+        for (i=0; i < ilen; ++i)
+            if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
+                Tcl_ResetResult(interp);
+                idata[i]=0.0; /* this is non-fatal by choice */
+            }
+        result = Tcl_NewListObj(0,NULL);
+        if (rank == root) {
+            odata = (double *)Tcl_Alloc(mlen*sizeof(double));
+            ierr=MPI_Gather(idata,ilen,MPI_DOUBLE,
+                            odata,olen,MPI_DOUBLE,root,comm);
+            for (i=0; i < mlen; ++i)
+                Tcl_ListObjAppendElement(interp,result,
+                                         Tcl_NewDoubleObj(odata[i]));
+            Tcl_Free((char *)odata);
+        } else {
+            odata=NULL;
+            ierr=MPI_Gather(idata,ilen,MPI_DOUBLE,
+                            odata,olen,MPI_DOUBLE,root,comm);
+        }
+        Tcl_Free((char *)idata);
+
+    } else {
+        Tcl_DecrRefCount(objv[1]);
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": support for data type ", Tcl_GetString(objv[2]),
+                         " is not yet implemented.",NULL);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(objv[1]);
+
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
+        return TCL_ERROR;
+
+    if (result) Tcl_SetObjResult(interp,result);
+    return TCL_OK;
+}
+
 
 /*! wrapper for MPI_Allreduce() 
  * \param nodata ignored
@@ -1128,6 +1414,179 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
                                      Tcl_NewIntObj(odata[i]));
         Tcl_Free((char *)idata);
         Tcl_Free((char *)odata);    
+    } else {
+        Tcl_DecrRefCount(objv[1]);
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": support for data type ", Tcl_GetString(objv[2]),
+                         " is not yet implemented.",NULL);
+        return TCL_ERROR;
+    }
+    Tcl_DecrRefCount(objv[1]);
+
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
+        return TCL_ERROR;
+
+    if (result) Tcl_SetObjResult(interp,result);
+    return TCL_OK;
+}
+
+/*! wrapper for MPI_Reduce() 
+ * \param nodata ignored
+ * \param interp current Tcl interpreter
+ * \param objc number of argument objects
+ * \param objv list of argument object
+ * \return TCL_OK or TCL_ERROR
+ *
+ * This function implements a reduction function for TclMPI.
+ * This operation does not accept the tclmpi::auto data type, also support
+ * for types outside of tclmpi::int and tclmpi::double is incomplete.
+ * The length of the data is inferred from the data object passed to this 
+ * function and thus a 'count' argument is not needed.
+ * 
+ * The result is collected on the process with rank root and converted
+ *  back into Tcl objects and passed up as result value to the calling
+ * Tcl code. If the MPI call failed an MPI error message is passed up
+ * as result instead.
+ */
+int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
+                     int objc, Tcl_Obj *const objv[])
+{
+    Tcl_Obj *result = NULL;
+    const char *opstr;
+    MPI_Comm comm;
+    MPI_Op op;
+    int i,type,root,rank,len,ierr;
+
+    if (objc != 6) {
+        Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <op> <root> <comm>");
+        return TCL_ERROR;
+    }
+
+    type = tclmpi_datatype(Tcl_GetString(objv[2]));
+    if (tclmpi_typecheck(interp,type,objv[0],objv[2]) != TCL_OK)
+        return TCL_ERROR;
+
+    opstr = Tcl_GetString(objv[3]);
+
+    if (Tcl_GetIntFromObj(interp,objv[4],&root) != TCL_OK)
+        return TCL_ERROR;
+
+    comm = tcl2mpi_comm(Tcl_GetString(objv[5]));
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[5]) != TCL_OK)
+        return TCL_ERROR;
+
+    /* special case check for reduction */
+    if (type == TCLMPI_AUTO) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": does not support data type ",
+                         Tcl_GetString(objv[2]),NULL);
+        return TCL_ERROR;
+    }
+
+    if (strcmp(opstr,"tclmpi::max") == 0)
+        op = MPI_MAX;
+    else if (strcmp(opstr,"tclmpi::min") == 0)
+        op = MPI_MIN;
+    else if (strcmp(opstr,"tclmpi::sum") == 0)
+        op = MPI_SUM;
+    else if (strcmp(opstr,"tclmpi::prod") == 0)
+        op = MPI_PROD;
+    else if (strcmp(opstr,"tclmpi::land") == 0)
+        op = MPI_LAND;
+    else if (strcmp(opstr,"tclmpi::band") == 0)
+        op = MPI_BAND;
+    else if (strcmp(opstr,"tclmpi::lor") == 0)
+        op = MPI_LOR;
+    else if (strcmp(opstr,"tclmpi::bor") == 0)
+        op = MPI_BOR;
+    else if (strcmp(opstr,"tclmpi::lxor") == 0)
+        op = MPI_LXOR;
+    else if (strcmp(opstr,"tclmpi::bxor") == 0)
+        op = MPI_BXOR;
+    else if (strcmp(opstr,"tclmpi::maxloc") == 0)
+        op = MPI_MAXLOC;
+    else if (strcmp(opstr,"tclmpi::minloc") == 0)
+        op = MPI_MINLOC;
+    else {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": unknown reduction operator: ",opstr,NULL);
+        return TCL_ERROR;
+    }
+
+    MPI_Comm_rank(comm,&rank);
+    ierr = MPI_SUCCESS;
+    Tcl_IncrRefCount(objv[1]);
+
+    if (type == TCLMPI_INT) {
+        Tcl_Obj **ilist;
+        int *idata, *odata;
+        if (Tcl_ListObjGetElements(interp,objv[1],&len,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        idata = (int *)Tcl_Alloc(len*sizeof(int));
+        if (rank == root)
+            odata = (int *)Tcl_Alloc(len*sizeof(int));
+        else odata = NULL;
+        for (i=0; i < len; ++i)
+            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
+                Tcl_ResetResult(interp);
+                idata[i]=0; /* this is non-fatal by choice */
+            }
+        ierr = MPI_Reduce(idata,odata,len,MPI_INT,op,root,comm);
+        result = Tcl_NewListObj(0,NULL);
+        if (rank == root)
+            for (i=0; i < len; ++i)
+                Tcl_ListObjAppendElement(interp,result,
+                                         Tcl_NewIntObj(odata[i]));
+        Tcl_Free((char *)idata);
+        if (rank == root)
+            Tcl_Free((char *)odata);
+
+    } else if (type == TCLMPI_DOUBLE) {
+        Tcl_Obj **ilist;
+        double *idata, *odata;
+        if (Tcl_ListObjGetElements(interp,objv[1],&len,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        idata = (double *)Tcl_Alloc(len*sizeof(double));
+        if (rank == root)
+            odata = (double *)Tcl_Alloc(len*sizeof(double));
+        else odata = NULL;
+        for (i=0; i < len; ++i)
+            if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
+                Tcl_ResetResult(interp);
+                idata[i]=0.0; /* this is non-fatal by choice */
+            }
+        ierr = MPI_Reduce(idata,odata,len,MPI_DOUBLE,op,root,comm);
+        result = Tcl_NewListObj(0,NULL);
+        if (rank == root)
+            for (i=0; i < len; ++i)
+                Tcl_ListObjAppendElement(interp,result,
+                                         Tcl_NewDoubleObj(odata[i]));
+        Tcl_Free((char *)idata);
+        if (rank == root)
+            Tcl_Free((char *)odata);
+    } else if (type == TCLMPI_INT_INT) {
+        Tcl_Obj **ilist;
+        int *idata, *odata;
+        if (Tcl_ListObjGetElements(interp,objv[1],&len,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        idata = (int *)Tcl_Alloc(len*sizeof(int));
+        if (rank == root)
+            odata = (int *)Tcl_Alloc(len*sizeof(int));
+        else odata = NULL;
+        for (i=0; i < len; ++i)
+            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
+                Tcl_ResetResult(interp);
+                idata[i]=0; /* this is non-fatal by choice */
+            }
+        ierr = MPI_Reduce(idata,odata,len/2,MPI_2INT,op,root,comm);
+        result = Tcl_NewListObj(0,NULL);
+        if (rank == root)
+            for (i=0; i < len; ++i)
+                Tcl_ListObjAppendElement(interp,result,
+                                         Tcl_NewIntObj(odata[i]));
+        Tcl_Free((char *)idata);
+        if (rank == root)
+            Tcl_Free((char *)odata);    
     } else {
         Tcl_DecrRefCount(objv[1]);
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
@@ -2126,6 +2585,12 @@ int _tclmpi_Init(Tcl_Interp *interp)
     Tcl_CreateObjCommand(interp,"tclmpi::bcast",TclMPI_Bcast,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"tclmpi::allreduce",TclMPI_Allreduce,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"tclmpi::reduce",TclMPI_Reduce,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"tclmpi::scatter",TclMPI_Scatter,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"tclmpi::gather",TclMPI_Gather,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"tclmpi::send",TclMPI_Send,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);

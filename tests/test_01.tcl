@@ -105,6 +105,60 @@ run_return [list ::tclmpi::bcast {-1 2 +3 2.0 7 016}             \
 run_return [list ::tclmpi::bcast {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
                 $double $master $self] {-100000.0 1.1 0.0 0.02 6e+26 34.0}
 
+# scatter
+set numargs \
+    "wrong # args: should be \"::tclmpi::scatter <data> <type> <root> <comm>\""
+run_error  [list ::tclmpi::scatter] $numargs
+run_error  [list ::tclmpi::scatter {}] $numargs
+run_error  [list ::tclmpi::scatter {} $auto] $numargs
+run_error  [list ::tclmpi::scatter {} $auto $master] $numargs
+run_error  [list ::tclmpi::scatter {} $auto $master $comm xxx] $numargs
+run_error  [list ::tclmpi::scatter {} $auto $master comm0] \
+    {::tclmpi::scatter: unknown communicator: comm0}
+run_error  [list ::tclmpi::scatter {} $auto $master $null] \
+    {::tclmpi::scatter: does not support data type tclmpi::auto}
+run_error  [list ::tclmpi::scatter {{xx 11} {1 2 3} {}} $int 1 $comm] \
+    {::tclmpi::scatter: MPI_ERR_ROOT: invalid root}
+run_error  [list ::tclmpi::scatter {} tclmpi::real $master $comm]    \
+    {::tclmpi::scatter: invalid data type: tclmpi::real}
+
+# check data type conversions
+run_return [list ::tclmpi::scatter {{xx 11} {1 2 3} 2.0 7 0xff yy} \
+                $int $master $self] {0 0 0 7 255 0}
+run_return [list ::tclmpi::scatter {{xx 11} {1 2 3} 2.5 yy 1}      \
+                $double $master $comm] {0.0 0.0 2.5 0.0 1.0}
+run_return [list ::tclmpi::scatter {-1 2 +3 2.0 7 016}             \
+                $int $master $comm] {-1 2 3 0 7 14}
+run_return [list ::tclmpi::scatter {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
+                $double $master $self] {-100000.0 1.1 0.0 0.02 6e+26 34.0}
+
+# gather
+set numargs \
+    "wrong # args: should be \"::tclmpi::gather <data> <type> <root> <comm>\""
+run_error  [list ::tclmpi::gather] $numargs
+run_error  [list ::tclmpi::gather {}] $numargs
+run_error  [list ::tclmpi::gather {} $auto] $numargs
+run_error  [list ::tclmpi::gather {} $auto $master] $numargs
+run_error  [list ::tclmpi::gather {} $auto $master $comm xxx] $numargs
+run_error  [list ::tclmpi::gather {} $auto $master comm0] \
+    {::tclmpi::gather: unknown communicator: comm0}
+run_error  [list ::tclmpi::gather {} $auto $master $null] \
+    {::tclmpi::gather: does not support data type tclmpi::auto}
+run_error  [list ::tclmpi::gather {{xx 11} {1 2 3} {}} $int 1 $comm] \
+    {::tclmpi::gather: MPI_ERR_ROOT: invalid root}
+run_error  [list ::tclmpi::gather {} tclmpi::real $master $comm]    \
+    {::tclmpi::gather: invalid data type: tclmpi::real}
+
+# check data type conversions
+run_return [list ::tclmpi::gather {{xx 11} {1 2 3} 2.0 7 0xff yy} \
+                $int $master $self] {0 0 0 7 255 0}
+run_return [list ::tclmpi::gather {{xx 11} {1 2 3} 2.5 yy 1}      \
+                $double $master $comm] {0.0 0.0 2.5 0.0 1.0}
+run_return [list ::tclmpi::gather {-1 2 +3 2.0 7 016}             \
+                $int $master $comm] {-1 2 3 0 7 14}
+run_return [list ::tclmpi::gather {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
+                $double $master $self] {-100000.0 1.1 0.0 0.02 6e+26 34.0}
+
 # allreduce
 set numargs \
     "wrong # args: should be \"::tclmpi::allreduce <data> <type> <op> <comm>\""
@@ -142,6 +196,37 @@ run_return [list ::tclmpi::allreduce {{xx 11} {1 2 3} 2.5 yy 1}      \
                 $double tclmpi::sum $comm] {0.0 0.0 2.5 0.0 1.0}
 run_return [list ::tclmpi::allreduce {-1 2 +3 2.0 7 016}             \
                 $int tclmpi::prod $comm] {-1 2 3 0 7 14}
+
+# reduce
+set numargs \
+    "wrong # args: should be \"::tclmpi::reduce <data> <type> <op> <root> <comm>\""
+run_error  [list ::tclmpi::reduce] $numargs
+run_error  [list ::tclmpi::reduce {}] $numargs
+run_error  [list ::tclmpi::reduce {} $auto] $numargs
+run_error  [list ::tclmpi::reduce {} $auto tclmpi::sum] $numargs
+run_error  [list ::tclmpi::reduce {} $auto tclmpi::prod 0] $numargs
+run_error  [list ::tclmpi::reduce {} $auto tclmpi::prod 0 $comm xxx] $numargs
+run_error  [list ::tclmpi::reduce {} $auto tclmpi::max 0 $comm]      \
+    {::tclmpi::reduce: does not support data type tclmpi::auto}
+run_error  [list ::tclmpi::reduce {} $int tclmpi::max 0 comm0]       \
+    {::tclmpi::reduce: unknown communicator: comm0}
+run_error  [list ::tclmpi::reduce {} $int tclmpi::maxloc 0 $comm]    \
+    {::tclmpi::reduce: MPI_ERR_OP: invalid reduce operation}
+run_error  [list ::tclmpi::reduce {} $double tclmpi::minloc 0 $comm] \
+    {::tclmpi::reduce: MPI_ERR_OP: invalid reduce operation}
+run_error [list ::tclmpi::reduce {1 0 2 1 4 3} $intint \
+               tclmpi::max 0 $comm] \
+    {::tclmpi::reduce: MPI_ERR_OP: invalid reduce operation}
+run_error  [list ::tclmpi::reduce {} tclmpi::real tclmpi::min 0 $comm] \
+    {::tclmpi::reduce: invalid data type: tclmpi::real}
+run_error  [list ::tclmpi::reduce {} $int tclmpi::land 0 $null]          \
+    {::tclmpi::reduce: MPI_ERR_COMM: invalid communicator}
+run_error  [list ::tclmpi::reduce {{}} $int tclmpi::gamma 0 $comm]       \
+    {::tclmpi::reduce: unknown reduction operator: tclmpi::gamma}
+run_return [list ::tclmpi::reduce {2 0 1 1} $intint \
+                tclmpi::maxloc 0 $comm] {2 0 1 1}
+#run_return [list ::tclmpi::reduce {1.0 0 2.0 1} $dblint \
+    tclmpi::minloc $comm] {1.0 0 2.0 1}
 
 # probe
 set numargs \
