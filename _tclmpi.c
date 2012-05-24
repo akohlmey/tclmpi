@@ -616,12 +616,12 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
     for (i=1; i < argc; ++i) {
         Tcl_ListObjAppendElement(interp,result,Tcl_NewStringObj(argv[i],-1));
     }
-    Tcl_SetVar2Ex(interp,"argv",NULL,result,TCL_GLOBAL_ONLY);
-    Tcl_SetVar2Ex(interp,"argc",NULL,Tcl_NewIntObj(argc-1),TCL_GLOBAL_ONLY);
-
-    Tcl_DecrRefCount(argobj);
     for (i=0; i < narg; ++i)
         Tcl_DecrRefCount(args[i]);
+    Tcl_DecrRefCount(argobj);
+
+    Tcl_SetVar2Ex(interp,"argv",NULL,result,TCL_GLOBAL_ONLY);
+    Tcl_SetVar2Ex(interp,"argc",NULL,Tcl_NewIntObj(argc-1),TCL_GLOBAL_ONLY);
 
     Tcl_Free((char *)argv);
     Tcl_ResetResult(interp);
