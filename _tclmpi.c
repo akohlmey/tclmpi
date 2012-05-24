@@ -2374,7 +2374,7 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
                 return TCL_ERROR;
 
             if (req->type == TCLMPI_AUTO) {
-                result = Tcl_NewStringObj(req->data,req->len);
+                result = Tcl_NewStringObj((const char*)req->data,req->len);
 
             } else if (req->type == TCLMPI_INT) {
                 int *idata = (int *)req->data;
