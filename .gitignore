@@ -1,5 +1,7 @@
 .gdb_history
 _tclmpi.so
+tclmpish
+refman.pdf
 docs
 *~
 *.o

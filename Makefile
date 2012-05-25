@@ -64,7 +64,7 @@ all: dynamic static doc
 
 clean:
 	rm -f _tclmpi.so tclmpish *.o *~ tests/*~ examples/*~
-	rm -rf docs/*
+	rm -rf docs/* doxygen.log
 
 check: _tclmpi.so
 	(cd tests; ./test_01.tcl)
