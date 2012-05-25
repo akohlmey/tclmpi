@@ -1,9 +1,11 @@
 ## \file
-# This is the ::tclmpi:: namespace and the documentation of the 
-# Tcl API of TclMPI.
+# This file contains the Tcl script parts of the tclmpi namespace and
+# the embedded documentation of the Tcl API of TclMPI.
 
-## TclMPI wrapper
+## TclMPI package namespace, tclmpi
 namespace eval tclmpi {
+
+    variable version "0.7"  ;#< version number of this package
 
     variable auto   tclmpi::auto   ;#< constant for automatic data type
     variable int    tclmpi::int    ;#< constant for integer data type
@@ -33,8 +35,6 @@ namespace eval tclmpi {
 
     variable undefined  tclmpi::undefined  ;#< constant to indicate an undefined number
 
-    variable version "0.7"  ;#< version number of this package
-
     # export all API functions
     namespace export \
         init finalize abort comm_size comm_rank comm_split barrier bcast \
@@ -43,8 +43,9 @@ namespace eval tclmpi {
 
     # The following section is to trick doxygen into documenting the Tcl API
     # of TclMPI. The since the actual functions are provided as compiled C 
-    # code in _tclmpi.c, we define dummy versions of them and then immediately
-    # delete them again.
+    # code in _tclmpi.c, we define dummy versions of them in a piece of code
+    # that is always going to be excluded
+    if {0} {
 
     ## Initialize the MPI environment from Tcl
     #
@@ -58,7 +59,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Init().
     proc init {} {}
-    rename init ""
 
     ## Shut down the MPI environment from Tcl
     #
@@ -71,7 +71,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Finalize().
     proc finalize {} {}
-    rename finalize ""
 
     ## Terminates the MPI environment from Tcl
     # \param comm Tcl representation of an MPI communicator
@@ -84,7 +83,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Abort().
     proc abort {comm errorcode} {}
-    rename abort ""
 
     ## Returns the number of processes involved in an MPI communicator
     # \param comm Tcl representation of an MPI communicator
@@ -101,7 +99,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Comm_size().
     proc comm_size {comm} {}
-    rename comm_size ""
 
     ## Returns the rank of the current process in an MPI communicator
     # \param comm Tcl representation of an MPI communicator
@@ -117,7 +114,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Comm_rank().
     proc comm_rank {comm} {}
-    rename comm_rank ""
 
     ## Creates new communicators based on "color" and "key" flags
     # \param comm Tcl representation of an MPI communicator
@@ -147,7 +143,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Comm_split().
     proc comm_split {comm color key} {}
-    rename comm_split ""
 
     ## Synchronize MPI processes
     # \param comm Tcl representation of an MPI communicator
@@ -159,7 +154,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Barrier().
     proc barrier {comm} {}
-    rename barrier ""
 
     ## Broadcasts data from one process to all processes on the communicator
     # \param data data to be broadcast (Tcl data object)
@@ -181,7 +175,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Bcast().
     proc bcast {data type root comm} {}
-    rename bcast ""
 
     ## Distributes data from one process to all processes on the communicator
     # \param data data to be distributed (Tcl data object)
@@ -203,7 +196,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Scatter().
     proc scatter {data type root comm} {}
-    rename scatter ""
 
     ## Collects data from all processes on the communicator
     # \param data data to be distributed (Tcl data object)
@@ -223,7 +215,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Gather().
     proc gather {data type root comm} {}
-    rename gather ""
 
     ## Combines data from all processes and distributes the result back to them
     # \param data data to be reduced (Tcl data object)
@@ -251,7 +242,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Allreduce().
     proc allreduce {data type op comm} {}
-    rename allreduce ""
 
     ## Combines data from all processes on one process
     # \param data data to be reduced (Tcl data object)
@@ -281,7 +271,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Reduce().
     proc reduce {data type op root comm} {}
-    rename reduce ""
 
     ## Perform a blocking send
     # \param data data to be sent (Tcl data object)
@@ -299,7 +288,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Send().
     proc send {data type dest tag comm} {}
-    rename send ""
 
     ## Perform a non-blocking send
     # \param data data to be sent (Tcl data object)
@@ -321,7 +309,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Isend().
     proc isend {data type dest tag comm} {}
-    rename isend ""
 
     ## Perform a blocking receive
     # \param type data type to be used (string constant)
@@ -347,7 +334,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Recv().
     proc recv {type source tag comm {status {}}} {}
-    rename recv ""
 
     ## Initiate a non-blocking receive
     # \param type data type to be used (string constant)
@@ -370,7 +356,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Irecv().
     proc irecv {type source tag comm} {}
-    rename irecv ""
 
     ## Blocking test for a message 
     # \param source rank of sending process or tclmpi::any_source
@@ -395,7 +380,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Probe().
     proc probe {source tag comm {status {}}} {}
-    rename probe ""
 
     ## Non-blocking test for a message 
     # \param source rank of sending process or tclmpi::any_source
@@ -421,7 +405,6 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Iprobe().
     proc iprobe {source tag comm {status {}}} {}
-    rename iprobe ""
 
     ## Wait for MPI request completion
     # \param request Tcl representation of an MPI request
@@ -445,7 +428,7 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Wait().
     proc wait {request {status {}}} {}
-    rename wait ""
+    }
 
     ## Wait for multiple MPI request completions
     # \param requests List of Tcl representations of an MPI request
@@ -479,8 +462,7 @@ namespace eval tclmpi {
     }
 }
 
-package provide tclmpi $tclmpi::version
-
 # load the ancilliary methods from the DSO
 package require _tclmpi $::tclmpi::version
+package provide tclmpi $tclmpi::version
 

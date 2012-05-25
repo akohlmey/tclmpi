@@ -2485,58 +2485,18 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
     }
 }
 
-
-/*! register this plugin with the Tcl interpreter
- * \param interp current Tcl interpreter
- * \return TCL_OK or TCL_ERROR
+/*! initialize TclMPI extensions and do one time init
+ * \param interp pointer to current Tcl interpreter
  *
- * This function sets up the plugin to register the various MPI wrappers
- * in this package with the Tcl interpreter.
- * 
- * Depending on the USE_TCL_STUBS define being active or not, this is
- * done using the native dynamic loader interface or the Tcl stubs 
- * interface, which would allow to load the plugin into static executables
- * and plugins from different Tcl versions.
- *
- * In addition the linked list for translating MPI communicators is 
- * initialized for the predefined communicators tclmpi::comm_world,
- * tclmpi::comm_self, and tclmpi::comm_null and its corresponding MPI
- * counterparts.
+ * This hooks up the commands provided by TclMPI into the provided
+ * interpreter and also initializes the predefined communicators
+ * tclmpi::comm_world, tclmpi::comm_self, and tclmpi::comm_null and its
+ * corresponding MPI counterparts.
  */
-
-#if defined(MPIWRAPSTCLDLL_EXPORTS) && defined(_WIN32)
-#  undef TCL_STORAGE_CLASS
-#  define TCL_STORAGE_CLASS DLLEXPORT
-
-#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Window s headers
-#include <windows.h>
-
-BOOL APIENTRY DllMain( HANDLE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved )
-{
-    return TRUE;
-}
-
-EXTERN int _tclmpi_Init(Tcl_Interp *interp)
-
-#else
-
-int _tclmpi_Init(Tcl_Interp *interp)
-
-#endif
+static void tclmpi_init_api(Tcl_Interp *interp) 
 {
     char *label;
     tclmpi_comm_t *comm;
-
-#if defined(USE_TCL_STUBS)
-    if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL)
-        return TCL_ERROR;
-    if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 0) == NULL)
-        return TCL_ERROR;
-#endif
-    if (Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION) != TCL_OK)
-        return TCL_ERROR;
 
     /* add world, self, and null communicator to translation table */
     comm = (tclmpi_comm_t *)Tcl_Alloc(sizeof(tclmpi_comm_t));
@@ -2606,5 +2566,105 @@ int _tclmpi_Init(Tcl_Interp *interp)
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"tclmpi::wait",TclMPI_Wait,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+}
+
+/*! register the package as a plugin with the Tcl interpreter
+ * \param interp current Tcl interpreter
+ * \return TCL_OK or TCL_ERROR
+ *
+ * This function sets up the plugin to register the various MPI wrappers
+ * in this package with the Tcl interpreter.
+ * 
+ * Depending on the USE_TCL_STUBS define being active or not, this is
+ * done using the native dynamic loader interface or the Tcl stubs 
+ * interface, which would allow to load the plugin into static executables
+ * and plugins from different Tcl versions.
+ *
+ * In addition the linked list for translating MPI communicators is 
+ * initialized for the predefined communicators tclmpi::comm_world,
+ * tclmpi::comm_self, and tclmpi::comm_null and its corresponding MPI
+ * counterparts.
+ */
+
+#if defined(MPIWRAPSTCLDLL_EXPORTS) && defined(_WIN32)
+#  undef TCL_STORAGE_CLASS
+#  define TCL_STORAGE_CLASS DLLEXPORT
+
+#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Window s headers
+#include <windows.h>
+
+BOOL APIENTRY DllMain( HANDLE hModule,
+                       DWORD  ul_reason_for_call,
+                       LPVOID lpReserved )
+{
+    return TRUE;
+}
+
+EXTERN int _tclmpi_Init(Tcl_Interp *interp)
+
+#else
+
+int _tclmpi_Init(Tcl_Interp *interp)
+
+#endif
+{
+
+#if defined(USE_TCL_STUBS)
+    if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL)
+        return TCL_ERROR;
+    if (Tcl_PkgRequire(interp, "Tcl", TCL_VERSION, 0) == NULL)
+        return TCL_ERROR;
+#endif
+    if (Tcl_PkgProvide(interp, PACKAGE_NAME, PACKAGE_VERSION) != TCL_OK)
+        return TCL_ERROR;
+
+    tclmpi_init_api(interp);
+
     return TCL_OK;
 }
+
+
+#if defined(BUILD_TCLMPISH)
+#if defined(USE_TCL_STUBS)
+#error "building a static interpreter and USE_TCL_STUBS are not compatible"
+#endif
+/*! TclMPI shell application one time inititalization
+ * \param interp pointer to current Tcl interpreter
+ * \return error status
+ *
+ * This function does initialization calls required to get a standalone
+ * Tcl interpreter application going.  It specifically includes a call
+ * to Tcl_StaticPackage() declare the embedded code for the TclMPI
+ * plugin as already loaded, but allow script code act as if it was not.
+ */
+static int tclmpi_app_init(Tcl_Interp *interp)
+{
+    if ((Tcl_Init)(interp) == TCL_ERROR)
+        return TCL_ERROR;
+
+    if (_tclmpi_Init(interp) == TCL_ERROR)
+        return TCL_ERROR;
+
+    Tcl_StaticPackage(interp,PACKAGE_NAME,_tclmpi_Init,NULL);
+
+    /* use a specific profile filename */
+#ifdef DJGPP
+    (Tcl_SetVar)(interp, "tcl_rcFileName", "~/tclmpish.rc", TCL_GLOBAL_ONLY);
+#else
+    (Tcl_SetVar)(interp, "tcl_rcFileName", "~/.tclmpishrc", TCL_GLOBAL_ONLY);
+#endif
+
+    return TCL_OK;
+}
+
+/*! entry point for static tclmpish executable
+ * \param argc number of elements of the argument vector
+ * \param argv argument vector
+ * \return executable exit status
+ */
+int main(int argc, char **argv)
+{
+    Tcl_Main(argc, argv, tclmpi_app_init);
+    return 0;
+}
+#endif
