@@ -5,7 +5,7 @@
 ## TclMPI package namespace, tclmpi
 namespace eval tclmpi {
 
-    variable version "0.7"  ;#< version number of this package
+    variable version "@VERSION@"   ;#< version number of this package
 
     variable auto   tclmpi::auto   ;#< constant for automatic data type
     variable int    tclmpi::int    ;#< constant for integer data type
@@ -466,3 +466,6 @@ namespace eval tclmpi {
 package require _tclmpi $::tclmpi::version
 package provide tclmpi $tclmpi::version
 
+# Local Variables:
+# mode: tcl
+# End:

@@ -1,5 +1,6 @@
 #!/usr/bin/make
 SHELL=/bin/sh
+VERSION=0.7
 # please adjust to your local setup
 ########### configuration section ###########
 # MPI C-compiler wrapper
@@ -15,7 +16,7 @@ DEBUG=-g
 STUBS=-DUSE_TCL_STUBS
 
 # defines
-DEFINE=-DPACKAGE_NAME=\"_tclmpi\" -DPACKAGE_VERSION=\"0.7\"
+DEFINE=-DPACKAGE_NAME=\"_tclmpi\" -DPACKAGE_VERSION=\"$(VERSION)\"
 
 # platform specific compiler flags:
 ## Linux and multiple other platforms with GCC (generic)
@@ -56,23 +57,24 @@ LDFLAGS=$(DEBUG) $(TCLLIBRARY) $(MPILIBRARY)
 DYNLIBS= $(TCLSTUBLIB) $(MPILIB)
 LIBS= $(TCLLIB) $(MPILIB)
 
-default: _tclmpi.so
+default: version _tclmpi.so
 
-dynamic: _tclmpi.so check
-static: tclmpish check-static
+dynamic: version _tclmpi.so check
+static: version tclmpish check-static
 all: dynamic static doc
 
 clean:
 	rm -f _tclmpi.so tclmpish *.o *~ tests/*~ examples/*~
 	rm -rf docs/* doxygen.log
+	rm -f pkgIndex.tcl Doxyfile tclmpi.tcl
 
-check: _tclmpi.so
+check: version _tclmpi.so
 	(cd tests; ./test_01.tcl)
 	(cd tests; ./test_02.tcl)
 	(cd tests; mpirun -np 2 ./test_03.tcl)
 	(cd tests; mpirun -np 2 ./test_04.tcl)
 
-check-static: tclmpish
+check-static: version tclmpish
 	(cd tests; ../tclmpish ./test_01.tcl)
 	(cd tests; ../tclmpish ./test_02.tcl)
 	(cd tests; mpirun -np 2 ../tclmpish ./test_03.tcl)
@@ -101,6 +103,18 @@ docs:
 	mkdir docs
 
 #############################################
-.PHONY: default clean check doc all dynamic static check-static
+version: Doxyfile tclmpi.tcl pkgIndex.tcl
+
+Doxyfile: Doxyfile.in
+	sed -e s,@VERSION@,$(VERSION),g $< > $@
+
+tclmpi.tcl: tclmpi.tcl.in pkgIndex.tcl
+	sed -e s,@VERSION@,$(VERSION),g $< > $@
+
+pkgIndex.tcl: pkgIndex.tcl.in
+	sed -e s,@VERSION@,$(VERSION),g $< > $@
+
+#############################################
+.PHONY: default clean check doc all dynamic static check-static version
 .SUFFIXES:
 

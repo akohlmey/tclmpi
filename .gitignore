@@ -6,3 +6,6 @@ docs
 *~
 *.o
 doxygen.log
+Doxyfile
+pkgIndex.tcl
+tclmpi.tcl
