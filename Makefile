@@ -11,34 +11,38 @@ LD=$(CC)
 # set to empty if you don't want to include debug info
 DEBUG=-g
 
+# comment out if you want to use 
+STUBS=-DUSE_TCL_STUBS
+
 # defines
-DEFINE=-DUSE_TCL_STUBS -DPACKAGE_NAME=\"_tclmpi\" -DPACKAGE_VERSION=\"0.7\"
+DEFINE=-DPACKAGE_NAME=\"_tclmpi\" -DPACKAGE_VERSION=\"0.7\"
 
 # platform specific compiler flags:
 ## Linux and multiple other platforms with GCC (generic)
 COMPILE=-fPIC  -O2 -Wall -W
-LINK=-shared 
+DYNLINK=-shared 
 ## Linux x86 32-bit:
 #COMPILE=-fPIC -m32 -O2 -Wall -W
-#LINK=-shared -m32
+#DYNLINK=-shared -m32
 ## Linux x86 64-bit:
 #COMPILE=-fPIC -m64 -O2 -Wall -W
-#LINK=-shared -m64
+#DYNLINK=-shared -m64
 ## MacOSX x86 32-bit
 #COMPILE=-Os -Wall -m32 -fPIC -dynamic
-#LINK= -bundle -m32 -L/usr/X11R6/lib/
+#DYNLINK= -bundle -m32 -L/usr/X11R6/lib/
 ## MacOSX x86 64-bit
 #COMPILE=-Os -Wall -fPIC -dynamic -m64
-#LINK= -bundle -L/usr/X11R6/lib/
+#DYNLINK= -bundle -L/usr/X11R6/lib/
 ## Win32/MinGW via cross compiler
 #CC=i686-pc-mingw32-gcc
 #COMPILE= -DMPIWRAPSTCLDLL_EXPORTS -O2 -Wall -W -fno-strict-aliasing
-#LINK= -shared 
+#DYNLINK= -shared 
 
 # set, if needed to match Tcl installation
 TCLINCLUDE=-I/usr/include
 TCLLIBRARY=-L/usr/lib64 -L/usr/lib
-TCLLIB=-ltclstub8.5
+TCLSTUBLIB=-ltclstub8.5
+TCLLIB=-ltcl8.5
 
 # set, if needed, to match MPI installation
 # not needed if MPI compiler wrappers work
@@ -48,15 +52,18 @@ TCLLIB=-ltclstub8.5
 ######## end of configuration section #######
 
 CFLAGS=$(COMPILE) $(DEBUG) $(DEFINE) $(TCLINCLUDE) $(MPIINCLUDE) 
-LDFLAGS=$(LINK) $(DEBUG) $(TCLLIBRARY) $(MPILIBRARY)
+LDFLAGS=$(DEBUG) $(TCLLIBRARY) $(MPILIBRARY)
+DYNLIBS= $(TCLSTUBLIB) $(MPILIB)
 LIBS= $(TCLLIB) $(MPILIB)
 
 default: _tclmpi.so
 
-all: _tclmpi.so refman.pdf check
+dynamic: _tclmpi.so check
+static: tclmpish check-static
+all: dynamic static doc
 
 clean:
-	rm -f _tclmpi.so *.o *~ tests/*~ examples/*~
+	rm -f _tclmpi.so tclmpish *.o *~ tests/*~ examples/*~
 	rm -rf docs/*
 
 check: _tclmpi.so
@@ -65,12 +72,21 @@ check: _tclmpi.so
 	(cd tests; mpirun -np 2 ./test_03.tcl)
 	(cd tests; mpirun -np 2 ./test_04.tcl)
 
+check-static: tclmpish
+	(cd tests; ../tclmpish ./test_01.tcl)
+	(cd tests; ../tclmpish ./test_02.tcl)
+	(cd tests; mpirun -np 2 ../tclmpish ./test_03.tcl)
+	(cd tests; mpirun -np 2 ../tclmpish ./test_04.tcl)
+
 #############################################
 _tclmpi.so:  _tclmpi.o
-	$(LD) $(LDFLAGS) -o $@ $^ $(LIBS)
+	$(LD) $(DYNLINK) $(LDFLAGS) -o $@ $^ $(DYNLIBS)
 
 _tclmpi.o: _tclmpi.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) $(STUBS) -c $<
+
+tclmpish: _tclmpi.c
+	$(LD) $(CFLAGS) -DBUILD_TCLMPISH $< -o $@ $(LDFLAGS) $(LIBS)
 
 #############################################
 
@@ -85,6 +101,6 @@ docs:
 	mkdir docs
 
 #############################################
-.PHONY: default clean check doc all
+.PHONY: default clean check doc all dynamic static check-static
 .SUFFIXES:
 
