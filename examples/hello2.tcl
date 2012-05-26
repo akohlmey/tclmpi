@@ -8,7 +8,7 @@ package require tclmpi 0.6
 
 # import the namespace and a shortcut to the world communicator
 namespace import tclmpi::*
-namespace upvar tclmpi comm_world comm
+set comm $tclmpi::comm_world
 
 # initialize TclMPI
 init

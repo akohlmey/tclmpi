@@ -1,26 +1,44 @@
 Compilation:
-The TclMPI package currently consist   of  a C source file,   _tclmpi.c,
-which needs  to  be compiled for  dynamic  linkage, and two  Tcl  script
-files,   tclmpi.tcl  and   pkgIndex.tcl  that hook   it  into  the   Tcl
-environment.  You need a   working Tcl and MPI   development environment
-(C-only). Since compilation will create a dynamical shared object (DSO),
-both  Tcl and MPI  have to be compiled as  shared libraries. This is the
-default for  Tcl and OpenMPI  on Linux, but  your  mileage may  vary. To
-update the documentation you will also need doxygen 1.8 or later and its
-prerequistes ((pdf)latex, dvi2ps, ghostscript, graphviz) installed.
 
-To compile the package adjust the  settings in the Makefile according to
+The package currently  consist of a single C  source  file which usually
+will  be compiled for  dynamic linkage, but  can also be compiled into a
+new Tcl  interpreter  with  the  TclMPI  package  included (required  on
+platforms like Cray XT, XE, or XK machines that need static linkage) and
+two Tcl script files tclmpi.tcl and pkgIndex.tcl,  that hook it into the
+Tcl  interpreter.   The corresponding  commands   for Linux  and  MacOSX
+systems are included in the provided makefile.  All  that is required to
+compile the  package is an installed  Tcl development system for Tcl 8.4
+or   higher and reasonably   well  MPI-2 compatible installation.   When
+compiled for a  dynamically loaded  shared object (DSO),  MPI has  to be
+compiled and linked as shared libraries (this is  the default OpenMPI on
+Linux, but your mileage may vary).  To update the documentation you will
+also need doxygen 1.8 or later and its prerequistes ((pdf)latex, dvi2ps,
+ghostscript, graphviz) installed.
+
+As of May 25  2012 the code has  been  tested on  32-bit and 64-bit  x86
+Linux platforms with OpenMPI, MVAPICH, Cray MPT and SGI-MPT, Tcl 8.4 and
+8.5.  OpenMPI and MVAPICH complete all tests, however MVAPICH fails some
+due to differences in the error messages (needs to  be fixed in the test
+suite).  SGI-MPT has problems with MPI_COMM_NULL (segfault).
+
+To compile the package adjust the settings in  the Makefile according to
 your platform, MPI and Tcl installation.  Typical settings for Linux and
-MacOSX systems are included as  comments in the provided makefile.  Then
-type "make" to compile  the _tclmpi.so file.  With "make check"  you can
-run  the  integrated  unit  tests to  see  if  everything  is working as
-expected.  With "make  doc" the  documentation can be  updated and "make
-all" will run all three steps together.
+MacOSX systems are included as comments  in the provided makefile.  Then
+type   "make" to compile the   _tclmpi.so file; type  "make tclmpish" to
+compile  the extended Tcl shell interpreter.   With "make check" you can
+run  the integrated unit    tests to see if    everything is working  as
+expected and "make check-static" will do the  corresponding test for the
+extended  shell  binary..   With  "make  doc" the  documentation  can be
+updated and "make all" will run all steps together.
 
 Installation:
-To install you  can create a directory, e.g.  /usr/local/libexec/tclmpi,
-and copy the  files _tclmpi.so, tclmpi.tcl  and pkgIndex.tcl into it. If
-you  then     use     the     command    'set    auto_path       [concat
-/usr/local/libexec/tclmpi $auto_path]' in  your .tclshrc  or .vmdrc, you
-can load the   tclmpi wrappers on  demand simply  by  using  the command
-'package require tclmpi'.
+
+To install you can create a  directory, e.g.  /usr/local/libexec/tclmpi,
+and  copy the files _tclmpi.so,  tclmpi.tcl and pkgIndex.tcl into it. If
+you     then     use     the    command   'set       auto_path   [concat
+/usr/local/libexec/tclmpi $auto_path]' in  your .tclshrc or  .vmdrc, you
+can load the  tclmpi wrappers  on demand simply   by using the   command
+'package require tclmpi'. For the   static executable you only need   to
+copy  the files  tclmpi.tcl  and  pkgIndex.tcl  and then   copy tclmpish
+somewhere where it is in  your path. In  that case the startup file will
+be called .tclmpishrc or tclmpi.rc if you compile on windows.

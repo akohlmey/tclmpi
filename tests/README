@@ -14,7 +14,15 @@ Simple tests that can be run in serial. This is mostly
 testing validity of arguments and internal handling of data
 
 test_02.tcl:
+Same tests as in test_01.tcl, but this time importing 
+all new functions from the tclmpi namespace.
+
+test_03.tcl:
 Tests that need to be run with two MPI processes. This
 is mostly testing of proper sending of data. It cannot
 test for situations where deadlocks, data corruption 
 or aborts/segfaults would happen.
+
+test_04.tcl:
+Same tests as in test_03.tcl, but this time importing 
+all new functions from the tclmpi namespace.

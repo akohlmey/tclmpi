@@ -5,18 +5,12 @@ VERSION=0.7
 ########### configuration section ###########
 # MPI C-compiler wrapper
 CC=mpicc
-
 # linker (usually the same as compiler)
 LD=$(CC)
-
 # set to empty if you don't want to include debug info
 DEBUG=-g
-
-# comment out if you want to use 
+# comment out if you want to use the stubs interface
 STUBS=-DUSE_TCL_STUBS
-
-# defines
-DEFINE=-DPACKAGE_NAME=\"_tclmpi\" -DPACKAGE_VERSION=\"$(VERSION)\"
 
 # platform specific compiler flags:
 ## Linux and multiple other platforms with GCC (generic)
@@ -43,7 +37,7 @@ DYNLINK=-shared
 TCLINCLUDE=-I/usr/include
 TCLLIBRARY=-L/usr/lib64 -L/usr/lib
 TCLSTUBLIB=-ltclstub8.5
-TCLLIB=-ltcl8.5
+TCLLIB=-ltcl8.5 -dl
 
 # set, if needed, to match MPI installation
 # not needed if MPI compiler wrappers work
@@ -51,6 +45,10 @@ TCLLIB=-ltcl8.5
 #MPILIBRARY=-L/usr/lib
 #MPILIB=-lmpi
 ######## end of configuration section #######
+NAME=tclmpi
+# defines
+DEFINE=-DPACKAGE_NAME=\"_$(NAME)\" -DPACKAGE_VERSION=\"$(VERSION)\" \
+	-DMPICH_SKIP_MPICXX -DOMPI_SKIP_MPICXX=1
 
 CFLAGS=$(COMPILE) $(DEBUG) $(DEFINE) $(TCLINCLUDE) $(MPIINCLUDE) 
 LDFLAGS=$(DEBUG) $(TCLLIBRARY) $(MPILIBRARY)
@@ -102,6 +100,19 @@ refman.pdf: Doxyfile _tclmpi.c tests/harness.tcl tclmpi.tcl docs
 docs:
 	mkdir docs
 
+tar: doc
+	rm -rvf $(NAME)-$(VERSION)
+	mkdir $(NAME)-$(VERSION)
+	cp refman.pdf $(NAME)-$(VERSION)/$(NAME)-$(VERSION)-docs.pdf
+	cp Makefile *.in _tclmpi.c README INSTALL LICENSE $(NAME)-$(VERSION)
+	mkdir $(NAME)-$(VERSION)/tests
+	cp tests/README $(NAME)-$(VERSION)/tests
+	cp tests/*.tcl $(NAME)-$(VERSION)/tests
+	mkdir $(NAME)-$(VERSION)/examples
+	cp examples/*.tcl $(NAME)-$(VERSION)/examples
+	tar -czvvf $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)
+	rm -rvf $(NAME)-$(VERSION)
+
 #############################################
 version: Doxyfile tclmpi.tcl pkgIndex.tcl
 
@@ -115,6 +126,6 @@ pkgIndex.tcl: pkgIndex.tcl.in
 	sed -e s,@VERSION@,$(VERSION),g $< > $@
 
 #############################################
-.PHONY: default clean check doc all dynamic static check-static version
+.PHONY: default clean check doc all dynamic static check-static version tar
 .SUFFIXES:
 
