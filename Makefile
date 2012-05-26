@@ -63,8 +63,9 @@ all: dynamic static doc
 
 clean:
 	rm -f _tclmpi.so tclmpish *.o *~ tests/*~ examples/*~
-	rm -rf docs/* doxygen.log
+	rm -rf latex doxygen.log
 	rm -f pkgIndex.tcl Doxyfile tclmpi.tcl
+	rm -f tclmpi-*.tar.gz tclmpi-*.pdf
 
 check: version _tclmpi.so
 	(cd tests; ./test_01.tcl)
@@ -90,20 +91,18 @@ tclmpish: _tclmpi.c
 
 #############################################
 
-doc: refman.pdf
+doc: $(NAME)-$(VERSION)-docs.pdf
 
-refman.pdf: Doxyfile _tclmpi.c tests/harness.tcl tclmpi.tcl docs
+$(NAME)-$(VERSION)-docs.pdf: Doxyfile _tclmpi.c \
+	tests/harness.tcl tclmpi.tcl
 	doxygen || rm -f $@
-	make -C docs/latex || rm -f $@
-	cp -p docs/latex/refman.pdf $@ || rm -f $@
-
-docs:
-	mkdir docs
+	make -C latex || rm -f $@
+	cp -p latex/refman.pdf $@ || rm -f $@
 
 tar: doc
 	rm -rvf $(NAME)-$(VERSION)
 	mkdir $(NAME)-$(VERSION)
-	cp refman.pdf $(NAME)-$(VERSION)/$(NAME)-$(VERSION)-docs.pdf
+	cp $(NAME)-$(VERSION)-docs.pdf $(NAME)-$(VERSION)/
 	cp Makefile *.in _tclmpi.c README INSTALL LICENSE $(NAME)-$(VERSION)
 	mkdir $(NAME)-$(VERSION)/tests
 	cp tests/README $(NAME)-$(VERSION)/tests

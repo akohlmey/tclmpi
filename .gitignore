@@ -9,3 +9,6 @@ doxygen.log
 Doxyfile
 pkgIndex.tcl
 tclmpi.tcl
+tclmpi-*.tar.gz
+tclmpi-*docs.pdf
+latex

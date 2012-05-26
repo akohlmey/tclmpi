@@ -9,29 +9,58 @@ par_init
 namespace import tclmpi::*
 # use aliases instead of predefined variables
 unset comm self null
-namespace upvar tclmpi comm_world comm
-namespace upvar tclmpi comm_self  self
-namespace upvar tclmpi comm_null  null
-namespace upvar tclmpi any_source any_source
-namespace upvar tclmpi any_tag    any_tag
-namespace upvar tclmpi undefined  undefined
 
-namespace upvar tclmpi sum    mpi_sum
-namespace upvar tclmpi prod   mpi_prod
-namespace upvar tclmpi max    mpi_max
-namespace upvar tclmpi min    mpi_min
-namespace upvar tclmpi land   mpi_land
-namespace upvar tclmpi lor    mpi_lor
-namespace upvar tclmpi lxor   mpi_lxor
-namespace upvar tclmpi band   mpi_band
-namespace upvar tclmpi bor    mpi_bor
-namespace upvar tclmpi bxor   mpi_bxor
-namespace upvar tclmpi auto   mpi_auto
-namespace upvar tclmpi double mpi_double
-namespace upvar tclmpi int    mpi_int
-namespace upvar tclmpi minloc minloc
-namespace upvar tclmpi maxloc maxloc
+# version 8.4 compatibility
+if {$tcl_version < 8.5} {
+    set comm $tclmpi::comm_world
+    set self $tclmpi::comm_self
+    set null $tclmpi::comm_null
 
+    set any_source $tclmpi::any_source
+    set any_tag $tclmpi::any_tag
+    set undefined $tclmpi::undefined
+
+    set mpi_sum $tclmpi::sum
+    set mpi_prod $tclmpi::prod
+    set mpi_max $tclmpi::max
+    set mpi_min $tclmpi::min
+    set mpi_land $tclmpi::land
+    set mpi_lor  tclmpi lor
+    set mpi_lxor tclmpi lxor
+    set mpi_band tclmpi band
+    set mpi_bor  tclmpi bor 
+    set mpi_bxor tclmpi bxor
+
+    set mpi_auto $tclmpi::auto
+    set mpi_double $tclmpi::double
+    set mpi_int $tclmpi::int
+    set minloc $tclmpi::minloc
+    set maxloc $tclmpi::maxloc
+} else {
+    namespace upvar tclmpi comm_world comm
+    namespace upvar tclmpi comm_self self
+    namespace upvar tclmpi comm_null null
+
+    namespace upvar tclmpi any_source any_source
+    namespace upvar tclmpi any_tag    any_tag
+    namespace upvar tclmpi undefined  undefined
+
+    namespace upvar tclmpi sum    mpi_sum
+    namespace upvar tclmpi prod   mpi_prod
+    namespace upvar tclmpi max    mpi_max
+    namespace upvar tclmpi min    mpi_min
+    namespace upvar tclmpi land   mpi_land
+    namespace upvar tclmpi lor    mpi_lor
+    namespace upvar tclmpi lxor   mpi_lxor
+    namespace upvar tclmpi band   mpi_band
+    namespace upvar tclmpi bor    mpi_bor
+    namespace upvar tclmpi bxor   mpi_bxor
+    namespace upvar tclmpi auto   mpi_auto
+    namespace upvar tclmpi double mpi_double
+    namespace upvar tclmpi int    mpi_int
+    namespace upvar tclmpi minloc minloc
+    namespace upvar tclmpi maxloc maxloc
+}
 
 # size/rank checks
 par_return [list [list comm_size $comm] \

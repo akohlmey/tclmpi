@@ -8,20 +8,39 @@ ser_init
 namespace import tclmpi::*
 # use aliases instead of predefined variables
 unset comm self null
-namespace upvar tclmpi comm_world comm
-namespace upvar tclmpi comm_self self
-namespace upvar tclmpi comm_null null
-namespace upvar tclmpi sum    mpi_sum
-namespace upvar tclmpi prod   mpi_prod
-namespace upvar tclmpi max    mpi_max
-namespace upvar tclmpi min    mpi_min
-namespace upvar tclmpi land   mpi_land
-namespace upvar tclmpi auto   mpi_auto
-namespace upvar tclmpi double mpi_double
-namespace upvar tclmpi int    mpi_int
-namespace upvar tclmpi minloc minloc
-namespace upvar tclmpi maxloc maxloc
-namespace upvar tclmpi undefined undefined
+
+# version 8.4 compatibility
+if {$tcl_version < 8.5} {
+    set comm $tclmpi::comm_world
+    set self $tclmpi::comm_self
+    set null $tclmpi::comm_null
+    set mpi_sum $tclmpi::sum
+    set mpi_prod $tclmpi::prod
+    set mpi_max $tclmpi::max
+    set mpi_min $tclmpi::min
+    set mpi_land $tclmpi::land
+    set mpi_auto $tclmpi::auto
+    set mpi_double $tclmpi::double
+    set mpi_int $tclmpi::int
+    set minloc $tclmpi::minloc
+    set maxloc $tclmpi::maxloc
+    set undefined $tclmpi::undefined
+} else {
+    namespace upvar tclmpi comm_world comm
+    namespace upvar tclmpi comm_self self
+    namespace upvar tclmpi comm_null null
+    namespace upvar tclmpi sum    mpi_sum
+    namespace upvar tclmpi prod   mpi_prod
+    namespace upvar tclmpi max    mpi_max
+    namespace upvar tclmpi min    mpi_min
+    namespace upvar tclmpi land   mpi_land
+    namespace upvar tclmpi auto   mpi_auto
+    namespace upvar tclmpi double mpi_double
+    namespace upvar tclmpi int    mpi_int
+    namespace upvar tclmpi minloc minloc
+    namespace upvar tclmpi maxloc maxloc
+    namespace upvar tclmpi undefined undefined
+}
 
 # init
 run_error  [list init 0] \
