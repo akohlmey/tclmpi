@@ -55,31 +55,43 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * \section compile Compilation and Installation
  *
- * The package currently consist of a single C source file which needs
- * to be compiled for dynamic linkage. The corresponding commands for
- * Linux and MacOSX systems are included in the provided makefile. All
- * that is required to compile the package is an installed Tcl
- * development system and a working MPI installation. Since this
- * creates a dynamically loaded shared object (DSO), both Tcl and MPI
- * have to be compiled and linked as shared libraries (this is the
- * default for Tcl and OpenMPI on Linux, but your mileage may
- * vary). As of May 15 2012 the code has only been tested on 32-bit
- * and 64-bit x86 Linux platforms with OpenMPI.
+ * The package currently consist of a single C source file which usually
+ * will be compiled for dynamic linkage, but can also be compiled into a
+ * new Tcl interpreter with TclMPI included (required on platforms like
+ * Cray XT, XE, or XK machines that need static linkage) and a Tcl
+ * script file. The corresponding commands for Linux and MacOSX systems
+ * are included in the provided makefile. All that is required to
+ * compile the package is an installed Tcl development system and a
+ * working MPI-2 compliant installation. When compiled for a dynamically
+ * loaded shared object (DSO), MPI has to be compiled and linked as
+ * shared libraries (this is the default OpenMPI on Linux, but your
+ * mileage may vary). As of May 25 2012 the code has been tested on
+ * 32-bit and 64-bit x86 Linux platforms with OpenMPI, MVAPICH, Cray MPT
+ * and SGI-MPT. OpenMPI and MVAPICH complete all tests, however MVAPICH
+ * fails some due to differences in the error messages (needs to be
+ * fixed in the test suite). SGI-MPT has problems with MPI_COMM_NULL
+ * (segfault).
  *
  * To compile the package adjust the settings in the Makefile according
  * to your platform, MPI and Tcl installation. For most Linux
  * distributions, this requires installing not only an MPI and Tcl
  * package, but also the corresponding development packages, e.g. on
  * Fedora you need openmpi, openmpi-devel, tcl, and tcl-devel and their
- * dependencies. Then type make to compile the tclmpi.so file. With make
- * check you can run the integrated unittest package to see, if
+ * dependencies. Then type make to compile the _tclmpi.so file or make
+ * tclmpish to compile the extended Tcl shell. With make check or make
+ * check-static you can run the integrated unittest package to see, if
  * everything is working as expected.
  *
- * To install you can create a directory, e.g. /usr/local/libexec/tclmpi,
- * and copy the files tclmpi.so and pkgIndex.tcl into it. If you then use
- * the command set auto_path [concat /usr/local/libexec/tclmpi
- * $auto_path] in your .tclshrc or .vmdrc, you can load the tclmpi
- * wrappers on demand simply by using the command package require tclmpi.
+ * To install you can create a directory,
+ * e.g. /usr/local/libexec/tclmpi, and copy the files tclmpi.tcl,
+ * _tclmpi.so and pkgIndex.tcl into it. If you then use the command set
+ * auto_path [concat /usr/local/libexec/tclmpi $auto_path] in your
+ * .tclshrc or .vmdrc, you can load the TclMPI wrappers on demand simply
+ * by using the command package require tclmpi. For the extended shell,
+ * the _tclmpi.so file can be omitted and instead tclmpish needs to be
+ * copied somewhere in the search path for executable,
+ * e.g. /usr/local/bin. In this case the startup script is called
+ * .tclmpishrc instead of .tclshrc.
  *
  * \section devel Software Development and Bug Reports
  *
