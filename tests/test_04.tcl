@@ -25,11 +25,11 @@ if {$tcl_version < 8.5} {
     set mpi_max $tclmpi::max
     set mpi_min $tclmpi::min
     set mpi_land $tclmpi::land
-    set mpi_lor  tclmpi lor
-    set mpi_lxor tclmpi lxor
-    set mpi_band tclmpi band
-    set mpi_bor  tclmpi bor 
-    set mpi_bxor tclmpi bxor
+    set mpi_lor  $tclmpi::lor
+    set mpi_lxor $tclmpi::lxor
+    set mpi_band $tclmpi::band
+    set mpi_bor  $tclmpi::bor 
+    set mpi_bxor $tclmpi::bxor
 
     set mpi_auto $tclmpi::auto
     set mpi_double $tclmpi::double
