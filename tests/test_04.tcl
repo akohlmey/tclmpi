@@ -1,4 +1,3 @@
-
 #!/usr/bin/tclsh
 # non-destructive tests to be run with 2 MPI tasks.
 source harness.tcl
@@ -165,9 +164,16 @@ set idata {016 {1 2 3} 2.0 7 0xff yy}
 par_return [list [list scatter {} $int 1 $comm] \
                 [list scatter $idata $int 1 $comm]] \
     [list {14 0 0} {7 255 0}]
-par_return [list [list scatter $idata $double $master $comm] \
-                [list scatter {} $double $master $comm]] \
-    [list {14.0 0.0 2.0} {7.0 255.0 0.0}]
+
+if {$tcl_version < 8.5} {
+    par_return [list [list scatter $idata $double $master $comm] \
+                    [list scatter {} $double $master $comm]] \
+        [list {16.0 0.0 2.0} {7.0 255.0 0.0}]
+} else {
+    par_return [list [list scatter $idata $double $master $comm] \
+                    [list scatter {} $double $master $comm]] \
+        [list {14.0 0.0 2.0} {7.0 255.0 0.0}]
+}
 
 set idata {016 {1 2 3} 2.0 7 0xff}
 set odata {scatter: number of data items must be divisible by the number of processes}
@@ -183,7 +189,12 @@ set odata {14 0 0 7 255 0}
 par_return [list [list gather {016 {1 2 3} 2.0} $int 1 $comm] \
                 [list gather {7 0xff yy} $int 1 $comm]] \
     [list {} $odata]
-set odata {14.0 0.0 2.0 7.0 255.0 0.0}
+
+if {$tcl_version < 8.5} {
+    set odata {16.0 0.0 2.0 7.0 255.0 0.0}
+} else {
+    set odata {14.0 0.0 2.0 7.0 255.0 0.0}
+}
 par_return [list [list gather {016 {1 2 3} 2.0} $double 0 $comm] \
                 [list gather {7 0xff yy} $double 0 $comm]] \
     [list $odata {}]
