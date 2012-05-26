@@ -87,7 +87,11 @@ set idata {016 {1 2 3} 2.0 7 0xff yy}
 set odata {14 0 0 7 255 0}
 par_return [list [list ::tclmpi::bcast {} $int 1 $comm] \
                 [list ::tclmpi::bcast $idata $int 1 $comm]] [list $odata $odata]
-set odata {14.0 0.0 2.0 7.0 255.0 0.0}
+if {$tcl_version < 8.5} {
+    set odata {16.0 0.0 2.0 7.0 255.0 0.0}
+} else {
+    set odata {14.0 0.0 2.0 7.0 255.0 0.0}
+}
 par_return [list [list ::tclmpi::bcast $idata $double $master $comm] \
                 [list ::tclmpi::bcast {} $double $master $comm]] \
     [list $odata $odata]

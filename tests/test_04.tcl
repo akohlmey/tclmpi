@@ -1,3 +1,4 @@
+
 #!/usr/bin/tclsh
 # non-destructive tests to be run with 2 MPI tasks.
 source harness.tcl
@@ -144,7 +145,11 @@ set idata {016 {1 2 3} 2.0 7 0xff yy}
 set odata {14 0 0 7 255 0}
 par_return [list [list bcast {} $int 1 $comm] \
                 [list bcast $idata $int 1 $comm]] [list $odata $odata]
-set odata {14.0 0.0 2.0 7.0 255.0 0.0}
+if {$tcl_version < 8.5} {
+    set odata {16.0 0.0 2.0 7.0 255.0 0.0}
+} else {
+    set odata {14.0 0.0 2.0 7.0 255.0 0.0}
+}
 par_return [list [list bcast $idata $double $master $comm] \
                 [list bcast {} $double $master $comm]] \
     [list $odata $odata]
