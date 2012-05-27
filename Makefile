@@ -25,9 +25,13 @@ DYNLINK=-shared
 ## MacOSX x86 32-bit
 #COMPILE=-Os -Wall -m32 -fPIC -dynamic
 #DYNLINK= -bundle -m32 -L/usr/X11R6/lib/
+#TCLSTUBLIB=-framework Tcl
+#TCLLIB=-framework Tcl
 ## MacOSX x86 64-bit
 #COMPILE=-Os -Wall -fPIC -dynamic -m64
-#DYNLINK= -bundle -L/usr/X11R6/lib/
+#DYNLINK= -bundle -m64 -L/usr/X11R6/lib/
+#TCLSTUBLIB=-framework Tcl
+#TCLLIB=-framework Tcl
 ## Win32/MinGW via cross compiler
 #CC=i686-pc-mingw32-gcc
 #COMPILE= -DMPIWRAPSTCLDLL_EXPORTS -O2 -Wall -W -fno-strict-aliasing
