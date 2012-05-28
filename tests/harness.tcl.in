@@ -237,7 +237,7 @@ proc par_return {cmd retval {comm tclmpi::comm_world}} {
     # all parallel commands came through
     if {[lindex $res 0] == 0} {
         set res [::tclmpi::allreduce \
-                     [list [string equal $retval $result] $rank] \
+                     [list [compare $retval $result] $rank] \
                      tclmpi::intint tclmpi::minloc $comm]
         if {[lindex $res 0] == 0} {
             incr fail
@@ -316,7 +316,7 @@ proc par_error {cmd retval {comm tclmpi::comm_world}} {
     # at least one parallel command failed
     if {[lindex $res 0] == 1} {
         set res [::tclmpi::allreduce \
-                     [list [string equal $retval $result] $rank] \
+                     [list [compare $retval $result] $rank] \
                      tclmpi::intint tclmpi::minloc $comm]
         if {[lindex $res 0] > 0} {
             incr pass

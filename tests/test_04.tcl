@@ -73,12 +73,12 @@ par_return [list [list comm_rank $self] \
                 [list comm_rank $self]] [list 0 0]
 par_error  [list [list comm_size $null] \
                 [list comm_size $null] ] \
-    [list {comm_size: MPI_ERR_COMM: invalid communicator} \
-         {comm_size: MPI_ERR_COMM: invalid communicator} ]
+    [list {comm_size: invalid communicator} \
+         {comm_size: invalid communicator} ]
 par_error  [list [list comm_rank $null] \
                 [list comm_rank $null] ] \
-    [list {comm_rank: MPI_ERR_COMM: invalid communicator} \
-         {comm_rank: MPI_ERR_COMM: invalid communicator} ]
+    [list {comm_rank: invalid communicator} \
+         {comm_rank: invalid communicator} ]
 
 set split0 tclmpi::comm0
 set split1 tclmpi::comm1
@@ -135,15 +135,16 @@ par_return [list [list barrier $split2]  \
 set idata [list {xx 11} {1 2 3} {}]
 par_return [list [list bcast $idata $auto $master $comm] \
                 [list bcast {} $auto $master $comm]]     \
-    [list $idata $idata]
+    [list [list $idata] [list $idata]]
 par_return [list [list bcast {} $auto $master $comm]     \
                 [list bcast $idata $auto $master $comm]] \
     [list {} {}]
 
 set idata {016 {1 2 3} 2.0 7 0xff yy}
 set odata {14 0 0 7 255 0}
-par_return [list [list bcast {} $int 1 $comm] \
-                [list bcast $idata $int 1 $comm]] [list $odata $odata]
+par_return [list [list bcast {} $int 1 $comm]     \
+                [list bcast $idata $int 1 $comm]] \
+    [list [list $odata] [list $odata]]
 if {$tcl_version < 8.5} {
     set odata {16.0 0.0 2.0 7.0 255.0 0.0}
 } else {
@@ -151,44 +152,44 @@ if {$tcl_version < 8.5} {
 }
 par_return [list [list bcast $idata $double $master $comm] \
                 [list bcast {} $double $master $comm]] \
-    [list $odata $odata]
+    [list [list $odata] [list $odata]]
 
 # when mixing $auto with other data types, we have mismatch or low-level
 # MPI calls which is indicated in the truncated error message.
 par_error  [list [list bcast $idata $double $master $comm] \
                 [list bcast {} $auto $master $comm]] \
-    [list $odata {bcast: MPI_ERR_TRUNCATE: message truncated}]
+    [list [list $odata] {bcast: message truncated}]
 
 # scatter
 set idata {016 {1 2 3} 2.0 7 0xff yy}
 par_return [list [list scatter {} $int 1 $comm] \
                 [list scatter $idata $int 1 $comm]] \
-    [list {14 0 0} {7 255 0}]
+    [list {{14 0 0}} {{7 255 0}}]
 
 if {$tcl_version < 8.5} {
     par_return [list [list scatter $idata $double $master $comm] \
                     [list scatter {} $double $master $comm]] \
-        [list {16.0 0.0 2.0} {7.0 255.0 0.0}]
+        [list {{16.0 0.0 2.0}} {{7.0 255.0 0.0}}]
 } else {
     par_return [list [list scatter $idata $double $master $comm] \
                     [list scatter {} $double $master $comm]] \
-        [list {14.0 0.0 2.0} {7.0 255.0 0.0}]
+        [list {{14.0 0.0 2.0}} {{7.0 255.0 0.0}}]
 }
 
 set idata {016 {1 2 3} 2.0 7 0xff}
 set odata {scatter: number of data items must be divisible by the number of processes}
 par_error [list [list scatter {} $int 1 $comm] \
                 [list scatter $idata $int 1 $comm]] \
-    [list $odata $odata]
+    [list [list $odata] [list $odata]]
 par_error [list [list scatter $idata $double $master $comm] \
                 [list scatter {} $double $master $comm]] \
-    [list $odata $odata]
+    [list [list $odata] [list $odata]]
 
 # gather
 set odata {14 0 0 7 255 0}
 par_return [list [list gather {016 {1 2 3} 2.0} $int 1 $comm] \
                 [list gather {7 0xff yy} $int 1 $comm]] \
-    [list {} $odata]
+    [list {} [list $odata]]
 
 if {$tcl_version < 8.5} {
     set odata {16.0 0.0 2.0 7.0 255.0 0.0}
@@ -197,15 +198,15 @@ if {$tcl_version < 8.5} {
 }
 par_return [list [list gather {016 {1 2 3} 2.0} $double 0 $comm] \
                 [list gather {7 0xff yy} $double 0 $comm]] \
-    [list $odata {}]
+    [list [list $odata] {}]
 
 set odata {gather: number of data items must be the same on all processes}
 par_error [list [list gather {016 {1 2 3}} $int 1 $comm] \
                 [list gather {7 0xff yy} $int 1 $comm]] \
-    [list $odata $odata]
+    [list [list $odata] [list $odata]]
 par_error [list [list gather {016 {1 2 3} 2.0} $double 0 $comm] \
                 [list gather {2.0 7 0xff yy} $double 0 $comm]] \
-    [list $odata $odata]
+    [list [list $odata] [list $odata]]
 
 # allreduce
 set idata {0 1 3 0 1 10}
@@ -215,75 +216,64 @@ set odata {1 -1 0 0 1 18}
 set rdata {0 1 0 0 1 1}
 par_return [list [list allreduce $idata $int $mpi_land $comm] \
                 [list allreduce $odata $int $mpi_land $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {1 1 1 0 1 1}
 par_return [list [list allreduce $idata $int $mpi_lor $comm] \
                 [list allreduce $odata $int $mpi_lor $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {1 0 1 0 0 0}
 par_return [list [list allreduce $idata $int $mpi_lxor $comm] \
                 [list allreduce $odata $int $mpi_lxor $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {0 1 0 0 1 2}
 par_return [list [list allreduce $idata $int $mpi_band $comm] \
                 [list allreduce $odata $int $mpi_band $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {1 -1 3 0 1 26}
 par_return [list [list allreduce $idata $int $mpi_bor $comm] \
                 [list allreduce $odata $int $mpi_bor $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {1 -2 3 0 0 24}
 par_return [list [list allreduce $idata $int $mpi_bxor $comm] \
                 [list allreduce $odata $int $mpi_bxor $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 
 # integer
 set rdata {1 1 3 0 1 18}
 par_return [list [list allreduce $idata $int $mpi_max $comm] \
                 [list allreduce $odata $int $mpi_max $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {0 -1 0 0 1 10}
 par_return [list [list allreduce $idata $int $mpi_min $comm] \
                 [list allreduce $odata $int $mpi_min $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {1 0 3 0 2 28}
 par_return [list [list allreduce $idata $int $mpi_sum $comm] \
                 [list allreduce $odata $int $mpi_sum $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {0 -1 0 0 1 180}
 par_return [list [list allreduce $idata $int $mpi_prod $comm] \
                 [list allreduce $odata $int $mpi_prod $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 
 # floating point
-set idata {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22}
-set rdata {1.0 1.1 0.0 0.02 6e+26 34.0}
+set idata {-1e5 2.4 1.5d0 0.2e-1 0.06E+28 0x22}
+set rdata {1.0 2.4 0.0 0.02 6e+26 34.0}
 par_return [list [list allreduce $idata $double $mpi_max $comm] \
                 [list allreduce $odata $double $mpi_max $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {-100000.0 -1.0 0.0 0.0 1.0 18.0}
 par_return [list [list allreduce $idata $double $mpi_min $comm] \
                 [list allreduce $odata $double $mpi_min $comm]] \
-    [list $rdata $rdata]
-set rdata {-99999.0 0.10000000000000009 0.0 0.02 6e+26 52.0}
+    [list [list $rdata] [list $rdata]]
+set rdata {-99999.0 1.4 0.0 0.02 6e+26 52.0}
 par_return [list [list allreduce $idata $double $mpi_sum $comm] \
                 [list allreduce $odata $double $mpi_sum $comm]] \
-    [list $rdata $rdata]
-set rdata {-100000.0 -1.1 0.0 0.0 6e+26 612.0}
+    [list [list $rdata] [list $rdata]]
+set rdata {-100000.0 -2.4 0.0 0.0 6e+26 612.0}
 par_return [list [list allreduce $idata $double $mpi_prod $comm] \
                 [list allreduce $odata $double $mpi_prod $comm]] \
-    [list $rdata $rdata]
-
-# send/recv both blocking
-set idata [list 0 1 2 {3 4} 4 5 6]
-par_return [list [list send $idata $auto 1 666 $comm] \
-                [list recv $auto 0 666 $comm] ] [list {} $idata]
-set rdata [list 0 1 2 0 4 5 6]
-par_return [list [list send $idata $int 1 666 $comm] \
-                [list recv $int $any_source 666 $comm] ] [list {} $rdata]
-set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
-par_return [list [list send $idata $double 1 666 $comm] \
-                [list recv $double 0 $any_tag $comm] ] [list {} $rdata]
+    [list [list $rdata] [list $rdata]]
 
 # reduce
 set idata {0 1 3 0 1 10}
@@ -293,64 +283,77 @@ set odata {1 -1 0 0 1 18}
 set rdata {0 1 0 0 1 1}
 par_return [list [list reduce $idata $int $mpi_land 0 $comm] \
                 [list reduce $odata $int $mpi_land 0 $comm]] \
-    [list $rdata {}]
+    [list [list $rdata] {}]
 set rdata {1 1 1 0 1 1}
 par_return [list [list reduce $idata $int $mpi_lor 1 $comm] \
                 [list reduce $odata $int $mpi_lor 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 set rdata {1 0 1 0 0 0}
 par_return [list [list reduce $idata $int $mpi_lxor 1 $comm] \
                 [list reduce $odata $int $mpi_lxor 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 set rdata {0 1 0 0 1 2}
 par_return [list [list reduce $idata $int $mpi_band 0 $comm] \
                 [list reduce $odata $int $mpi_band 0 $comm]] \
-    [list $rdata {}]
+    [list [list $rdata] {}]
 set rdata {1 -1 3 0 1 26}
 par_return [list [list reduce $idata $int $mpi_bor 0 $comm] \
                 [list reduce $odata $int $mpi_bor 0 $comm]] \
-    [list $rdata {}]
+    [list [list $rdata] {}]
 set rdata {1 -2 3 0 0 24}
 par_return [list [list reduce $idata $int $mpi_bxor 1 $comm] \
                 [list reduce $odata $int $mpi_bxor 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 
 # integer
 set rdata {1 1 3 0 1 18}
 par_return [list [list reduce $idata $int $mpi_max 1 $comm] \
                 [list reduce $odata $int $mpi_max 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 set rdata {0 -1 0 0 1 10}
 par_return [list [list reduce $idata $int $mpi_min 1 $comm] \
                 [list reduce $odata $int $mpi_min 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 set rdata {1 0 3 0 2 28}
 par_return [list [list reduce $idata $int $mpi_sum 0 $comm] \
                 [list reduce $odata $int $mpi_sum 0 $comm]] \
-    [list $rdata {}]
+    [list [list $rdata] {}]
 set rdata {0 -1 0 0 1 180}
 par_return [list [list reduce $idata $int $mpi_prod 1 $comm] \
                 [list reduce $odata $int $mpi_prod 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 
 # floating point
-set idata {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22}
-set rdata {1.0 1.1 0.0 0.02 6e+26 34.0}
+set idata {-1e5 2.4 1.5d0 0.2e-1 0.06E+28 0x22}
+set rdata {1.0 2.4 0.0 0.02 6e+26 34.0}
 par_return [list [list reduce $idata $double $mpi_max 0 $comm] \
                 [list reduce $odata $double $mpi_max 0 $comm]] \
-    [list $rdata {}]
+    [list [list $rdata] {}]
 set rdata {-100000.0 -1.0 0.0 0.0 1.0 18.0}
 par_return [list [list reduce $idata $double $mpi_min 0 $comm] \
                 [list reduce $odata $double $mpi_min 0 $comm]] \
-    [list $rdata {}]
-set rdata {-99999.0 0.10000000000000009 0.0 0.02 6e+26 52.0}
+    [list [list $rdata] {}]
+set rdata {-99999.0 1.4 0.0 0.02 6e+26 52.0}
 par_return [list [list reduce $idata $double $mpi_sum 0 $comm] \
                 [list reduce $odata $double $mpi_sum 0 $comm]] \
-    [list $rdata {}]
-set rdata {-100000.0 -1.1 0.0 0.0 6e+26 612.0}
+    [list [list $rdata] {}]
+set rdata {-100000.0 -2.4 0.0 0.0 6e+26 612.0}
 par_return [list [list reduce $idata $double $mpi_prod 1 $comm] \
                 [list reduce $odata $double $mpi_prod 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
+
+# send/recv both blocking
+set idata [list 0 1 2 {3 4} 4 5 6]
+par_return [list [list send $idata $auto 1 666 $comm] \
+                [list recv $auto 0 666 $comm] ] [list {} $idata]
+set rdata [list 0 1 2 0 4 5 6]
+par_return [list [list send $idata $int 1 666 $comm]     \
+                [list recv $int $any_source 666 $comm] ] \
+    [list {} [list $rdata]]
+set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
+par_return [list [list send $idata $double 1 666 $comm] \
+                [list recv $double 0 $any_tag $comm] ]  \
+    [list {} [list $rdata]]
 
 # non-blocking send / blocking recv
 set req0 tclmpi::req0
@@ -360,11 +363,13 @@ set idata [list 0 1 2 {3 4} 4 5 6]
 par_return [list [list isend $idata $auto 1 666 $comm] \
                 [list recv $auto 0 666 $comm] ] [list $req0 $idata]
 set rdata [list 0 1 2 0 4 5 6]
-par_return [list [list isend $idata $int 1 666 $comm] \
-                [list recv $int $any_source 666 $comm status] ] [list $req1 $rdata]
+par_return [list [list isend $idata $int 1 666 $comm]           \
+                [list recv $int $any_source 666 $comm status] ] \
+    [list $req1 [list $rdata]]
 set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
 par_return [list [list recv $double 1 $any_tag $comm status] \
-                [list isend $idata $double 0 666 $comm] ] [list $rdata $req0]
+                [list isend $idata $double 0 666 $comm] ]    \
+    [list [list $rdata] $req0]
 
 # clear up all pending requests
 par_return [list [list wait $req0] \
@@ -397,9 +402,9 @@ par_return [list [list irecv $double 1 $any_tag $comm] \
 
 # clear up all pending requests
 par_return [list [list wait $req2] \
-                [list wait $req1]] [list $rdata $idata]
+                [list wait $req1]] [list [list $rdata] [list $idata]]
 par_return [list [list set i 0] [list wait $req2 status]] \
-                [list 0 {0 1 2 0 4 5 6} {}]
+    [list {0} {{0 1 2 0 4 5 6}}]
 
 # print results and exit
 finalize

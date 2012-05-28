@@ -16,12 +16,12 @@ par_return [list [list ::tclmpi::comm_rank $self] \
                 [list ::tclmpi::comm_rank $self]] [list 0 0]
 par_error  [list [list ::tclmpi::comm_size $null] \
                 [list ::tclmpi::comm_size $null] ] \
-    [list {::tclmpi::comm_size: MPI_ERR_COMM: invalid communicator} \
-         {::tclmpi::comm_size: MPI_ERR_COMM: invalid communicator} ]
+    [list {::tclmpi::comm_size: invalid communicator} \
+         {::tclmpi::comm_size: invalid communicator} ]
 par_error  [list [list ::tclmpi::comm_rank $null] \
                 [list ::tclmpi::comm_rank $null] ] \
-    [list {::tclmpi::comm_rank: MPI_ERR_COMM: invalid communicator} \
-         {::tclmpi::comm_rank: MPI_ERR_COMM: invalid communicator} ]
+    [list {::tclmpi::comm_rank: invalid communicator} \
+         {::tclmpi::comm_rank: invalid communicator} ]
 
 set split0 tclmpi::comm0
 set split1 tclmpi::comm1
@@ -78,15 +78,16 @@ par_return [list [list ::tclmpi::barrier $split2]  \
 set idata [list {xx 11} {1 2 3} {}]
 par_return [list [list ::tclmpi::bcast $idata $auto $master $comm] \
                 [list ::tclmpi::bcast {} $auto $master $comm]]     \
-    [list $idata $idata]
+    [list [list $idata] [list $idata]]
 par_return [list [list ::tclmpi::bcast {} $auto $master $comm]     \
                 [list ::tclmpi::bcast $idata $auto $master $comm]] \
     [list {} {}]
 
 set idata {016 {1 2 3} 2.0 7 0xff yy}
 set odata {14 0 0 7 255 0}
-par_return [list [list ::tclmpi::bcast {} $int 1 $comm] \
-                [list ::tclmpi::bcast $idata $int 1 $comm]] [list $odata $odata]
+par_return [list [list ::tclmpi::bcast {} $int 1 $comm]     \
+                [list ::tclmpi::bcast $idata $int 1 $comm]] \
+    [list [list $odata] [list $odata]]
 if {$tcl_version < 8.5} {
     set odata {16.0 0.0 2.0 7.0 255.0 0.0}
 } else {
@@ -94,44 +95,44 @@ if {$tcl_version < 8.5} {
 }
 par_return [list [list ::tclmpi::bcast $idata $double $master $comm] \
                 [list ::tclmpi::bcast {} $double $master $comm]] \
-    [list $odata $odata]
+    [list [list $odata] [list $odata]]
 
 # when mixing $auto with other data types, we have mismatch or low-level
 # MPI calls which is indicated in the truncated error message.
 par_error  [list [list ::tclmpi::bcast $idata $double $master $comm] \
                 [list ::tclmpi::bcast {} $auto $master $comm]] \
-    [list $odata {::tclmpi::bcast: MPI_ERR_TRUNCATE: message truncated}]
+    [list [list $odata] {::tclmpi::bcast: message truncated}]
 
 # scatter
 set idata {016 {1 2 3} 2.0 7 0xff yy}
 par_return [list [list ::tclmpi::scatter {} $int 1 $comm] \
                 [list ::tclmpi::scatter $idata $int 1 $comm]] \
-    [list {14 0 0} {7 255 0}]
+    [list {{14 0 0}} {{7 255 0}}]
 
 if {$tcl_version < 8.5} {
     par_return [list [list ::tclmpi::scatter $idata $double $master $comm] \
                     [list ::tclmpi::scatter {} $double $master $comm]] \
-        [list {16.0 0.0 2.0} {7.0 255.0 0.0}]
+        [list {{16.0 0.0 2.0}} {{7.0 255.0 0.0}}]
 } else {
     par_return [list [list ::tclmpi::scatter $idata $double $master $comm] \
                     [list ::tclmpi::scatter {} $double $master $comm]] \
-        [list {14.0 0.0 2.0} {7.0 255.0 0.0}]
+        [list {{14.0 0.0 2.0}} {{7.0 255.0 0.0}}]
 }
 
 set idata {016 {1 2 3} 2.0 7 0xff}
 set odata {::tclmpi::scatter: number of data items must be divisible by the number of processes}
 par_error [list [list ::tclmpi::scatter {} $int 1 $comm] \
                 [list ::tclmpi::scatter $idata $int 1 $comm]] \
-    [list $odata $odata]
+    [list [list $odata] [list $odata]]
 par_error [list [list ::tclmpi::scatter $idata $double $master $comm] \
                 [list ::tclmpi::scatter {} $double $master $comm]] \
-    [list $odata $odata]
+    [list [list $odata] [list $odata]]
 
 # gather
 set odata {14 0 0 7 255 0}
 par_return [list [list ::tclmpi::gather {016 {1 2 3} 2.0} $int 1 $comm] \
                 [list ::tclmpi::gather {7 0xff yy} $int 1 $comm]] \
-    [list {} $odata]
+    [list {} [list $odata]]
 
 if {$tcl_version < 8.5} {
     set odata {16.0 0.0 2.0 7.0 255.0 0.0}
@@ -140,15 +141,15 @@ if {$tcl_version < 8.5} {
 }
 par_return [list [list ::tclmpi::gather {016 {1 2 3} 2.0} $double 0 $comm] \
                 [list ::tclmpi::gather {7 0xff yy} $double 0 $comm]] \
-    [list $odata {}]
+    [list [list $odata] {}]
 
 set odata {::tclmpi::gather: number of data items must be the same on all processes}
 par_error [list [list ::tclmpi::gather {016 {1 2 3}} $int 1 $comm] \
                 [list ::tclmpi::gather {7 0xff yy} $int 1 $comm]] \
-    [list $odata $odata]
+    [list [list $odata] [list $odata]]
 par_error [list [list ::tclmpi::gather {016 {1 2 3} 2.0} $double 0 $comm] \
                 [list ::tclmpi::gather {2.0 7 0xff yy} $double 0 $comm]] \
-    [list $odata $odata]
+    [list [list $odata] [list $odata]]
 
 # allreduce
 set idata {0 1 3 0 1 10}
@@ -158,64 +159,64 @@ set odata {1 -1 0 0 1 18}
 set rdata {0 1 0 0 1 1}
 par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::land $comm] \
                 [list ::tclmpi::allreduce $odata $int tclmpi::land $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {1 1 1 0 1 1}
 par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::lor $comm] \
                 [list ::tclmpi::allreduce $odata $int tclmpi::lor $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {1 0 1 0 0 0}
 par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::lxor $comm] \
                 [list ::tclmpi::allreduce $odata $int tclmpi::lxor $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {0 1 0 0 1 2}
 par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::band $comm] \
                 [list ::tclmpi::allreduce $odata $int tclmpi::band $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {1 -1 3 0 1 26}
 par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::bor $comm] \
                 [list ::tclmpi::allreduce $odata $int tclmpi::bor $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {1 -2 3 0 0 24}
 par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::bxor $comm] \
                 [list ::tclmpi::allreduce $odata $int tclmpi::bxor $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 
 # integer
 set rdata {1 1 3 0 1 18}
 par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::max $comm] \
                 [list ::tclmpi::allreduce $odata $int tclmpi::max $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {0 -1 0 0 1 10}
 par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::min $comm] \
                 [list ::tclmpi::allreduce $odata $int tclmpi::min $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {1 0 3 0 2 28}
 par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::sum $comm] \
                 [list ::tclmpi::allreduce $odata $int tclmpi::sum $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {0 -1 0 0 1 180}
 par_return [list [list ::tclmpi::allreduce $idata $int tclmpi::prod $comm] \
                 [list ::tclmpi::allreduce $odata $int tclmpi::prod $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 
 # floating point
-set idata {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22}
-set rdata {1.0 1.1 0.0 0.02 6e+26 34.0}
+set idata {-1e5 2.4 1.5d0 0.2e-1 0.06E+28 0x22}
+set rdata {1.0 2.4 0.0 0.02 6e+26 34.0}
 par_return [list [list ::tclmpi::allreduce $idata $double tclmpi::max $comm] \
                 [list ::tclmpi::allreduce $odata $double tclmpi::max $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 set rdata {-100000.0 -1.0 0.0 0.0 1.0 18.0}
 par_return [list [list ::tclmpi::allreduce $idata $double tclmpi::min $comm] \
                 [list ::tclmpi::allreduce $odata $double tclmpi::min $comm]] \
-    [list $rdata $rdata]
-set rdata {-99999.0 0.10000000000000009 0.0 0.02 6e+26 52.0}
+    [list [list $rdata] [list $rdata]]
+set rdata {-99999.0 1.4 0.0 0.02 6e+26 52.0}
 par_return [list [list ::tclmpi::allreduce $idata $double tclmpi::sum $comm] \
                 [list ::tclmpi::allreduce $odata $double tclmpi::sum $comm]] \
-    [list $rdata $rdata]
-set rdata {-100000.0 -1.1 0.0 0.0 6e+26 612.0}
+    [list [list $rdata] [list $rdata]]
+set rdata {-100000.0 -2.4 0.0 0.0 6e+26 612.0}
 par_return [list [list ::tclmpi::allreduce $idata $double tclmpi::prod $comm] \
                 [list ::tclmpi::allreduce $odata $double tclmpi::prod $comm]] \
-    [list $rdata $rdata]
+    [list [list $rdata] [list $rdata]]
 
 # reduce
 set idata {0 1 3 0 1 10}
@@ -225,75 +226,77 @@ set odata {1 -1 0 0 1 18}
 set rdata {0 1 0 0 1 1}
 par_return [list [list ::tclmpi::reduce $idata $int tclmpi::land 0 $comm] \
                 [list ::tclmpi::reduce $odata $int tclmpi::land 0 $comm]] \
-    [list $rdata {}]
+    [list [list $rdata] {}]
 set rdata {1 1 1 0 1 1}
 par_return [list [list ::tclmpi::reduce $idata $int tclmpi::lor 1 $comm] \
                 [list ::tclmpi::reduce $odata $int tclmpi::lor 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 set rdata {1 0 1 0 0 0}
 par_return [list [list ::tclmpi::reduce $idata $int tclmpi::lxor 1 $comm] \
                 [list ::tclmpi::reduce $odata $int tclmpi::lxor 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 set rdata {0 1 0 0 1 2}
 par_return [list [list ::tclmpi::reduce $idata $int tclmpi::band 0 $comm] \
                 [list ::tclmpi::reduce $odata $int tclmpi::band 0 $comm]] \
-    [list $rdata {}]
+    [list [list $rdata] {}]
 set rdata {1 -1 3 0 1 26}
 par_return [list [list ::tclmpi::reduce $idata $int tclmpi::bor 0 $comm] \
                 [list ::tclmpi::reduce $odata $int tclmpi::bor 0 $comm]] \
-    [list $rdata {}]
+    [list [list $rdata] {}]
 set rdata {1 -2 3 0 0 24}
 par_return [list [list ::tclmpi::reduce $idata $int tclmpi::bxor 1 $comm] \
                 [list ::tclmpi::reduce $odata $int tclmpi::bxor 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 
 # integer
 set rdata {1 1 3 0 1 18}
 par_return [list [list ::tclmpi::reduce $idata $int tclmpi::max 1 $comm] \
                 [list ::tclmpi::reduce $odata $int tclmpi::max 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 set rdata {0 -1 0 0 1 10}
 par_return [list [list ::tclmpi::reduce $idata $int tclmpi::min 1 $comm] \
                 [list ::tclmpi::reduce $odata $int tclmpi::min 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 set rdata {1 0 3 0 2 28}
 par_return [list [list ::tclmpi::reduce $idata $int tclmpi::sum 0 $comm] \
                 [list ::tclmpi::reduce $odata $int tclmpi::sum 0 $comm]] \
-    [list $rdata {}]
+    [list [list $rdata] {}]
 set rdata {0 -1 0 0 1 180}
 par_return [list [list ::tclmpi::reduce $idata $int tclmpi::prod 1 $comm] \
                 [list ::tclmpi::reduce $odata $int tclmpi::prod 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 
 # floating point
-set idata {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22}
-set rdata {1.0 1.1 0.0 0.02 6e+26 34.0}
+set idata {-1e5 2.4 1.5d0 0.2e-1 0.06E+28 0x22}
+set rdata {1.0 2.4 0.0 0.02 6e+26 34.0}
 par_return [list [list ::tclmpi::reduce $idata $double tclmpi::max 0 $comm] \
                 [list ::tclmpi::reduce $odata $double tclmpi::max 0 $comm]] \
-    [list $rdata {}]
+    [list [list $rdata] {}]
 set rdata {-100000.0 -1.0 0.0 0.0 1.0 18.0}
 par_return [list [list ::tclmpi::reduce $idata $double tclmpi::min 0 $comm] \
                 [list ::tclmpi::reduce $odata $double tclmpi::min 0 $comm]] \
-    [list $rdata {}]
-set rdata {-99999.0 0.10000000000000009 0.0 0.02 6e+26 52.0}
+    [list [list $rdata] {}]
+set rdata {-99999.0 1.4 0.0 0.02 6e+26 52.0}
 par_return [list [list ::tclmpi::reduce $idata $double tclmpi::sum 0 $comm] \
                 [list ::tclmpi::reduce $odata $double tclmpi::sum 0 $comm]] \
-    [list $rdata {}]
-set rdata {-100000.0 -1.1 0.0 0.0 6e+26 612.0}
+    [list [list $rdata] {}]
+set rdata {-100000.0 -2.4 0.0 0.0 6e+26 612.0}
 par_return [list [list ::tclmpi::reduce $idata $double tclmpi::prod 1 $comm] \
                 [list ::tclmpi::reduce $odata $double tclmpi::prod 1 $comm]] \
-    [list {} $rdata]
+    [list {} [list $rdata]]
 
 # send/recv both blocking
 set idata [list 0 1 2 {3 4} 4 5 6]
 par_return [list [list ::tclmpi::send $idata $auto 1 666 $comm] \
                 [list ::tclmpi::recv $auto 0 666 $comm] ] [list {} $idata]
 set rdata [list 0 1 2 0 4 5 6]
-par_return [list [list ::tclmpi::send $idata $int 1 666 $comm] \
-                [list ::tclmpi::recv $int tclmpi::any_source 666 $comm] ] [list {} $rdata]
+par_return [list [list ::tclmpi::send $idata $int 1 666 $comm]            \
+                [list ::tclmpi::recv $int tclmpi::any_source 666 $comm] ] \
+    [list {} [list $rdata]]
 set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
-par_return [list [list ::tclmpi::send $idata $double 1 666 $comm] \
-                [list ::tclmpi::recv $double 0 tclmpi::any_tag $comm] ] [list {} $rdata]
+par_return [list [list ::tclmpi::send $idata $double 1 666 $comm]       \
+                [list ::tclmpi::recv $double 0 tclmpi::any_tag $comm] ] \
+    [list {} [list $rdata]]
 
 # non-blocking send / blocking recv
 set req0 tclmpi::req0
@@ -303,11 +306,13 @@ set idata [list 0 1 2 {3 4} 4 5 6]
 par_return [list [list ::tclmpi::isend $idata $auto 1 666 $comm] \
                 [list ::tclmpi::recv $auto 0 666 $comm] ] [list $req0 $idata]
 set rdata [list 0 1 2 0 4 5 6]
-par_return [list [list ::tclmpi::isend $idata $int 1 666 $comm] \
-                [list ::tclmpi::recv $int tclmpi::any_source 666 $comm status] ] [list $req1 $rdata]
+par_return [list [list ::tclmpi::isend $idata $int 1 666 $comm]  \
+                [list ::tclmpi::recv $int tclmpi::any_source 666 \
+                     $comm status] ] [list $req1 [list $rdata]]
 set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
 par_return [list [list ::tclmpi::recv $double 1 tclmpi::any_tag $comm status] \
-                [list ::tclmpi::isend $idata $double 0 666 $comm] ] [list $rdata $req0]
+                [list ::tclmpi::isend $idata $double 0 666 $comm] ] \
+    [list [list $rdata] $req0]
 
 # clear up all pending requests
 par_return [list [list ::tclmpi::wait $req0] \
@@ -340,9 +345,10 @@ par_return [list [list ::tclmpi::irecv $double 1 tclmpi::any_tag $comm] \
 
 # clear up all pending requests
 par_return [list [list ::tclmpi::wait $req2] \
-                [list ::tclmpi::wait $req1]] [list $rdata $idata]
+                [list ::tclmpi::wait $req1]] \
+    [list [list $rdata] [list $idata]]
 par_return [list [list set i 0] [list ::tclmpi::wait $req2 status]] \
-                [list 0 {0 1 2 0 4 5 6} {}]
+    [list {0} {{0 1 2 0 4 5 6}}]
 
 # print results and exit
 ::tclmpi::finalize
