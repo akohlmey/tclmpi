@@ -18,16 +18,17 @@ modification, are permitted provided that the following conditions are met:
    contributors may be used to endorse or promote products derived from
    this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER>
+BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+THE POSSIBILITY OF SUCH DAMAGE.
 
  ***************************************************************************/
 
@@ -242,6 +243,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * from one representation to the other while tclmpi_add_comm will 
  * append a new communicator to the list.
  */
+
+/* fallback */
+#if !defined(MPI_VERSION)
+#define MPI_VERSION 1
+#endif
 
 /*! Linked list entry type for managing MPI communicators */
 typedef struct tclmpi_comm tclmpi_comm_t;
@@ -510,7 +516,7 @@ static char tclmpi_errmsg[MPI_MAX_ERROR_STRING];
  * \param obj Tcl object representing the current command name
  * \return TCL_OK if the "error" is MPI_SUCCESS or TCL_ERROR
  *
- * This is a simple convenience wrapper that will use MPI_Error_strin() to
+ * This is a simple convenience wrapper that will use MPI_Error_string() to
  * convert any error returned from MPI function calls to a Tcl error message
  * appended to the result vector of the current command. Should be called
  * after each MPI call, since we change communicators to not result in fatal
@@ -621,7 +627,11 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
 
     /* change default error handler, so we can convert
        MPI errors into 'catch'able Tcl errors */
+#if MPI_VERSION < 2
+    MPI_Errhandler_set(MPI_COMM_WORLD,MPI_ERRORS_RETURN);
+#else
     MPI_Comm_set_errhandler(MPI_COMM_WORLD,MPI_ERRORS_RETURN);
+#endif
 
     /* build new argv list */
     result = Tcl_NewListObj(0,NULL);
@@ -834,7 +844,11 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
 
     /* change default error handler on new communicator, so that
        we can convert MPI errors into 'catch'able Tcl errors */
+#if MPI_VERSION < 2
+    MPI_Errhandler_set(newcomm,MPI_ERRORS_RETURN);
+#else
     MPI_Comm_set_errhandler(newcomm,MPI_ERRORS_RETURN);
+#endif
 
     result = Tcl_NewStringObj(tclmpi_add_comm(newcomm),-1);
     Tcl_SetObjResult(interp,result);
