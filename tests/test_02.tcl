@@ -58,7 +58,7 @@ run_error  [list comm_size comm0] \
 run_return [list comm_size $comm] 1
 run_return [list comm_size $self] 1
 run_error  [list comm_size $null] \
-    {comm_size: mpi invalid communicator}
+    {comm_size: invalid communicator}
 
 # comm_rank
 set numargs "wrong # args: should be \"comm_rank <comm>\""
@@ -69,7 +69,7 @@ run_error  [list comm_rank comm0] \
 run_return [list comm_rank $comm] 0
 run_return [list comm_rank $self] 0
 run_error  [list comm_rank $null] \
-    {comm_rank: mpi invalid communicator}
+    {comm_rank: invalid communicator}
 
 # comm_split
 set split0 tclmpi::comm0
@@ -89,7 +89,7 @@ run_return [list comm_split $self $undefined -1] [list $null]
 run_error  [list comm_split $comm -1 0] \
     {{comm_split: invalid color argument}}
 run_error  [list comm_split $null 5 0]  \
-    {comm_split: mpi invalid communicator}
+    {comm_split: invalid communicator}
 run_error  [list comm_split $comm x 0]  \
     {{expected integer but got "x"}}
 run_error  [list comm_split $comm 0 x]  \
@@ -108,7 +108,7 @@ run_error  [list barrier $comm 1] [list $numargs]
 run_error  [list barrier comm0]   \
     {{barrier: unknown communicator: comm0}}
 run_error  [list barrier $null]   \
-    {barrier: mpi invalid communicator}
+    {barrier: invalid communicator}
 run_return [list barrier $comm] {}
 run_return [list barrier $self] {}
 
@@ -123,9 +123,9 @@ run_error  [list bcast {} $auto $master $comm xxx] [list $numargs]
 run_error  [list bcast {} $auto $master comm0] \
     {{bcast: unknown communicator: comm0}}
 run_error  [list bcast {} $auto $master $null] \
-    {bcast: mpi invalid communicator}
+    {bcast: invalid communicator}
 run_error  [list bcast {{xx 11} {1 2 3} {}} $auto 1 $comm] \
-    {bcast: mpi invalid root}
+    {bcast: invalid root}
 
 # check data type conversions
 run_return [list bcast {{xx 11} {1 2 3} {}}            \
@@ -155,7 +155,7 @@ run_error  [list scatter {} $auto $master comm0] \
 run_error  [list scatter {} $auto $master $null] \
     {{scatter: does not support data type tclmpi::auto}}
 run_error  [list scatter {{xx 11} {1 2 3} {}} $int 1 $comm] \
-    {scatter: mpi invalid root}
+    {scatter: invalid root}
 run_error  [list scatter {} tclmpi::real $master $comm]    \
     {{scatter: invalid data type: tclmpi::real}}
 
@@ -182,7 +182,7 @@ run_error  [list gather {} $auto $master comm0] \
 run_error  [list gather {} $auto $master $null] \
     {{gather: does not support data type tclmpi::auto}}
 run_error  [list gather {{xx 11} {1 2 3} {}} $int 1 $comm] \
-    {gather: mpi invalid root}
+    {gather: invalid root}
 run_error  [list gather {} tclmpi::real $master $comm]    \
     {{gather: invalid data type: tclmpi::real}}
 
