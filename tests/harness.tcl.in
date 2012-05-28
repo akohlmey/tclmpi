@@ -139,7 +139,7 @@ proc run_return {cmd retval} {
     if {[catch $cmd result]} {
         incr fail
         puts [test_format {check/run} $cmd {FAIL/abort}]
-        puts "$fail/Error message $result"
+        puts "$fail/Error message [string tolower $result]"
     } else {
         if {[compare $retval $result]} {
             incr pass
@@ -148,7 +148,7 @@ proc run_return {cmd retval} {
             incr fail
             puts [test_format {check/run} $cmd {FAIL/retval}]
             puts "$fail/Expected $retval"
-            puts "$fail/Received $result"
+            puts "$fail/Received [string tolower $result]"
         }
     }
     return {}
@@ -176,12 +176,12 @@ proc run_error {cmd errormsg} {
             incr fail
             puts [test_format {check/fail} $cmd {FAIL/errmsg}]
             puts "$fail/Expected $errormsg"
-            puts "$fail/Received $result"
+            puts "$fail/Received [string tolower $result]"
         }
     } else {
         incr fail
         puts [test_format {check/fail} $cmd {FAIL/noerr}]
-        puts "$fail/Result $result"
+        puts "$fail/Result [string tolower $result]"
     }
     return {}
 }
@@ -244,7 +244,7 @@ proc par_return {cmd retval {comm tclmpi::comm_world}} {
             if {$rank == [lindex $res 1]} {
                 puts [test_format {par/run} $cmd {FAIL/retval}]
                 puts "$fail/Expected $retval"
-                puts "$fail/Received $result on rank $rank"
+                puts "$fail/Received [string tolower $result] on rank $rank"
             }
         } else {
             incr pass
@@ -258,7 +258,7 @@ proc par_return {cmd retval {comm tclmpi::comm_world}} {
         incr fail
         if {$rank == [lindex $res 1]} {
             puts [test_format {par/run} $cmd {FAIL/abort}]
-            puts "$fail/Error message $result on rank $rank"
+            puts "$fail/Error message [string tolower $result] on rank $rank"
         }
     }
     ::tclmpi::barrier $comm
@@ -328,7 +328,7 @@ proc par_error {cmd retval {comm tclmpi::comm_world}} {
             if {$rank == [lindex $res 1]} {
                 puts [test_format {par/fail} $cmd {FAIL/retval}]
                 puts "$fail/Expected $retval"
-                puts "$fail/Received $result on rank $rank"
+                puts "$fail/Received [string tolower $result] on rank $rank"
             }
         }
 
@@ -337,7 +337,7 @@ proc par_error {cmd retval {comm tclmpi::comm_world}} {
         incr fail
         if {$rank != [lindex $res 1]} {
             puts [test_format {par/fail} $cmd {FAIL/noerr}]
-            puts "$fail/Error message $result on rank $rank"
+            puts "$fail/Error message [string tolower $result] on rank $rank"
         }
     }
     ::tclmpi::barrier $comm
