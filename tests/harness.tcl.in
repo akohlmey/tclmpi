@@ -206,6 +206,7 @@ proc par_return {cmd retval {comm tclmpi::comm_world}} {
     global pass fail master int
 
     flush stdout
+    ::tclmpi::barrier $comm
     set size [::tclmpi::comm_size $comm]
     set rank [::tclmpi::comm_rank $comm]
 
@@ -283,8 +284,9 @@ proc par_return {cmd retval {comm tclmpi::comm_world}} {
 # failure is reported otherwise success.
 proc par_error {cmd retval {comm tclmpi::comm_world}} {
     global pass fail master int
-    flush stdout
 
+    flush stdout
+    ::tclmpi::barrier $comm
     set size [::tclmpi::comm_size $comm]
     set rank [::tclmpi::comm_rank $comm]
 
