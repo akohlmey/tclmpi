@@ -11,7 +11,7 @@
 ###########################################################
 
 # Current version.
-set version 0.8
+set version @VERSION@
 global env
 
 # add path to extension

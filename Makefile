@@ -117,15 +117,18 @@ tar: doc
 	rm -rvf $(NAME)-$(VERSION)
 
 #############################################
-version: Doxyfile tclmpi.tcl pkgIndex.tcl
+version: Doxyfile tclmpi.tcl pkgIndex.tcl tests/harness.tcl
 
-Doxyfile: Doxyfile.in
+Doxyfile: Doxyfile.in Makefile
 	sed -e s,@VERSION@,$(VERSION),g $< > $@
 
-tclmpi.tcl: tclmpi.tcl.in pkgIndex.tcl
+tclmpi.tcl: tclmpi.tcl.in pkgIndex.tcl Makefile
 	sed -e s,@VERSION@,$(VERSION),g $< > $@
 
-pkgIndex.tcl: pkgIndex.tcl.in
+pkgIndex.tcl: pkgIndex.tcl.in Makefile
+	sed -e s,@VERSION@,$(VERSION),g $< > $@
+
+tests/harness.tcl: tests/harness.tcl.in Makefile
 	sed -e s,@VERSION@,$(VERSION),g $< > $@
 
 #############################################
