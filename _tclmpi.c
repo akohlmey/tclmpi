@@ -849,6 +849,13 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
     if (Tcl_GetIntFromObj(interp,objv[3],&key) != TCL_OK)
         return TCL_ERROR;
 
+    /* several MPI applications do not catch this. so we got to do it */
+    if (color < 0 && color != MPI_UNDEFINED) {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": invalid color argument", NULL);
+        return TCL_ERROR;
+    }
+
     ierr = MPI_Comm_split(comm,color,key,&newcomm);
     if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
