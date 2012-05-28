@@ -58,6 +58,33 @@ proc test_format {kind cmd result} {
     return $string
 }
 
+## partial result and error message comparison
+# \param reflist list of strings that have to appear in the result
+# \param result result string
+# \return 1 if all reflist strings were found in result
+# 
+# This function does an inexact comparison of the reference data
+# to the actual result. The reference is a list of strings, each
+# of which has to be matched in a case insensitive string search.
+# The function returns a 1 if all tests did match.
+proc compare {reflist result} {
+    set count 0
+
+    set res [string tolower $result]
+    foreach ref $reflist {
+        incr count
+        if {[string first $ref $res] < 0} {
+            return 0
+        }
+    }
+
+    if {($count == 0) && [string length $result] > 0} {
+        return 0
+    } else {
+        return 1
+    }
+}
+
 
 ## init for serial tests
 # \param args all parameters are ignored
@@ -96,7 +123,7 @@ proc par_init {args} {
 
 ## run a serial test that is expected to succeed
 # \param cmd string or list with the command to execute
-# \param retval expected return value
+# \param retval expected return value contents
 # \return empty
 #
 # This function executes the command line passed in $cmd and intercepts its
@@ -114,7 +141,7 @@ proc run_return {cmd retval} {
         puts [test_format {check/run} $cmd {FAIL/abort}]
         puts "$fail/Error message $result"
     } else {
-        if {[string equal $result $retval]} {
+        if {[compare $retval $result]} {
             incr pass
             puts [test_format {check/run} $cmd PASS]
         } else {
@@ -129,7 +156,7 @@ proc run_return {cmd retval} {
 
 ## run a serial test that is expected to fail
 # \param cmd string or list with the command to execute
-# \param errormsg expected error message
+# \param errormsg expected error message contents
 # \return empty
 #
 # This function executes the command line passed in $cmd and intercepts its
@@ -142,7 +169,7 @@ proc run_return {cmd retval} {
 proc run_error {cmd errormsg} {
     global pass fail
     if {[catch $cmd result]} {
-        if {[string equal $result $errormsg]} {
+        if {[compare $errormsg $result]} {
             incr pass
             puts [test_format {check/fail} $cmd PASS];
         } else {
@@ -354,3 +381,6 @@ proc test_summary {section} {
     return {}
 }
 
+# Local Variables:
+# mode: tcl
+# End:
