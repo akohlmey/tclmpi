@@ -593,7 +593,7 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
     Tcl_Obj *result,*argobj,**args;
-    int argc,narg,i,ierr;
+    int argc,narg,i,ierr,tlevel;
     char **argv;
 
     if (objc != 1) {
@@ -620,7 +620,15 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
                          " multiple times is erroneous.",NULL);
         return TCL_ERROR;
     }
+
+#if MPI_VERSION < 2
     ierr = MPI_Init(&argc,&argv);
+#else
+    /* XXX: this should be made dependent on whether Tcl
+       was compiled with thread support or not and how 
+       Tcl would handle threading in this case. */
+    ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_SINGLE,&tlevel);
+#endif
     if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
         return TCL_ERROR;
     tclmpi_init_done=1;
