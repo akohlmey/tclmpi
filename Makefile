@@ -68,7 +68,7 @@ all: dynamic static doc
 clean:
 	rm -f _tclmpi.so tclmpish *.o *~ tests/*~ examples/*~
 	rm -rf latex doxygen.log
-	rm -f pkgIndex.tcl Doxyfile tclmpi.tcl
+	rm -f pkgIndex.tcl Doxyfile tclmpi.tcl tests/harness.tcl
 	rm -f tclmpi-*.tar.gz tclmpi-*.pdf
 
 check: version _tclmpi.so
@@ -110,7 +110,8 @@ tar: doc
 	cp Makefile *.in _tclmpi.c README INSTALL LICENSE $(NAME)-$(VERSION)
 	mkdir $(NAME)-$(VERSION)/tests
 	cp tests/README $(NAME)-$(VERSION)/tests
-	cp tests/*.tcl $(NAME)-$(VERSION)/tests
+	cp tests/*.in $(NAME)-$(VERSION)/tests
+	cp tests/test*.tcl $(NAME)-$(VERSION)/tests
 	mkdir $(NAME)-$(VERSION)/examples
 	cp examples/*.tcl $(NAME)-$(VERSION)/examples
 	tar -czvvf $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION)

@@ -9,6 +9,7 @@ doxygen.log
 Doxyfile
 pkgIndex.tcl
 tclmpi.tcl
+tests/harness.tcl
 tclmpi-*.tar.gz
 tclmpi-*docs.pdf
 latex
