@@ -516,17 +516,20 @@ static char tclmpi_errmsg[MPI_MAX_ERROR_STRING];
  * \param obj Tcl object representing the current command name
  * \return TCL_OK if the "error" is MPI_SUCCESS or TCL_ERROR
  *
- * This is a simple convenience wrapper that will use MPI_Error_string() to
- * convert any error returned from MPI function calls to a Tcl error message
- * appended to the result vector of the current command. Should be called
- * after each MPI call, since we change communicators to not result in fatal
- * errors, so we have to generate Tcl errors instead (which can be caught).
+ * This is a convenience wrapper that will use MPI_Error_string() to
+ * convert any error code returned from MPI function calls to the
+ * respective error class and that into a string. This string is
+ * appended to the Tcl result vector of the current command. Should be
+ * called after each MPI call. Since we change error handlers on all
+ * communicators to not result in fatal errors, we have to generate Tcl
+ * errors instead (which can be caught).
  */
 static int tclmpi_errcheck(Tcl_Interp *interp, int ierr, Tcl_Obj *obj)
 {
     if (ierr != MPI_SUCCESS) {
-        int len;
-        MPI_Error_string(ierr,tclmpi_errmsg,&len);
+        int len,eclass;
+        MPI_Error_class(ierr,&eclass);
+        MPI_Error_string(eclass,tclmpi_errmsg,&len);
         Tcl_AppendResult(interp,Tcl_GetString(obj),": ",
                          tclmpi_errmsg,NULL);
         return TCL_ERROR;
