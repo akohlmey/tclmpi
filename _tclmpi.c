@@ -114,7 +114,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
  * \code {.tcl}
  #!/bin/sh \
  exec tclsh "$0" "$@"
- package require tclmpi 0.6
+ package require tclmpi 0.9
 
  # initialize MPI
  ::tclmpi::init
@@ -140,7 +140,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
  * \code {.tcl}
  #!/bin/sh \
  exec tclsh "$0" "$@"
- package require tclmpi 0.6
+ package require tclmpi 0.9
 
  # initialize MPI
  ::tclmpi::init
@@ -220,6 +220,28 @@ THE POSSIBILITY OF SUCH DAMAGE.
  * should be very close to the corresponding C bindings, but probably not
  * as efficient.
  *
+ * \section naming Naming Conventions
+ * All functions that are new Tcl commands follow the MPI naming
+ * conventions, but using TclMPI_ as prefix instead of MPI_.
+ * The corresponding Tcl commands are placed in the tclmpi namespace
+ * and all lower case. Example: TclMPI_Init() is the wrapper for 
+ * MPI_Init() and is provided as command tclmpi::init.
+ * Defines and constants from the MPI header file are represented in
+ * TclMPI as plain strings, all lowercase and with a tclmpi:: prefix.
+ * Thus MPI_COMM_WORLD becomes tclmpi::comm_world and MPI_INT becomes
+ * tclmpi::int.
+
+ * Functions that are internal to the plugin as well as static variables
+ * are prefixed with all lower case, i.e. tclmpi_. Those functions have
+ * to be declared static.
+ *
+ * All string constants are also declared as namespace variables,
+ * e.g. $tclmpi::comm_world, so that shortcut notations are possible
+ * as shown in the following example:
+ * \code {.tcl}
+ namespace upvar tclmpi comm_world comm
+ namespace upvar tclmpi int        mpi_int
+ * \endcode
  *
  * \section Internal TclMPI Support Functions
  * Several MPI entities like communicators, requests, status objects
