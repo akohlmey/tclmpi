@@ -86,7 +86,7 @@ run_return [list comm_split $comm 5 -1] [list $split0]
 run_return [list comm_split $comm 0 0]  [list $split1]
 run_return [list comm_split $self 4 -1] [list $split2]
 run_return [list comm_split $self $undefined -1] [list $null]
-run_error  [list comm_split $comm -1 0] \
+run_error  [list comm_split $comm -5 0] \
     {{comm_split: invalid color argument}}
 run_error  [list comm_split $null 5 0]  \
     {comm_split: invalid communicator}
@@ -100,6 +100,15 @@ run_return [list comm_size $split0] 1
 run_return [list comm_size $split1] 1
 run_return [list comm_rank $split0] 0
 run_return [list comm_rank $split1] 0
+
+# comm_free
+set numargs \
+    "wrong # args: should be \"comm_free <comm>\""
+run_error  [list comm_free] [list $numargs]
+run_error  [list comm_free $comm 1] [list $numargs]
+run_error  [list comm_free comm0]  \
+    {{comm_free: unknown communicator: comm0}}
+run_return [list comm_free $split2] {}
 
 # barrier
 set numargs "wrong # args: should be \"barrier <comm>\""
@@ -290,6 +299,10 @@ run_error  [list abort comm0 1] \
     {{abort: unknown communicator: comm0}}
 run_error  [list abort $comm comm0] \
     {{expected integer but got "comm0"}}
+
+# special case. this has to be at the end
+run_error  [list comm_free $null]  \
+    {comm_free: mpi invalid communicator}
 
 # finalize
 run_error  [list finalize 0] \

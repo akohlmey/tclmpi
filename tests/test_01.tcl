@@ -36,6 +36,7 @@ run_error  [list ::tclmpi::comm_rank $null] \
 # comm_split
 set split0 tclmpi::comm0
 set split1 tclmpi::comm1
+set split2 tclmpi::comm2
 set numargs \
     "wrong # args: should be \"::tclmpi::comm_split <comm> <color> <key>\""
 run_error  [list ::tclmpi::comm_split] [list $numargs]
@@ -48,7 +49,7 @@ run_return [list ::tclmpi::comm_split $comm 0 0]  {tclmpi::comm1}
 run_return [list ::tclmpi::comm_split $self 4 -1] {tclmpi::comm2}
 run_return [list ::tclmpi::comm_split $self tclmpi::undefined -1] \
     {tclmpi::comm_null}
-run_error  [list ::tclmpi::comm_split $comm -1 0] \
+run_error  [list ::tclmpi::comm_split $comm -5 0] \
     {{::tclmpi::comm_split: invalid color argument}}
 run_error  [list ::tclmpi::comm_split $null 5 0]  \
     {::tclmpi::comm_split: mpi invalid communicator}
@@ -62,6 +63,15 @@ run_return [list ::tclmpi::comm_size $split0] 1
 run_return [list ::tclmpi::comm_size $split1] 1
 run_return [list ::tclmpi::comm_rank $split0] 0
 run_return [list ::tclmpi::comm_rank $split1] 0
+
+# comm_free
+set numargs \
+    "wrong # args: should be \"::tclmpi::comm_free <comm>\""
+run_error  [list ::tclmpi::comm_free] [list $numargs]
+run_error  [list ::tclmpi::comm_free $comm 1] [list $numargs]
+run_error  [list ::tclmpi::comm_free comm0]  \
+    {{::tclmpi::comm_free: unknown communicator: comm0}}
+run_return [list ::tclmpi::comm_free $split2] {}
 
 # barrier
 set numargs "wrong # args: should be \"::tclmpi::barrier <comm>\""
@@ -256,6 +266,10 @@ run_error  [list ::tclmpi::abort comm0 1] \
     {{::tclmpi::abort: unknown communicator: comm0}}
 run_error  [list ::tclmpi::abort $comm comm0] \
     {{expected integer but got "comm0"}}
+
+# special case. this has to be at the end
+run_error  [list ::tclmpi::comm_free $null]  \
+    {::tclmpi::comm_free: mpi invalid communicator}
 
 # finalize
 run_error  [list ::tclmpi::finalize 0] \

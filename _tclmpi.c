@@ -325,7 +325,7 @@ static MPI_Comm tcl2mpi_comm(const char *label)
  * \return the corresponding string label or NULL.
  *
  * This function will first call mpi2tcl_comm in order to see, if the
- * communicator handed it, is already listed and return that communicators
+ * communicator handed in, is already listed and return that communicators
  * Tcl label string. If it is not yet lists, a new entry is added to the 
  * linked list and a new label of the format "tclmpi::comm%d" assigned.
  * The (global/static) variable tclmpi_comm_cntr is incremented every time
@@ -351,6 +351,34 @@ static const char *tclmpi_add_comm(MPI_Comm comm)
     last_comm->next = next;
     last_comm = next;
     return next->label;
+}
+
+/*! Remove an MPI communicator from the linked list of communicators
+ * \param label the Tcl name for the communicator
+ * \return TCL_OK if deletion was successful, else TCL_ERROR
+ *
+ * This function will find the entry in the linked list that matches
+ * the Tcl label string, remove it and free the associated resources.
+ */
+static int tclmpi_del_comm(const char *label)
+{
+    tclmpi_comm_t *next,*prev;
+
+    prev = first_comm;
+    if (prev->next != NULL) next = prev->next;
+    else return TCL_ERROR;
+
+    while (next) {
+        if (strcmp(label,next->label) == 0) {
+            prev->next = next->next;
+            Tcl_Free(next->label);
+            Tcl_Free((char *)next);
+            return TCL_OK;
+        }
+        prev = next;
+        next = next->next;
+    }
+    return TCL_ERROR;
 }
 
 /* some symbolic constants */
@@ -870,6 +898,45 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
 
     result = Tcl_NewStringObj(tclmpi_add_comm(newcomm),-1);
     Tcl_SetObjResult(interp,result);
+    return TCL_OK;
+}
+
+
+/*! wrapper for MPI_Comm_free() 
+ * \param nodata ignored
+ * \param interp current Tcl interpreter
+ * \param objc number of argument objects
+ * \param objv list of argument object
+ * \return TCL_OK or TCL_ERROR
+ *
+ * This function deletes a defined MPI communicator and removes its Tcl
+ * representation from the local translation tables.
+ */
+int TclMPI_Comm_free(ClientData nodata, Tcl_Interp *interp,
+                      int objc, Tcl_Obj *const objv[])
+{
+    Tcl_Obj *result;
+    const char *label;
+    MPI_Comm comm;
+    int ierr;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp,1,objv,"<comm>");
+        return TCL_ERROR;
+    }
+
+    label = Tcl_GetString(objv[1]);
+    comm = tcl2mpi_comm(label);
+    if (tclmpi_commcheck(interp,comm,objv[0],objv[1]) != TCL_OK)
+        return TCL_ERROR;
+    if (tclmpi_del_comm(label) != TCL_OK)
+        return TCL_ERROR;
+
+    ierr = MPI_Comm_free(&comm);
+    if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK)
+        return TCL_ERROR;
+
+    Tcl_ResetResult(interp);
     return TCL_OK;
 }
 
@@ -2583,6 +2650,8 @@ static void tclmpi_init_api(Tcl_Interp *interp)
     Tcl_CreateObjCommand(interp,"tclmpi::comm_rank",TclMPI_Comm_rank,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"tclmpi::comm_split",TclMPI_Comm_split,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"tclmpi::comm_free",TclMPI_Comm_free,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"tclmpi::barrier",TclMPI_Barrier,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);

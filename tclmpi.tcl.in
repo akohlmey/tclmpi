@@ -36,8 +36,10 @@ namespace eval tclmpi {
 
     # export all API functions
     namespace export \
-        init finalize abort comm_size comm_rank comm_split barrier bcast \
-        scatter gather reduce allreduce send isend recv irecv probe iprobe \
+        init finalize abort \
+        comm_size comm_rank comm_split comm_free \
+        barrier bcast scatter gather reduce allreduce \
+        send isend recv irecv probe iprobe \
         wait waitall
 
     # The following section is to trick doxygen into documenting the Tcl API
@@ -142,6 +144,17 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Comm_split().
     proc comm_split {comm color key} {}
+
+    ## Deletes a dynamically created communicator and frees its resources
+    # \param comm Tcl representation of an MPI communicator
+    #
+    # This operation marks the MPI communicator associated with it Tcl
+    # representation comm for deallocation by the underlying MPI library.
+    # Any pending communications using this communicator will still
+    # complete normally.
+    #
+    # For implementation details see TclMPI_Comm_free().
+    proc comm_free {comm} {}
 
     ## Synchronize MPI processes
     # \param comm Tcl representation of an MPI communicator
