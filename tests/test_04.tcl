@@ -110,9 +110,9 @@ par_return [list [list comm_rank $split2] \
                 [list comm_rank $split2]] [list 0 1]
 
 # one real and one "null" communicator
-par_return [list [list comm_split $comm $undefined 1] \
-                [list comm_split $comm 1 -1] ] \
-    [list [list $null] {tclmpi::comm3}]
+par_return [list [list comm_split $comm 1 -1] \
+                [list comm_split $comm $undefined 1] ] \
+    [list {tclmpi::comm3} [list $null]]
 
 # barrier
 par_return [list [list barrier $comm]    \
@@ -130,6 +130,17 @@ par_return [list [list barrier $split1]  \
 par_return [list [list barrier $split2]  \
                 [list barrier $split2] ] \
     [list {} {}]
+
+# comm_free
+par_return [list [list comm_free $split2]  \
+                [list comm_free $split2] ] \
+    [list {} {}]
+par_error [list [list set i 0]  \
+                [list comm_free tclmpi::comm3] ] \
+    [list {0} {{comm_free: unknown communicator: tclmpi::comm3}}]
+par_return [list [list comm_free tclmpi::comm3] \
+                [list set i 0] ] \
+    [list {} {0}]
 
 # bcast
 set idata [list {xx 11} {1 2 3} {}]
