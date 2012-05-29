@@ -393,7 +393,7 @@ static int tclmpi_del_comm(const char *label)
     while (next) {
         if (strcmp(label,next->label) == 0) {
             prev->next = next->next;
-            Tcl_Free(next->label);
+            Tcl_Free((char *)next->label);
             Tcl_Free((char *)next);
             return TCL_OK;
         }
@@ -402,6 +402,21 @@ static int tclmpi_del_comm(const char *label)
     }
     return TCL_ERROR;
 }
+
+/*! Data type for maxloc/minloc reductions with a double and an integer */
+typedef struct tclmpi_dblint tclmpi_dblint_t;
+/*! Represent a double/integer pair */
+struct tclmpi_dblint {
+    double d; /*!< double value */
+    int i;    /*!< integer value */
+};
+
+/*! Data type for maxloc/minloc reductions with two integers */
+typedef struct tclmpi_intint tclmpi_intint_t;
+/*! Represent an integer/integer pair */
+struct tclmpi_intint {
+    int i1,i2; /*!< integer values */
+};
 
 /* some symbolic constants */
 
@@ -1659,22 +1674,82 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
         Tcl_Free((char *)idata);
         Tcl_Free((char *)odata);
     } else if (type == TCLMPI_INT_INT) {
-        Tcl_Obj **ilist;
-        int *idata, *odata;
+        Tcl_Obj **ilist, **ipair;
+        tclmpi_intint_t *idata, *odata;
+        int plen;
         if (Tcl_ListObjGetElements(interp,objv[1],&len,&ilist) != TCL_OK)
             return TCL_ERROR;
-        idata = (int *)Tcl_Alloc(len*sizeof(int));
-        odata = (int *)Tcl_Alloc(len*sizeof(int));
-        for (i=0; i < len; ++i)
-            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0; /* this is non-fatal by choice */
+        idata = (tclmpi_intint_t *)Tcl_Alloc(len*sizeof(tclmpi_intint_t));
+        odata = (tclmpi_intint_t *)Tcl_Alloc(len*sizeof(tclmpi_intint_t));
+        for (i=0; i < len; ++i) {
+            if (Tcl_ListObjGetElements(interp,ilist[i],&plen,&ipair) != TCL_OK)
+                return TCL_ERROR;
+            if (plen < 2) {
+                Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": bad list format for loc reduction: ",opstr,NULL);
+                return TCL_ERROR;
             }
-        ierr = MPI_Allreduce(idata,odata,len/2,MPI_2INT,op,comm);
+                
+            if (Tcl_GetIntFromObj(interp,ipair[0],&(idata[i].i1)) != TCL_OK) {
+                Tcl_ResetResult(interp);
+                idata[i].i1=0; /* this is non-fatal by choice */
+            }
+            if (Tcl_GetIntFromObj(interp,ipair[1],&(idata[i].i2)) != TCL_OK) {
+                Tcl_ResetResult(interp);
+                Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": bad location data for reduction: ",opstr,NULL);
+                return TCL_ERROR;
+            }
+        }
+        ierr = MPI_Allreduce(idata,odata,len,MPI_2INT,op,comm);
         result = Tcl_NewListObj(0,NULL);
-        for (i=0; i < len; ++i)
-            Tcl_ListObjAppendElement(interp,result,
-                                     Tcl_NewIntObj(odata[i]));
+        for (i=0; i < len; ++i) {
+            Tcl_Obj *opair;
+            opair = Tcl_NewListObj(0,NULL);
+            Tcl_ListObjAppendElement(interp,opair,Tcl_NewIntObj(odata[i].i1));
+            Tcl_ListObjAppendElement(interp,opair,Tcl_NewIntObj(odata[i].i2));
+            Tcl_ListObjAppendElement(interp,result,opair);
+        }
+        Tcl_Free((char *)idata);
+        Tcl_Free((char *)odata);    
+    } else if (type == TCLMPI_DOUBLE_INT) {
+        Tcl_Obj **ilist, **ipair;
+        tclmpi_dblint_t *idata, *odata;
+        int plen;
+        if (Tcl_ListObjGetElements(interp,objv[1],&len,&ilist) != TCL_OK)
+            return TCL_ERROR;
+        idata = (tclmpi_dblint_t *)Tcl_Alloc(len*sizeof(tclmpi_dblint_t));
+        odata = (tclmpi_dblint_t *)Tcl_Alloc(len*sizeof(tclmpi_dblint_t));
+        for (i=0; i < len; ++i) {
+            if (Tcl_ListObjGetElements(interp,ilist[i],&plen,&ipair) != TCL_OK)
+                return TCL_ERROR;
+            if (plen < 2) {
+                Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": bad list format for loc reduction: ",opstr,NULL);
+                return TCL_ERROR;
+            }
+                
+            if (Tcl_GetDoubleFromObj(interp,ipair[0],&(idata[i].d))!=TCL_OK) {
+                Tcl_ResetResult(interp);
+                idata[i].d=0.0; /* this is non-fatal by choice */
+            }
+            if (Tcl_GetIntFromObj(interp,ipair[1],&(idata[i].i)) != TCL_OK) {
+                Tcl_ResetResult(interp);
+                Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": bad location data for reduction: ",opstr,NULL);
+                return TCL_ERROR;
+            }
+        }
+        ierr = MPI_Allreduce(idata,odata,len,MPI_DOUBLE_INT,op,comm);
+        result = Tcl_NewListObj(0,NULL);
+        for (i=0; i < len; ++i) {
+            Tcl_Obj *opair;
+            opair = Tcl_NewListObj(0,NULL);
+            Tcl_ListObjAppendElement(interp,opair,
+                                     Tcl_NewDoubleObj(odata[i].d));
+            Tcl_ListObjAppendElement(interp,opair,Tcl_NewIntObj(odata[i].i));
+            Tcl_ListObjAppendElement(interp,result,opair);
+        }
         Tcl_Free((char *)idata);
         Tcl_Free((char *)odata);    
     } else {

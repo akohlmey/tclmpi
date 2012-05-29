@@ -210,8 +210,11 @@ run_error  [list ::tclmpi::allreduce {} $int tclmpi::maxloc $comm]    \
     {::tclmpi::allreduce: invalid mpi op}
 run_error  [list ::tclmpi::allreduce {} $double tclmpi::minloc $comm] \
     {::tclmpi::allreduce: invalid mpi op}
-run_error [list ::tclmpi::allreduce {1 0 2 1 4 3} $intint \
+run_error [list ::tclmpi::allreduce {{1 0} {2 1} {4 3}} $intint \
                tclmpi::max $comm] \
+    {::tclmpi::allreduce: invalid mpi op}
+run_error [list ::tclmpi::allreduce {{1.0 0} {2.0 -1} {4.5 3}} $dblint \
+               tclmpi::min $comm] \
     {::tclmpi::allreduce: invalid mpi op}
 run_error  [list ::tclmpi::allreduce {} tclmpi::real tclmpi::min $comm] \
     {{::tclmpi::allreduce: invalid data type: tclmpi::real}}
@@ -219,10 +222,23 @@ run_error  [list ::tclmpi::allreduce {} $int tclmpi::land $null]          \
     {::tclmpi::allreduce: invalid communicator}
 run_error  [list ::tclmpi::allreduce {{}} $int tclmpi::gamma $comm]       \
     {{::tclmpi::allreduce: unknown reduction operator: tclmpi::gamma}}
-run_return [list ::tclmpi::allreduce {2 0 1 1} $intint \
-                tclmpi::maxloc $comm] {{2 0 1 1}}
-#run_return [list ::tclmpi::allreduce {1.0 0 2.0 1} $dblint \
-    ::tclmpi::minloc $comm] {{1.0 0 2.0 1}}
+run_error [list ::tclmpi::allreduce {2 0 1 1} $intint \
+                tclmpi::maxloc $comm] \
+    {{::tclmpi::allreduce: bad list format for loc reduction: tclmpi::maxloc}}
+run_return [list ::tclmpi::allreduce {{2 0} {1 -1}} $intint \
+                tclmpi::maxloc $comm] {{{2 0} {1 -1}}}
+run_return [list ::tclmpi::allreduce {{2 1 0} {1 1 0 0}} $intint \
+                tclmpi::minloc $comm] {{{2 1} {1 1}}}
+run_error [list ::tclmpi::allreduce {2.0 0 1.0 1} $dblint \
+                tclmpi::maxloc $comm] \
+    {{::tclmpi::allreduce: bad list format for loc reduction: tclmpi::maxloc}}
+run_return [list ::tclmpi::allreduce {{2.1 0} {-1 -1}} $dblint \
+                tclmpi::maxloc $comm] {{{2.1 0} {-1.0 -1}}}
+run_error  [list ::tclmpi::allreduce {{2 1.1} {-1 -1}} $dblint \
+                tclmpi::maxloc $comm] \
+    {{::tclmpi::allreduce: bad location data for reduction: tclmpi::maxloc}}
+run_return [list ::tclmpi::allreduce {{2 1 0} {1.0 1 0 0}} $dblint \
+                tclmpi::minloc $comm] {{{2.0 1} {1.0 1}}}
 
 # check some data type conversions
 run_return [list ::tclmpi::allreduce {{xx 11} {1 2 3} 2.0 7 0xff yy} \

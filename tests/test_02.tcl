@@ -245,8 +245,11 @@ run_error  [list allreduce {} $int $maxloc $comm]    \
     {allreduce: invalid mpi op}
 run_error  [list allreduce {} $double $minloc $comm] \
     {allreduce: invalid mpi op}
-run_error [list allreduce {1 0 2 1 4 3} $intint \
+run_error [list allreduce {{1 0} {2 1} {4 3}} $intint \
                tclmpi::max $comm] \
+    {allreduce: invalid mpi op}
+run_error [list allreduce {{1.0 0} {2.0 -1} {4.5 3}} $dblint \
+               tclmpi::min $comm] \
     {allreduce: invalid mpi op}
 run_error  [list allreduce {} tclmpi::real $mpi_min $comm] \
     {{allreduce: invalid data type: tclmpi::real}}
@@ -254,9 +257,22 @@ run_error  [list allreduce {} $int $mpi_land $null]          \
     {allreduce: invalid communicator}
 run_error  [list allreduce {{}} $int tclmpi::gamma $comm]       \
     {{allreduce: unknown reduction operator: tclmpi::gamma}}
-run_return [list allreduce {2 0 1 1} $intint $maxloc $comm] {{2 0 1 1}}
-#run_return [list allreduce {1.0 0 2.0 1} $dblint \
-    tclmpi::minloc $comm] {{1.0 0 2.0 1}}
+run_error [list allreduce {2 0 1 1} $intint $maxloc $comm] \
+    {{allreduce: bad list format for loc reduction: tclmpi::maxloc}}
+run_return [list allreduce {{2 0} {1 -1}} $intint $maxloc $comm] \
+    {{{2 0} {1 -1}}}
+run_return [list allreduce {{2 1 0} {1 1 0 0}} $intint $maxloc $comm] \
+    {{{2 1} {1 1}}}
+run_error [list allreduce {2.0 0 1.0 1} $dblint \
+                tclmpi::maxloc $comm] \
+    {{allreduce: bad list format for loc reduction: tclmpi::maxloc}}
+run_return [list allreduce {{2.1 0} {-1 -1}} $dblint \
+                tclmpi::maxloc $comm] {{{2.1 0} {-1.0 -1}}}
+run_error  [list allreduce {{2 1.1} {-1 -1}} $dblint \
+                tclmpi::maxloc $comm] \
+    {{allreduce: bad location data for reduction: tclmpi::maxloc}}
+run_return [list allreduce {{2 1 0} {1.0 1 0 0}} $dblint \
+                tclmpi::minloc $comm] {{{2.0 1} {1.0 1}}}
 
 # check some data type conversions
 run_return [list allreduce {{xx 11} {1 2 3} 2.0 7 0xff yy} \
