@@ -266,8 +266,11 @@ run_error  [list ::tclmpi::reduce {} $int tclmpi::maxloc 0 $comm]    \
     {::tclmpi::reduce: invalid mpi op}
 run_error  [list ::tclmpi::reduce {} $double tclmpi::minloc 0 $comm] \
     {::tclmpi::reduce: invalid mpi op}
-run_error [list ::tclmpi::reduce {1 0 2 1 4 3} $intint \
+run_error [list ::tclmpi::reduce {{1 0} {2 1} {4 3}} $intint \
                tclmpi::max 0 $comm] \
+    {::tclmpi::reduce: invalid mpi op}
+run_error [list ::tclmpi::reduce {{1.0 0} {2.0 -1} {4.5 3}} $dblint \
+               tclmpi::min 0 $comm] \
     {::tclmpi::reduce: invalid mpi op}
 run_error  [list ::tclmpi::reduce {} tclmpi::real tclmpi::min 0 $comm] \
     {{::tclmpi::reduce: invalid data type: tclmpi::real}}
@@ -275,10 +278,23 @@ run_error  [list ::tclmpi::reduce {} $int tclmpi::land 0 $null]          \
     {::tclmpi::reduce: invalid communicator}
 run_error  [list ::tclmpi::reduce {{}} $int tclmpi::gamma 0 $comm]       \
     {{::tclmpi::reduce: unknown reduction operator: tclmpi::gamma}}
-run_return [list ::tclmpi::reduce {2 0 1 1} $intint \
-                tclmpi::maxloc 0 $comm] {{2 0 1 1}}
-#run_return [list ::tclmpi::reduce {1.0 0 2.0 1} $dblint \
-    tclmpi::minloc $comm] {{1.0 0 2.0 1}}
+run_error [list ::tclmpi::reduce {2 0 1 1} $intint \
+                tclmpi::maxloc 0 $comm] \
+    {{::tclmpi::reduce: bad list format for loc reduction: tclmpi::maxloc}}
+run_return [list ::tclmpi::reduce {{2 0} {1 -1}} $intint \
+                tclmpi::maxloc 0 $comm] {{{2 0} {1 -1}}}
+run_return [list ::tclmpi::reduce {{2 1 0} {1 1 0 0}} $intint \
+                tclmpi::minloc 0 $comm] {{{2 1} {1 1}}}
+run_error [list ::tclmpi::reduce {2.0 0 1.0 1} $dblint \
+                tclmpi::maxloc 0 $comm] \
+    {{::tclmpi::reduce: bad list format for loc reduction: tclmpi::maxloc}}
+run_return [list ::tclmpi::reduce {{2.1 0} {-1 -1}} $dblint \
+                tclmpi::maxloc 0 $comm] {{{2.1 0} {-1.0 -1}}}
+run_error  [list ::tclmpi::reduce {{2 1.1} {-1 -1}} $dblint \
+                tclmpi::maxloc 0 $comm] \
+    {{::tclmpi::reduce: bad location data for reduction: tclmpi::maxloc}}
+run_return [list ::tclmpi::reduce {{2 1 0} {1.0 1 0 0}} $dblint \
+                tclmpi::minloc 0 $comm] {{{2.0 1} {1.0 1}}}
 
 # probe
 set numargs \

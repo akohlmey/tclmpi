@@ -299,19 +299,34 @@ run_error  [list reduce {} $int $maxloc 0 $comm]    \
     {reduce: invalid mpi op}
 run_error  [list reduce {} $double $minloc 0 $comm] \
     {reduce: invalid mpi op}
-run_error [list reduce {1 0 2 1 4 3} $intint \
+run_error [list reduce {{1 0} {2 1} {4 3}} $intint \
                tclmpi::max 0 $comm] \
     {reduce: invalid mpi op}
+run_error [list reduce {{1.0 0} {2.0 -1} {4.5 3}} $dblint \
+               $mpi_min 0 $comm] {reduce: invalid mpi op}
 run_error  [list reduce {} tclmpi::real $mpi_min 0 $comm] \
     {{reduce: invalid data type: tclmpi::real}}
 run_error  [list reduce {} $int $mpi_land 0 $null]          \
     {reduce: invalid communicator}
 run_error  [list reduce {{}} $int tclmpi::gamma 0 $comm]       \
     {{reduce: unknown reduction operator: tclmpi::gamma}}
-run_return [list reduce {2 0 1 1} $intint \
-                tclmpi::maxloc 0 $comm] {{2 0 1 1}}
-#run_return [list reduce {1.0 0 2.0 1} $dblint \
-    tclmpi::minloc $comm] {{1.0 0 2.0 1}}
+run_error [list reduce {2 0 1 1} $intint \
+                $maxloc 0 $comm] \
+    {{reduce: bad list format for loc reduction: tclmpi::maxloc}}
+run_return [list reduce {{2 0} {1 -1}} $intint \
+                $maxloc 0 $comm] {{{2 0} {1 -1}}}
+run_return [list reduce {{2 1 0} {1 1 0 0}} $intint \
+                $minloc 0 $comm] {{{2 1} {1 1}}}
+run_error [list reduce {2.0 0 1.0 1} $dblint \
+                $maxloc 0 $comm] \
+    {{reduce: bad list format for loc reduction: tclmpi::maxloc}}
+run_return [list reduce {{2.1 0} {-1 -1}} $dblint \
+                $maxloc 0 $comm] {{{2.1 0} {-1.0 -1}}}
+run_error  [list reduce {{2 1.1} {-1 -1}} $dblint \
+                $maxloc 0 $comm] \
+    {{reduce: bad location data for reduction: tclmpi::maxloc}}
+run_return [list reduce {{2 1 0} {1.0 1 0 0}} $dblint \
+                $minloc 0 $comm] {{{2.0 1} {1.0 1}}}
 
 # probe
 set numargs \
