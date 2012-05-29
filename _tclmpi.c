@@ -250,7 +250,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
  * identify this entity and then it will be translated into the real
  * object it represents with the help of the following support functions.
  *
- * \subsection tclcomm Mapping Communicators
+ * \subsection tclcomm Mapping MPI Communicators
  * MPI communicators are represented in TclMPI by strings of the form
  * "tclmpi::comm%d", with "%d" being replaced by a unique integer.
  * In addition, a few string constants are mapped to the default
@@ -261,9 +261,46 @@ THE POSSIBILITY OF SUCH DAMAGE.
  * Internally the map is maintained in a simple linked list which
  * is initialized with the three default communicators when the plugin
  * is loaded and where new communicators are added at the end as needed.
- * The functions mpi2tcl_comm and tcl2mpi_comm are then used to translate
- * from one representation to the other while tclmpi_add_comm will 
- * append a new communicator to the list.
+ * The functions \ref mpi2tcl_comm and \ref tcl2mpi_comm are then used
+ * to translate from one representation to the other while
+ * \ref tclmpi_add_comm will append a new structure containing the
+ * communicator to the list.
+ * Correspondingly \ref tclmpi_del_comm will remove a communicator entry
+ * from the lest, based on its Tcl string representation.
+ *
+ * \subsection tclreq Mapping MPI Requests
+ * MPI requests are represented in TclMPI by strings of the form
+ * "tclmpi::req%d", with "%d" being replaced by a unique integer.
+ * Internally this map is maintained in a simple linked list to which
+ * new requests are appended and from which completed requests are
+ * removed as needed.
+ * The function \ref tclmpi_find_req is used to locate a specific request
+ * and its associated data from its string label. In addition,
+ * \ref tclmpi_add_req will  append a new request to the list, and 
+ * \ref tclmpi_del_req will remove (completed) requests.
+ *
+ * \subsection tcldata Mapping Data Types
+ * The helper function \ref tclmpi_datatype is used to convert string
+ * constants representing specific data types into integer constants
+ * for convenient branching. Data types in TclMPI are somewhat different
+ * from MPI data types to match better the spirit of Tcl scripting.
+ *
+ * \subsection tclerr Common Error Message Processing
+ * There is a significant redundancy in checking for and reporting 
+ * error conditions. For this purpose, several support functions 
+ * exist.
+ *
+ * \ref tclmpi_errcheck verifies if calls to the MPI library were
+ * successful and if not, generates a formatted error message that
+ * is appended to the current result list.
+ *
+ * \ref tclmpi_commcheck verifies if a communicator argument was
+ * using a valid Tcl representation and if not, generates a
+ * formatted error message that is appended to the current result list.
+ *
+ * \ref tclmpi_typecheck test if a type argument was using  a valid
+ * Tcl representation and if not, generates a formatted error message
+ * that is appended to the current result list.
  */
 
 /* fallback */
@@ -407,15 +444,16 @@ static int tclmpi_del_comm(const char *label)
 typedef struct tclmpi_dblint tclmpi_dblint_t;
 /*! Represent a double/integer pair */
 struct tclmpi_dblint {
-    double d; /*!< double value */
-    int i;    /*!< integer value */
+    double d; /*!< double data value */
+    int i;    /*!< location data */
 };
 
 /*! Data type for maxloc/minloc reductions with two integers */
 typedef struct tclmpi_intint tclmpi_intint_t;
 /*! Represent an integer/integer pair */
 struct tclmpi_intint {
-    int i1,i2; /*!< integer values */
+    int i1; /*!< integer data value */
+    int i2; /*!< location data */
 };
 
 /* some symbolic constants */
