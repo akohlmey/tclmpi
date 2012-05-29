@@ -178,6 +178,30 @@ run_return [list scatter {-1 2 +3 2.0 7 016}             \
 run_return [list scatter {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
                 $double $master $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
 
+# allgather
+set numargs \
+    "wrong # args: should be \"allgather <data> <type> <comm>\""
+run_error  [list allgather] [list $numargs]
+run_error  [list allgather {}] [list $numargs]
+run_error  [list allgather {} $auto] [list $numargs]
+run_error  [list allgather {} $auto $comm xxx] [list $numargs]
+run_error  [list allgather {} $auto comm0] \
+    {{allgather: unknown communicator: comm0}}
+run_error  [list allgather {} $auto $null] \
+    {{allgather: does not support data type tclmpi::auto}}
+run_error  [list allgather {} tclmpi::real $comm]    \
+    {{allgather: invalid data type: tclmpi::real}}
+
+# check data type conversions
+run_return [list allgather {{xx 11} {1 2 3} 2.0 7 0xff yy} \
+                $int $self] {{0 0 0 7 255 0}}
+run_return [list allgather {{xx 11} {1 2 3} 2.5 yy 1}      \
+                $double $comm] {{0.0 0.0 2.5 0.0 1.0}}
+run_return [list allgather {-1 2 +3 2.0 7 016}             \
+                $int $comm] {{-1 2 3 0 7 14}}
+run_return [list allgather {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
+                $double $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
+
 # gather
 set numargs \
     "wrong # args: should be \"gather <data> <type> <root> <comm>\""

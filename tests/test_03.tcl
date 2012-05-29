@@ -139,6 +139,29 @@ par_error [list [list ::tclmpi::scatter $idata $double $master $comm] \
                 [list ::tclmpi::scatter {} $double $master $comm]] \
     [list [list $odata] [list $odata]]
 
+# allgather
+set odata {14 0 0 7 255 0}
+par_return [list [list ::tclmpi::allgather {016 {1 2 3} 2.0} $int $comm] \
+                [list ::tclmpi::allgather {7 0xff yy} $int $comm]] \
+    [list [list $odata] [list $odata]]
+
+if {$tcl_version < 8.5} {
+    set odata {16.0 0.0 2.0 7.0 255.0 0.0}
+} else {
+    set odata {14.0 0.0 2.0 7.0 255.0 0.0}
+}
+par_return [list [list ::tclmpi::allgather {016 {1 2 3} 2.0} $double $comm] \
+                [list ::tclmpi::allgather {7 0xff yy} $double $comm]] \
+    [list [list $odata] [list $odata]]
+
+set odata {::tclmpi::allgather: number of data items must be the same on all processes}
+par_error [list [list ::tclmpi::allgather {016 {1 2 3}} $int $comm] \
+                [list ::tclmpi::allgather {7 0xff yy} $int $comm]] \
+    [list [list $odata] [list $odata]]
+par_error [list [list ::tclmpi::allgather {016 {1 2 3} 2.0} $double $comm] \
+                [list ::tclmpi::allgather {2.0 7 0xff yy} $double $comm]] \
+    [list [list $odata] [list $odata]]
+
 # gather
 set odata {14 0 0 7 255 0}
 par_return [list [list ::tclmpi::gather {016 {1 2 3} 2.0} $int 1 $comm] \

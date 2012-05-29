@@ -196,6 +196,29 @@ par_error [list [list scatter $idata $double $master $comm] \
                 [list scatter {} $double $master $comm]] \
     [list [list $odata] [list $odata]]
 
+# allgather
+set odata {14 0 0 7 255 0}
+par_return [list [list allgather {016 {1 2 3} 2.0} $int $comm] \
+                [list allgather {7 0xff yy} $int $comm]] \
+    [list [list $odata] [list $odata]]
+
+if {$tcl_version < 8.5} {
+    set odata {16.0 0.0 2.0 7.0 255.0 0.0}
+} else {
+    set odata {14.0 0.0 2.0 7.0 255.0 0.0}
+}
+par_return [list [list allgather {016 {1 2 3} 2.0} $double $comm] \
+                [list allgather {7 0xff yy} $double $comm]] \
+    [list [list $odata] [list $odata]]
+
+set odata {allgather: number of data items must be the same on all processes}
+par_error [list [list allgather {016 {1 2 3}} $int $comm] \
+                [list allgather {7 0xff yy} $int $comm]] \
+    [list [list $odata] [list $odata]]
+par_error [list [list allgather {016 {1 2 3} 2.0} $double $comm] \
+                [list allgather {2.0 7 0xff yy} $double $comm]] \
+    [list [list $odata] [list $odata]]
+
 # gather
 set odata {14 0 0 7 255 0}
 par_return [list [list gather {016 {1 2 3} 2.0} $int 1 $comm] \
