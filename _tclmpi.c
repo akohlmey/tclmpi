@@ -2307,7 +2307,7 @@ int TclMPI_Iprobe(ClientData nodata, Tcl_Interp *interp,
  *
  * This function implements a wrapper around MPI_Wait for TclMPI. Due to
  * the design decisions in TclMPI, it works a bit different than
- * MPI_Write, particularly for non-blocking receive requests. As
+ * MPI_Wait, particularly for non-blocking receive requests. As
  * explained in the TclMPI_Irecv documentation, the corresponding
  * MPI_Irecv may not yet have been posted, so we have to first inspect
  * the tclmpi_req_t object, if the receive still needs to be posted. If
