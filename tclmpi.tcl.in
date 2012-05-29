@@ -38,7 +38,7 @@ namespace eval tclmpi {
     namespace export \
         init finalize abort \
         comm_size comm_rank comm_split comm_free \
-        barrier bcast scatter gather reduce allreduce \
+        barrier bcast scatter allgather gather reduce allreduce \
         send isend recv irecv probe iprobe \
         wait waitall
 
@@ -208,6 +208,24 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Scatter().
     proc scatter {data type root comm} {}
+
+    ## Collects data from all processes on the communicator
+    # \param data data to be distributed (Tcl data object)
+    # \param type data type to be used (string constant)
+    # \param root rank of process that will receive the data (integer)
+    # \param comm Tcl representation of an MPI communicator
+    # \return data that was collected or empty
+    #
+    # This command collects data the provided list from the process
+    # with rank root on the communicator comm to all processes sharing
+    # the communicator. The data argument has to be present on all
+    # processes and has to be of the same length.
+    # The data resulting from the gather will be stored in the 
+    # return value of the command for all processes.
+    # This function call is an implicit synchronization.
+    #
+    # For implementation details see TclMPI_Allgather().
+    proc allgather {data type comm} {}
 
     ## Collects data from all processes on the communicator
     # \param data data to be distributed (Tcl data object)
