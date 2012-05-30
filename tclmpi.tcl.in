@@ -1,5 +1,14 @@
 # This file contains the Tcl script parts of the tclmpi namespace and
 # the embedded documentation of the Tcl API of TclMPI.
+###########################################################
+# TclMPI - MPI bindings for Tcl
+#
+# Copyright (c) 2012 Axel Kohlmeyer <akohlmey@gmail.com>
+# All Rights Reserved.
+# 
+# See the file LICENSE in the top level directory for
+# licensing conditions.
+###########################################################
 
 ## TclMPI package namespace, tclmpi
 namespace eval tclmpi {
