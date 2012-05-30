@@ -102,6 +102,9 @@ $(NAME)-$(VERSION)-docs.pdf: Doxyfile _tclmpi.c \
 	doxygen || rm -f $@
 	make -C latex || rm -f $@
 	cp -p latex/refman.pdf $@ || rm -f $@
+	@echo '#####################################'
+	@echo 'Doxygen errors and warnings:'
+	@cat doxygen.log
 
 tar: doc
 	rm -rvf $(NAME)-$(VERSION)
