@@ -1,5 +1,3 @@
-#!/usr/bin/tclsh
-## \file harness.tcl
 ###########################################################
 # Test harness for TclMPI
 #
@@ -10,29 +8,41 @@
 # licensing conditions.
 ###########################################################
 
-# Current version.
-set version @VERSION@
-global env
+## TclMPI test harness
+# This namespace contains several Tcl procedures that
+# are used to conduct unit tests on the TclMPI package.
+# For simplicity paths are hardcoded, so that this file
+# must not be moved around and stay in the same directory
+# as the individual tests, which in turn have to be in
+# subdirectory of the directory where the TclMPI shared
+# object and/or the tclmpish extended Tcl shell reside.
 
-# add path to extension
+# extend package search path to find TclMPI
 set auto_path [concat [file normalize ..] $auto_path]
 
-# some convenience variables
-set comm   tclmpi::comm_world
-set self   tclmpi::comm_self
-set null   tclmpi::comm_null
-set master 0
-set rank 0
-set size 0
-set auto   tclmpi::auto
-set int    tclmpi::int
-set double tclmpi::double
-set intint tclmpi::intint
-set dblint tclmpi::dblint
+namespace eval tclmpi_test {
+    
+    set version "@VERSION@"  ;#< version of the package
 
-# counters for successful and failed tests
-set pass 0 ;##< counter for successful tests
-set fail 0 ;##< counter for failed tests
+    # define some convenience variables
+    variable comm   tclmpi::comm_world ;#< shortcut for world communicator
+
+    variable master 0              ;#< rank of MPI master process
+    variable rank   0              ;#< rank of this MPI process on $comm
+    variable size   1              ;#< number of processes on $comm
+    variable int    tclmpi::int    ;#< shortcut for tclmpi::int data type
+    variable intint tclmpi::intint ;#< shortcut for tclmpi::intint data type
+    variable maxloc tclmpi::maxloc ;#< shortcut for tclmpi::maxloc operator
+    variable minloc tclmpi::minloc ;#< shortcut for tclmpi::minloc operator
+
+    # counters for successful and failed tests
+    variable pass 0                ;#< counter for successful tests
+    variable fail 0                ;#< counter for failed tests
+
+    # export public functions
+    namespace export ser_init par_init test_summary \
+        run_return run_error par_return par_error
+}
 
 ## format output
 # \param kind string representing the kind of test (max 11 chars).
@@ -46,8 +56,10 @@ set fail 0 ;##< counter for failed tests
 # and failed tests, followed by a string describing the test type,
 # the command executed and a result string. The command string in the
 # middle will be truncated as needed to not break the format.
-proc test_format {kind cmd result} {
-    global pass fail
+proc tclmpi_test::test_format {kind cmd result} {
+    variable pass
+    variable fail
+
     set num [expr {$pass + $fail}]
     set string [format "%03d %-11s | %-46s | " $num $kind $cmd]
     if {[string length $string] > 66} {
@@ -67,7 +79,7 @@ proc test_format {kind cmd result} {
 # to the actual result. The reference is a list of strings, each
 # of which has to be matched in a case insensitive string search.
 # The function returns a 1 if all tests did match.
-proc compare {reflist result} {
+proc tclmpi_test::compare {reflist result} {
     set count 0
 
     set res [string tolower $result]
@@ -91,11 +103,26 @@ proc compare {reflist result} {
 # \return empty
 #
 # This function will perform a simple init test requesting the tclmpi
-# package and matching it against the current verison number. If called
-# from a parallel environment, it will only execute and produce output
-# on the master process
-proc ser_init {args} {
-    global version rank master
+# package and matching it against the current verison number. It will
+# also initialize some commonly used global variables.
+# If called from a parallel environment, it will only execute and
+# produce output on the master process
+proc tclmpi_test::ser_init {args} {
+    variable version
+    variable rank
+    variable master
+
+    # make some shortcuts
+    global comm self null auto int double intint dblint
+    set comm   tclmpi::comm_world
+    set self   tclmpi::comm_self
+    set null   tclmpi::comm_null
+    set auto   tclmpi::auto
+    set int    tclmpi::int
+    set double tclmpi::double
+    set intint tclmpi::intint
+    set dblint tclmpi::dblint
+
     if {$rank == $master} {
         puts {------------------------------------------------------------------------------}
         run_return "package require tclmpi $version" $version
@@ -110,8 +137,10 @@ proc ser_init {args} {
 # This function will perform an initialization of the parallel environment
 # for subsequent parallel tests. It also initializes the global variables
 # $rank and $size.
-proc par_init {args} {
-    global comm rank size
+proc tclmpi_test::par_init {args} {
+    variable comm
+    variable rank
+    variable size
 
     package require tclmpi
     ::tclmpi::init
@@ -133,8 +162,9 @@ proc par_init {args} {
 # and both the expected and actual results are printed. Also an unexpectedly
 # failure of the command is reported as failure and the resulting error
 # message is reported for debugging.
-proc run_return {cmd retval} {
-    global pass fail
+proc tclmpi_test::run_return {cmd retval} {
+    variable pass
+    variable fail
 
     if {[catch $cmd result]} {
         incr fail
@@ -166,8 +196,10 @@ proc run_return {cmd retval} {
 # and both the expected and actual error messages are printed. Also an
 # unexpectedly successful execution is considered a failure and its result
 # reported for reference.
-proc run_error {cmd errormsg} {
-    global pass fail
+proc tclmpi_test::run_error {cmd errormsg} {
+    variable pass
+    variable fail
+
     if {[catch $cmd result]} {
         if {[compare $errormsg $result]} {
             incr pass
@@ -202,8 +234,14 @@ proc run_error {cmd errormsg} {
 # expected one, failure is reported and both, expected and and actual results
 # are printed on one of the failing ranks. The error reporting expects that
 # the MPI communicator remains usable after failure.
-proc par_return {cmd retval {comm tclmpi::comm_world}} {
-    global pass fail master int
+proc tclmpi_test::par_return {cmd retval {comm tclmpi::comm_world}} {
+    variable pass
+    variable fail
+    variable master
+    variable int
+    variable intint
+    variable maxloc
+    variable minloc
 
     flush stdout
     ::tclmpi::barrier $comm
@@ -233,13 +271,13 @@ proc par_return {cmd retval {comm tclmpi::comm_world}} {
     set cmd [lindex $cmd $rank]
     set retval [lindex $retval $rank]
     set res [::tclmpi::allreduce [list [list [catch $cmd result] $rank]] \
-                 tclmpi::intint tclmpi::maxloc $comm]
+                 $intint $maxloc $comm]
 
     # all parallel commands came through
     if {[lindex $res 0 0] == 0} {
         set res [::tclmpi::allreduce \
                      [list [list [compare $retval $result] $rank]] \
-                     tclmpi::intint tclmpi::minloc $comm]
+                     $intint $minloc $comm]
         if {[lindex $res 0 0] == 0} {
             incr fail
             if {$rank == [lindex $res 0 1]} {
@@ -282,8 +320,14 @@ proc par_return {cmd retval {comm tclmpi::comm_world}} {
 # assignments to the individual ranks as the commands.
 # If one of the strings does not match or all command unexpectedly succeeded
 # failure is reported otherwise success.
-proc par_error {cmd retval {comm tclmpi::comm_world}} {
-    global pass fail master int
+proc tclmpi_test::par_error {cmd retval {comm tclmpi::comm_world}} {
+    variable pass
+    variable fail
+    variable master
+    variable int
+    variable intint
+    variable maxloc
+    variable minloc
 
     flush stdout
     ::tclmpi::barrier $comm
@@ -313,13 +357,13 @@ proc par_error {cmd retval {comm tclmpi::comm_world}} {
     set cmd [lindex $cmd $rank]
     set retval [lindex $retval $rank]
     set res [::tclmpi::allreduce [list [list [catch $cmd result] $rank]] \
-                 tclmpi::intint tclmpi::maxloc $comm]
+                 $intint $maxloc $comm]
 
     # at least one parallel command failed
     if {[lindex $res 0 0] == 1} {
         set res [::tclmpi::allreduce \
                      [list [list [compare $retval $result] $rank]] \
-                     tclmpi::intint tclmpi::minloc $comm]
+                     $intint $minloc $comm]
         if {[lindex $res 0 0] > 0} {
             incr pass
             if {$rank == $master} {
@@ -347,21 +391,6 @@ proc par_error {cmd retval {comm tclmpi::comm_world}} {
     return {}
 }
 
-## set variable to different values on different ranks
-# \param name name of variable
-# \param value list of values, one per rank
-# \param comm communicator
-# \return empty
-proc par_set {name value {comm tclmpi::comm_world}} {
-    upvar $name var
-
-    set size [::tclmpi::comm_size $comm]
-    set rank [::tclmpi::comm_rank $comm]
-
-    set var [lindex $value $rank]
-    return {}
-}
-
 ## print result summary
 # \param section number of the test section
 # \return empty
@@ -370,8 +399,12 @@ proc par_set {name value {comm tclmpi::comm_world}} {
 # of the tests. If executed in parallel only the master
 # rank of the world communicator will produce output.
 # 
-proc test_summary {section} {
-    global pass fail rank master
+proc tclmpi_test::test_summary {section} {
+    variable pass
+    variable fail
+    variable rank
+    variable master
+
     if {$rank == $master} {
         puts {------------------------------------------------------------------------------}
         puts [format {test section %02d | total pass: %03d | total fail: %03d} $section $pass $fail]

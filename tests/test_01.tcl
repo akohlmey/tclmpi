@@ -1,7 +1,19 @@
 #!/usr/bin/tclsh
+###########################################################
+# Unit tests for TclMPI - Part 1:
 # tests that can be run with just one process
-source harness.tcl
+# using the fully qualified name of the commands.
+#
+# Copyright (c) 2012 Axel Kohlmeyer <akohlmey@gmail.com>
+# All Rights Reserved.
+# 
+# See the file LICENSE in the top level directory for
+# licensing conditions.
+###########################################################
 
+# import and initialize test harness
+source harness.tcl
+namespace import tclmpi_test::*
 ser_init
 
 # init
@@ -90,30 +102,30 @@ set numargs \
 run_error  [list ::tclmpi::bcast] [list $numargs]
 run_error  [list ::tclmpi::bcast {}] [list $numargs]
 run_error  [list ::tclmpi::bcast {} $auto] [list $numargs]
-run_error  [list ::tclmpi::bcast {} $auto $master] [list $numargs]
-run_error  [list ::tclmpi::bcast {} $auto $master $comm xxx] [list $numargs]
-run_error  [list ::tclmpi::bcast {} $auto $master comm0] \
+run_error  [list ::tclmpi::bcast {} $auto 0] [list $numargs]
+run_error  [list ::tclmpi::bcast {} $auto 0 $comm xxx] [list $numargs]
+run_error  [list ::tclmpi::bcast {} $auto 0 comm0] \
     {{::tclmpi::bcast: unknown communicator: comm0}}
-run_error  [list ::tclmpi::bcast {} $auto $master $null] \
+run_error  [list ::tclmpi::bcast {} $auto 0 $null] \
     {::tclmpi::bcast: mpi invalid communicator}
 run_error  [list ::tclmpi::bcast {{xx 11} {1 2 3} {}} $auto 1 $comm] \
     {::tclmpi::bcast: mpi invalid root}
-run_error  [list ::tclmpi::bcast {} tclmpi::real $master $comm]    \
+run_error  [list ::tclmpi::bcast {} tclmpi::real 0 $comm]    \
     {{::tclmpi::bcast: invalid data type: tclmpi::real}}
 
 # check data type conversions
 run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} {}}            \
-                $auto $master $comm] {{{xx 11} {1 2 3} {}}}
+                $auto 0 $comm] {{{xx 11} {1 2 3} {}}}
 run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} {}}            \
-                $auto $master $self] {{{xx 11} {1 2 3} {}}}
+                $auto 0 $self] {{{xx 11} {1 2 3} {}}}
 run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.0 7 0xff yy} \
-                $int $master $self] {{0 0 0 7 255 0}}
+                $int 0 $self] {{0 0 0 7 255 0}}
 run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.5 yy 1}      \
-                $double $master $self] {{0.0 0.0 2.5 0.0 1.0}}
+                $double 0 $self] {{0.0 0.0 2.5 0.0 1.0}}
 run_return [list ::tclmpi::bcast {-1 2 +3 2.0 7 016}             \
-                $int $master $comm] {{-1 2 3 0 7 14}}
+                $int 0 $comm] {{-1 2 3 0 7 14}}
 run_return [list ::tclmpi::bcast {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
-                $double $master $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
+                $double 0 $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
 
 # scatter
 set numargs \
@@ -121,26 +133,26 @@ set numargs \
 run_error  [list ::tclmpi::scatter] [list $numargs]
 run_error  [list ::tclmpi::scatter {}] [list $numargs]
 run_error  [list ::tclmpi::scatter {} $auto] [list $numargs]
-run_error  [list ::tclmpi::scatter {} $auto $master] [list $numargs]
-run_error  [list ::tclmpi::scatter {} $auto $master $comm xxx] [list $numargs]
-run_error  [list ::tclmpi::scatter {} $auto $master comm0] \
+run_error  [list ::tclmpi::scatter {} $auto 0] [list $numargs]
+run_error  [list ::tclmpi::scatter {} $auto 0 $comm xxx] [list $numargs]
+run_error  [list ::tclmpi::scatter {} $auto 0 comm0] \
     {{::tclmpi::scatter: unknown communicator: comm0}}
-run_error  [list ::tclmpi::scatter {} $auto $master $null] \
+run_error  [list ::tclmpi::scatter {} $auto 0 $null] \
     {{::tclmpi::scatter: does not support data type tclmpi::auto}}
 run_error  [list ::tclmpi::scatter {{xx 11} {1 2 3} {}} $int 1 $comm] \
     {::tclmpi::scatter: mpi invalid root}
-run_error  [list ::tclmpi::scatter {} tclmpi::real $master $comm]    \
+run_error  [list ::tclmpi::scatter {} tclmpi::real 0 $comm]    \
     {{::tclmpi::scatter: invalid data type: tclmpi::real}}
 
 # check data type conversions
 run_return [list ::tclmpi::scatter {{xx 11} {1 2 3} 2.0 7 0xff yy} \
-                $int $master $self] {{0 0 0 7 255 0}}
+                $int 0 $self] {{0 0 0 7 255 0}}
 run_return [list ::tclmpi::scatter {{xx 11} {1 2 3} 2.5 yy 1}      \
-                $double $master $comm] {{0.0 0.0 2.5 0.0 1.0}}
+                $double 0 $comm] {{0.0 0.0 2.5 0.0 1.0}}
 run_return [list ::tclmpi::scatter {-1 2 +3 2.0 7 016}             \
-                $int $master $comm] {{-1 2 3 0 7 14}}
+                $int 0 $comm] {{-1 2 3 0 7 14}}
 run_return [list ::tclmpi::scatter {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
-                $double $master $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
+                $double 0 $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
 
 # allgather
 set numargs \
@@ -172,26 +184,26 @@ set numargs \
 run_error  [list ::tclmpi::gather] [list $numargs]
 run_error  [list ::tclmpi::gather {}] [list $numargs]
 run_error  [list ::tclmpi::gather {} $auto] [list $numargs]
-run_error  [list ::tclmpi::gather {} $auto $master] [list $numargs]
-run_error  [list ::tclmpi::gather {} $auto $master $comm xxx] [list $numargs]
-run_error  [list ::tclmpi::gather {} $auto $master comm0] \
+run_error  [list ::tclmpi::gather {} $auto 0] [list $numargs]
+run_error  [list ::tclmpi::gather {} $auto 0 $comm xxx] [list $numargs]
+run_error  [list ::tclmpi::gather {} $auto 0 comm0] \
     {{::tclmpi::gather: unknown communicator: comm0}}
-run_error  [list ::tclmpi::gather {} $auto $master $null] \
+run_error  [list ::tclmpi::gather {} $auto 0 $null] \
     {{::tclmpi::gather: does not support data type tclmpi::auto}}
 run_error  [list ::tclmpi::gather {{xx 11} {1 2 3} {}} $int 1 $comm] \
     {::tclmpi::gather: mpi invalid root}
-run_error  [list ::tclmpi::gather {} tclmpi::real $master $comm]    \
+run_error  [list ::tclmpi::gather {} tclmpi::real 0 $comm]    \
     {{::tclmpi::gather: invalid data type: tclmpi::real}}
 
 # check data type conversions
 run_return [list ::tclmpi::gather {{xx 11} {1 2 3} 2.0 7 0xff yy} \
-                $int $master $self] {{0 0 0 7 255 0}}
+                $int 0 $self] {{0 0 0 7 255 0}}
 run_return [list ::tclmpi::gather {{xx 11} {1 2 3} 2.5 yy 1}      \
-                $double $master $comm] {{0.0 0.0 2.5 0.0 1.0}}
+                $double 0 $comm] {{0.0 0.0 2.5 0.0 1.0}}
 run_return [list ::tclmpi::gather {-1 2 +3 2.0 7 016}             \
-                $int $master $comm] {{-1 2 3 0 7 14}}
+                $int 0 $comm] {{-1 2 3 0 7 14}}
 run_return [list ::tclmpi::gather {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
-                $double $master $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
+                $double 0 $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
 
 # allreduce
 set numargs \
@@ -325,7 +337,7 @@ run_error  [list ::tclmpi::abort $comm comm0] \
 
 # special case. this has to be at the end
 run_error  [list ::tclmpi::comm_free $null]  \
-    {::tclmpi::comm_free: mpi invalid communicator}
+    {::tclmpi::comm_free: invalid communicator}
 
 # finalize
 run_error  [list ::tclmpi::finalize 0] \

@@ -1,8 +1,19 @@
 #!/usr/bin/tclsh
-# non-destructive tests to be run with 2 MPI tasks.
-source harness.tcl
+###########################################################
+# Unit tests for TclMPI - Part 4:
+# non-destructive tests to be run with 2 MPI tasks
+# using commands from the imported tclmpi namespace
+#
+# Copyright (c) 2012 Axel Kohlmeyer <akohlmey@gmail.com>
+# All Rights Reserved.
+# 
+# See the file LICENSE in the top level directory for
+# licensing conditions.
+###########################################################
 
-# parallel init
+# import and initialize test harness
+source harness.tcl
+namespace import tclmpi_test::*
 par_init
 
 # import all API from namespace
@@ -34,8 +45,10 @@ if {$tcl_version < 8.5} {
     set mpi_auto $tclmpi::auto
     set mpi_double $tclmpi::double
     set mpi_int $tclmpi::int
-    set minloc $tclmpi::minloc
-    set maxloc $tclmpi::maxloc
+    set mpi_intint $tclmpi::intint
+    set mpi_dblint $tclmpi::dblint
+    set mpi_minloc $tclmpi::minloc
+    set mpi_maxloc $tclmpi::maxloc
 } else {
     namespace upvar tclmpi comm_world comm
     namespace upvar tclmpi comm_self self
@@ -58,8 +71,10 @@ if {$tcl_version < 8.5} {
     namespace upvar tclmpi auto   mpi_auto
     namespace upvar tclmpi double mpi_double
     namespace upvar tclmpi int    mpi_int
-    namespace upvar tclmpi minloc minloc
-    namespace upvar tclmpi maxloc maxloc
+    namespace upvar tclmpi intint mpi_intint
+    namespace upvar tclmpi dblint mpi_dblint
+    namespace upvar tclmpi minloc mpi_minloc
+    namespace upvar tclmpi maxloc mpi_maxloc
 }
 
 # size/rank checks
@@ -144,11 +159,11 @@ par_return [list [list comm_free tclmpi::comm3] \
 
 # bcast
 set idata [list {xx 11} {1 2 3} {}]
-par_return [list [list bcast $idata $auto $master $comm] \
-                [list bcast {} $auto $master $comm]]     \
+par_return [list [list bcast $idata $auto 0 $comm] \
+                [list bcast {} $auto 0 $comm]]     \
     [list [list $idata] [list $idata]]
-par_return [list [list bcast {} $auto $master $comm]     \
-                [list bcast $idata $auto $master $comm]] \
+par_return [list [list bcast {} $auto 0 $comm]     \
+                [list bcast $idata $auto 0 $comm]] \
     [list {} {}]
 
 set idata {016 {1 2 3} 2.0 7 0xff yy}
@@ -161,14 +176,14 @@ if {$tcl_version < 8.5} {
 } else {
     set odata {14.0 0.0 2.0 7.0 255.0 0.0}
 }
-par_return [list [list bcast $idata $double $master $comm] \
-                [list bcast {} $double $master $comm]] \
+par_return [list [list bcast $idata $double 0 $comm] \
+                [list bcast {} $double 0 $comm]] \
     [list [list $odata] [list $odata]]
 
 # when mixing $auto with other data types, we have mismatch or low-level
 # MPI calls which is indicated in the truncated error message.
-par_error  [list [list bcast $idata $double $master $comm] \
-                [list bcast {} $auto $master $comm]] \
+par_error  [list [list bcast $idata $double 0 $comm] \
+                [list bcast {} $auto 0 $comm]] \
     [list [list $odata] {bcast: message truncated}]
 
 # scatter
@@ -178,12 +193,12 @@ par_return [list [list scatter {} $int 1 $comm] \
     [list {{14 0 0}} {{7 255 0}}]
 
 if {$tcl_version < 8.5} {
-    par_return [list [list scatter $idata $double $master $comm] \
-                    [list scatter {} $double $master $comm]] \
+    par_return [list [list scatter $idata $double 0 $comm] \
+                    [list scatter {} $double 0 $comm]] \
         [list {{16.0 0.0 2.0}} {{7.0 255.0 0.0}}]
 } else {
-    par_return [list [list scatter $idata $double $master $comm] \
-                    [list scatter {} $double $master $comm]] \
+    par_return [list [list scatter $idata $double 0 $comm] \
+                    [list scatter {} $double 0 $comm]] \
         [list {{14.0 0.0 2.0}} {{7.0 255.0 0.0}}]
 }
 
@@ -192,8 +207,8 @@ set odata {scatter: number of data items must be divisible by the number of proc
 par_error [list [list scatter {} $int 1 $comm] \
                 [list scatter $idata $int 1 $comm]] \
     [list [list $odata] [list $odata]]
-par_error [list [list scatter $idata $double $master $comm] \
-                [list scatter {} $double $master $comm]] \
+par_error [list [list scatter $idata $double 0 $comm] \
+                [list scatter {} $double 0 $comm]] \
     [list [list $odata] [list $odata]]
 
 # allgather
@@ -309,6 +324,27 @@ par_return [list [list allreduce $idata $double $mpi_prod $comm] \
                 [list allreduce $odata $double $mpi_prod $comm]] \
     [list [list $rdata] [list $rdata]]
 
+# pairs
+set idata {{-016 0} {2 0} {1.5 0} {2 -1} {two 0} {0x22 0}}
+set odata {{1 1} {-1 1} {-10 1} {0 1} {1 1} {18 1}}
+set rdata {{1 1} {2 0} {0 0} {2 -1} {1 1} {34 0}}
+par_return [list [list allreduce $idata $mpi_intint $mpi_maxloc $comm] \
+                [list allreduce $odata $mpi_intint $mpi_maxloc $comm]] \
+    [list [list $rdata] [list $rdata]]
+set rdata {{-14 0} {-1 1} {-10 1} {0 1} {0 0} {18 1}}
+par_return [list [list allreduce $idata $mpi_intint $mpi_minloc $comm] \
+                [list allreduce $odata $mpi_intint $mpi_minloc $comm]] \
+    [list [list $rdata] [list $rdata]]
+set idata {{-1e5 0} {2.4 0} {1.5d0 0} {0.2e-1 0} {0.06E+28 0} {0x22 0}}
+set rdata {{1.0 1} {2.4 0} {0.0 0} {0.02 0} {6e+26 0} {34.0 0}}
+par_return [list [list allreduce $idata $mpi_dblint $mpi_maxloc $comm] \
+                [list allreduce $odata $mpi_dblint $mpi_maxloc $comm]] \
+    [list [list $rdata] [list $rdata]]
+set rdata {{-100000.0 0} {-1.0 1} {-10.0 1} {0.0 1} {1.0 1} {18.0 1}}
+par_return [list [list allreduce $idata $mpi_dblint $mpi_minloc $comm] \
+                [list allreduce $odata $mpi_dblint $mpi_minloc $comm]] \
+    [list [list $rdata] [list $rdata]]
+
 # reduce
 set idata {0 1 3 0 1 10}
 set odata {1 -1 0 0 1 18}
@@ -387,6 +423,27 @@ par_return [list [list send $idata $int 1 666 $comm]     \
 set rdata [list 0.0 1.0 2.0 0.0 4.0 5.0 6.0]
 par_return [list [list send $idata $double 1 666 $comm] \
                 [list recv $double 0 $any_tag $comm] ]  \
+    [list {} [list $rdata]]
+
+# pairs
+set idata {{-016 0} {2 0} {1.5 0} {2 -1} {two 0} {0x22 0}}
+set odata {{1 1} {-1 1} {-10 1} {0 1} {1 1} {18 1}}
+set rdata {{1 1} {2 0} {0 0} {2 -1} {1 1} {34 0}}
+par_return [list [list reduce $idata $mpi_intint $mpi_maxloc 1 $comm] \
+                [list reduce $odata $mpi_intint $mpi_maxloc 1 $comm]] \
+    [list {} [list $rdata]]
+set rdata {{-14 0} {-1 1} {-10 1} {0 1} {0 0} {18 1}}
+par_return [list [list reduce $idata $mpi_intint $mpi_minloc 0 $comm] \
+                [list reduce $odata $mpi_intint $mpi_minloc 0 $comm]] \
+    [list [list $rdata] {}]
+set idata {{-1e5 0} {2.4 0} {1.5d0 0} {0.2e-1 0} {0.06E+28 0} {0x22 0}}
+set rdata {{1.0 1} {2.4 0} {0.0 0} {0.02 0} {6e+26 0} {34.0 0}}
+par_return [list [list reduce $idata $mpi_dblint $mpi_maxloc 0 $comm] \
+                [list reduce $odata $mpi_dblint $mpi_maxloc 0 $comm]] \
+    [list [list $rdata] {}]
+set rdata {{-100000.0 0} {-1.0 1} {-10.0 1} {0.0 1} {1.0 1} {18.0 1}}
+par_return [list [list reduce $idata $mpi_dblint $mpi_minloc 1 $comm] \
+                [list reduce $odata $mpi_dblint $mpi_minloc 1 $comm]] \
     [list {} [list $rdata]]
 
 # non-blocking send / blocking recv
