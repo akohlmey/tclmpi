@@ -13,27 +13,3 @@ For compilation and installation instructions, please see the file INSTALL.
 Detailed documentation is available online from the project home page
 and as a bundled PDF file, tclmpi_docs.pdf, as part of the source package.
 
-Version History---------------------------------------------------------
-
-Version 0.1
-  Initial test version, unreleased
-Version 0.2
-  First public version. Supported operations: init, finalize, comm_rank,
-comm_size, comm_split, barrier, bcast, allreduce, send, recv, and probe.
-Version 0.3
-  Added operation: abort. Added unit tests. Converted MPI errors into Tcl 
-errors (so they can be handled with catch), argument testing code refactoring.
-Version 0.4
-  Fixed several bugs, more unit tests, better checking of arguments and
-error reports for it. Update/bugfix to pi.tcl example.
-Version 0.5
-  Fixed a few bugs and significantly cleaned up the argument
-handling. Added some non-blocking operations: isend, irecv, iprobe and
-wait. Added parallel unit tests and wrote a simple test harness for
-it. 
-Version 0.6
-  Made the package a full namespace written in Tcl. Adapted code to use
-Doxygen for generating detailed documentation. Prefixes changed to remove
-leading :: from string constants. Added modified BSD-style license, bundle
-documentation pdf, added examples and unit tests that use namespace import.
-tclmpi::init now manipulates argv and argc directly.
