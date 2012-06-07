@@ -69,14 +69,13 @@ set tstart [clock $tv]
 if { [comm_rank $comm] == $master } {
 
     #
-    # Distribute the data over the workers - the master just waits
-    # for the results
+    # Distribute the data
     #
     set size [comm_size $comm]
 
-    set incrSize [expr {($dataSize+$size-2)/($size-1)}]
+    set incrSize [expr {($dataSize+$size-1)/($size)}]
     set receiver 0
-    for { set start 0 } { $start < $dataSize } { incr start $incrSize } {
+    for { set start $incrSize } { $start < $dataSize } { incr start $incrSize } {
         incr receiver
         set end [expr {$start+$incrSize-1}]
         if { $end > $dataSize } {
@@ -85,15 +84,14 @@ if { [comm_rank $comm] == $master } {
 
         isend [lrange $data $start $end] $mpi_auto $receiver 42 $comm
     }
+    set data [lrange $data 0 [expr {$incrSize-1}]]
 }
 
 #
-# Let the workers do the work
+# Receive data on remote workers and compute global sum
 #
 if { [comm_rank $comm] != $master } {
     set data [recv $mpi_auto $master 42 $comm]
-} else {
-    set data 0   ;# The master should not do anything
 }
 
 set sum [allreduce [sum $data] $mpi_double $mpi_sum $comm]
