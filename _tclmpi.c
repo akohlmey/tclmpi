@@ -530,6 +530,48 @@ struct tclmpi_intint {
 #define TCLMPI_DOUBLE     4  /*!< floating point data type */
 #define TCLMPI_DOUBLE_INT 5  /*!< data type for double/integer pair */
 
+/*! Translate TclMPI strings to MPI constants for reductions
+ * \param opstr string constant describing the operator
+ * \param op pointer to location for storing the MPI constant
+ * \return TCL_OK if the string was recognized else TCL_ERROR
+ *
+ * This is a convenience function to consistently convert
+ * TclMPI string constants representing reduction operators
+ * to their corresponding MPI counterparts.
+ */
+static int tclmpi_get_op(const char *opstr, MPI_Op *op) 
+{
+    if (op == NULL) return TCL_ERROR;
+
+    if (strcmp(opstr,"tclmpi::max") == 0)
+        *op = MPI_MAX;
+    else if (strcmp(opstr,"tclmpi::min") == 0)
+        *op = MPI_MIN;
+    else if (strcmp(opstr,"tclmpi::sum") == 0)
+        *op = MPI_SUM;
+    else if (strcmp(opstr,"tclmpi::prod") == 0)
+        *op = MPI_PROD;
+    else if (strcmp(opstr,"tclmpi::land") == 0)
+        *op = MPI_LAND;
+    else if (strcmp(opstr,"tclmpi::band") == 0)
+        *op = MPI_BAND;
+    else if (strcmp(opstr,"tclmpi::lor") == 0)
+        *op = MPI_LOR;
+    else if (strcmp(opstr,"tclmpi::bor") == 0)
+        *op = MPI_BOR;
+    else if (strcmp(opstr,"tclmpi::lxor") == 0)
+        *op = MPI_LXOR;
+    else if (strcmp(opstr,"tclmpi::bxor") == 0)
+        *op = MPI_BXOR;
+    else if (strcmp(opstr,"tclmpi::maxloc") == 0)
+        *op = MPI_MAXLOC;
+    else if (strcmp(opstr,"tclmpi::minloc") == 0)
+        *op = MPI_MINLOC;
+    else return TCL_ERROR;
+
+    return TCL_OK;
+}
+
 /* translate MPI requests to Tcl strings and back "tclmpi::req%d" */
 
 /*! Linked list entry type for managing MPI requests */
@@ -1703,31 +1745,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    if (strcmp(opstr,"tclmpi::max") == 0)
-        op = MPI_MAX;
-    else if (strcmp(opstr,"tclmpi::min") == 0)
-        op = MPI_MIN;
-    else if (strcmp(opstr,"tclmpi::sum") == 0)
-        op = MPI_SUM;
-    else if (strcmp(opstr,"tclmpi::prod") == 0)
-        op = MPI_PROD;
-    else if (strcmp(opstr,"tclmpi::land") == 0)
-        op = MPI_LAND;
-    else if (strcmp(opstr,"tclmpi::band") == 0)
-        op = MPI_BAND;
-    else if (strcmp(opstr,"tclmpi::lor") == 0)
-        op = MPI_LOR;
-    else if (strcmp(opstr,"tclmpi::bor") == 0)
-        op = MPI_BOR;
-    else if (strcmp(opstr,"tclmpi::lxor") == 0)
-        op = MPI_LXOR;
-    else if (strcmp(opstr,"tclmpi::bxor") == 0)
-        op = MPI_BXOR;
-    else if (strcmp(opstr,"tclmpi::maxloc") == 0)
-        op = MPI_MAXLOC;
-    else if (strcmp(opstr,"tclmpi::minloc") == 0)
-        op = MPI_MINLOC;
-    else {
+    if (tclmpi_get_op(opstr,&op) != TCL_OK) {
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
                          ": unknown reduction operator: ",opstr,NULL);
         return TCL_ERROR;
@@ -1923,31 +1941,7 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    if (strcmp(opstr,"tclmpi::max") == 0)
-        op = MPI_MAX;
-    else if (strcmp(opstr,"tclmpi::min") == 0)
-        op = MPI_MIN;
-    else if (strcmp(opstr,"tclmpi::sum") == 0)
-        op = MPI_SUM;
-    else if (strcmp(opstr,"tclmpi::prod") == 0)
-        op = MPI_PROD;
-    else if (strcmp(opstr,"tclmpi::land") == 0)
-        op = MPI_LAND;
-    else if (strcmp(opstr,"tclmpi::band") == 0)
-        op = MPI_BAND;
-    else if (strcmp(opstr,"tclmpi::lor") == 0)
-        op = MPI_LOR;
-    else if (strcmp(opstr,"tclmpi::bor") == 0)
-        op = MPI_BOR;
-    else if (strcmp(opstr,"tclmpi::lxor") == 0)
-        op = MPI_LXOR;
-    else if (strcmp(opstr,"tclmpi::bxor") == 0)
-        op = MPI_BXOR;
-    else if (strcmp(opstr,"tclmpi::maxloc") == 0)
-        op = MPI_MAXLOC;
-    else if (strcmp(opstr,"tclmpi::minloc") == 0)
-        op = MPI_MINLOC;
-    else {
+    if (tclmpi_get_op(opstr,&op) != TCL_OK) {
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
                          ": unknown reduction operator: ",opstr,NULL);
         return TCL_ERROR;
