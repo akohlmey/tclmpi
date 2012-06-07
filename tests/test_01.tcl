@@ -16,6 +16,20 @@ source harness.tcl
 namespace import tclmpi_test::*
 ser_init
 
+# conv_set and conv_get
+run_return [list ::tclmpi::conv_get] {{tclmpi::error}}
+set numargs "wrong # args: should be \"::tclmpi::conv_set <handler>\""
+run_error  [list ::tclmpi::conv_set] [list $numargs]
+run_error  [list ::tclmpi::conv_set tclmpi::error 0] [list $numargs]
+run_error  [list ::tclmpi::conv_set tclmpi::zero] \
+    {{::tclmpi::conv_set: unknown conversion error handler: tclmpi::zero}}
+run_return [list ::tclmpi::conv_set tclmpi::abort] {}
+run_return [list ::tclmpi::conv_get] {{tclmpi::abort}}
+run_return [list ::tclmpi::conv_set tclmpi::error] {}
+run_return [list ::tclmpi::conv_get] {{tclmpi::error}}
+run_return [list ::tclmpi::conv_set tclmpi::tozero] {}
+run_return [list ::tclmpi::conv_get] {{tclmpi::tozero}}
+
 # init
 run_error  [list ::tclmpi::init 0] \
     [list "wrong # args: should be \"::tclmpi::init\""]
@@ -114,6 +128,20 @@ run_error  [list ::tclmpi::bcast {} tclmpi::real 0 $comm]    \
     {{::tclmpi::bcast: invalid data type: tclmpi::real}}
 
 # check data type conversions
+::tclmpi::conv_set tclmpi::error
+
+run_error  [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.0 7 0xff yy} \
+                $int 0 $self] {{expected integer but got "xx 11"}}
+run_error  [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.5 yy 1}      \
+                $double 0 $self] \
+    {{expected floating-point number but got "xx 11"}}
+run_error  [list ::tclmpi::bcast {-1 2 +3 2.0 7 016}             \
+                $int 0 $comm] {{expected integer but got "2.0"}}
+run_error [list ::tclmpi::bcast {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
+               $double 0 $self] \
+    {{expected floating-point number but got "1.2d0"}}
+
+::tclmpi::conv_set tclmpi::tozero
 run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} {}}            \
                 $auto 0 $comm] {{{xx 11} {1 2 3} {}}}
 run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} {}}            \

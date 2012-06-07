@@ -144,6 +144,8 @@ proc tclmpi_test::par_init {args} {
 
     package require tclmpi
     ::tclmpi::init
+    # keep going with data conversion errors in parallel
+    ::tclmpi::conv_set tclmpi::tozero
     set rank [::tclmpi::comm_rank $comm]
     set size [::tclmpi::comm_size $comm]
 

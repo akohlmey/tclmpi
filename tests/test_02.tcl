@@ -57,6 +57,20 @@ if {$tcl_version < 8.5} {
     namespace upvar tclmpi undefined undefined
 }
 
+# conv_set and conv_get
+run_return [list conv_get] {{tclmpi::error}}
+set numargs "wrong # args: should be \"conv_set <handler>\""
+run_error  [list conv_set] [list $numargs]
+run_error  [list conv_set tclmpi::error 0] [list $numargs]
+run_error  [list conv_set tclmpi::zero] \
+    {{conv_set: unknown conversion error handler: tclmpi::zero}}
+run_return [list conv_set tclmpi::abort] {}
+run_return [list conv_get] {{tclmpi::abort}}
+run_return [list conv_set tclmpi::error] {}
+run_return [list conv_get] {{tclmpi::error}}
+run_return [list conv_set tclmpi::tozero] {}
+run_return [list conv_get] {{tclmpi::tozero}}
+
 # init
 run_error  [list init 0] \
     [list "wrong # args: should be \"init\""]
@@ -152,6 +166,19 @@ run_error  [list bcast {{xx 11} {1 2 3} {}} $auto 1 $comm] \
     {bcast: invalid root}
 
 # check data type conversions
+conv_set tclmpi::error
+run_error  [list bcast {{xx 11} {1 2 3} 2.0 7 0xff yy} \
+                $int 0 $self] {{expected integer but got "xx 11"}}
+run_error  [list bcast {{xx 11} {1 2 3} 2.5 yy 1}      \
+                $double 0 $self] \
+    {{expected floating-point number but got "xx 11"}}
+run_error  [list bcast {-1 2 +3 2.0 7 016}             \
+                $int 0 $comm] {{expected integer but got "2.0"}}
+run_error [list bcast {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
+               $double 0 $self] \
+    {{expected floating-point number but got "1.2d0"}}
+
+conv_set tclmpi::tozero
 run_return [list bcast {{xx 11} {1 2 3} {}}            \
                 $auto 0 $comm] {{{xx 11} {1 2 3} {}}}
 run_return [list bcast {{xx 11} {1 2 3} {}}            \
@@ -164,7 +191,6 @@ run_return [list bcast {-1 2 +3 2.0 7 016}             \
                 $int 0 $comm] {{-1 2 3 0 7 14}}
 run_return [list bcast {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
                 $double 0 $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
-
 
 # scatter
 set numargs \
