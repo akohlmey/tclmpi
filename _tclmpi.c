@@ -174,6 +174,70 @@ THE POSSIBILITY OF SUCH DAMAGE.
  ::tclmpi::finalize
  exit 0
  * \endcode
+ *
+ * \subsection distsum Distributed Sum
+ * This is a small example version that distributes a data set
+ * and computes the sum across all elements in parallel.
+ *
+ * \code {.tcl}
+ #!/bin/sh \
+ exec tclsh "$0" "$@"
+ package require tclmpi 0.9
+
+ # data summation helper function
+ proc sum {data} {
+     set sum 0
+     foreach d $data {
+         set sum [expr {$sum + $d}]
+     }
+     return $sum
+ }
+
+ ::tclmpi::init
+
+ set comm       $tclmpi::comm_world
+ set mpi_sum    $tclmpi::sum
+ set mpi_double $tclmpi::double
+ set mpi_int    $tclmpi::int
+
+ set size [::tclmpi::comm_size $comm]
+ set rank [::tclmpi::comm_rank $comm]
+ set master 0
+
+ # The master creates the list of data
+ #
+ set dataSize 1000000
+ set data {}
+ if { $comm == $master } {
+     set mysum 0
+     for { set i 0 } { $i < $dataSize } { incr i } {
+         lappend data $i
+     }
+ }
+
+ # add padding, so the number of data elements is divisible
+ # by the number of processors as required by tclmpi::scatter
+ set needpad [expr {$dataSize % $size}]
+ set numpad [expr {$needpad ? ($size - $needpad) : 0}]
+ if { [comm_rank $comm] == $master } {
+     for {set i 0} {$i < $numpad} {incr i} {
+         lappend data 0
+     }
+ }
+ set blocksz [expr {($dataSize + $numpad)/ $size}]
+
+ # distribute data and do the summation on each node
+ # the sum the result across all nodes. Note: the data
+ # is integer, but we need to do the full sum in double
+ # precison to avoid overflows.
+ set mydata [::tclmpi::scatter $data $mpi_int $master $comm]
+ set sum [::tclmpi::allreduce [sum $mydata] $mpi_double $mpi_sum $comm]
+
+ if { $comm == $master } {
+     puts "Distributed sum: $sum"
+ }
+ ::tclmpi::finalize
+ * \endcode
  */
 
 /*! \page devguide TclMPI Developer's Guide
