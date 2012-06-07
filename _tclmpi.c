@@ -520,8 +520,11 @@ struct tclmpi_intint {
     int i2; /*!< location data */
 };
 
-/* some symbolic constants */
+/* some symbolic constants. some have multiple uses. */
 
+#define TCLMPI_TOZERO    -4  /*!< convert problematic data items to zero */
+#define TCLMPI_ABORT     -3  /*!< abort on problems */
+#define TCLMPI_ERROR     -2  /*!< flag problems as Tcl errors */
 #define TCLMPI_INVALID   -1  /*!< not ready to handle data */
 #define TCLMPI_NONE       0  /*!< no data type assigned */
 #define TCLMPI_AUTO       1  /*!< the tcl native data type (string) */
@@ -594,6 +597,45 @@ struct  tclmpi_req {
 static tclmpi_req_t *first_req = NULL;
 /*! Request counter. Incremented to get unique strings */
 static int tclmpi_req_cntr = 0;
+
+/*! Selects what to do when a data element in a list cannot
+ *  be successfully converted to the desired data type.
+ *  Default is to throw a Tcl error. */
+static int tclmpi_conv_handler = TCLMPI_ERROR;
+
+/*! Data conversion with with error handling
+ * \param type Tcl data type for calling Tcl_Get<Type>FromObj()
+ * \param in pointer to input object for conversion
+ * \param out pointer to output storage for conversion
+ * \param assign target to assign a zero to for TCLMPI_TOZERO
+ *
+ * This macro enables consistent handling of data conversions.
+ * It also queries the tclmpi_conv_handler variable to jump to
+ * the selected conversion error behavior. For TCLMPI_ERROR 
+ * (the default) a Tcl error is raised and TclMPI returns to
+ * the calling function. For TCLMPI_ABORT and error message
+ * is written to stderr and parallel execution on the current
+ * communicator is terminated via MPI_Abort(). For TCLMPI_TOZERO
+ * the error is silently ignored and the data element handed
+ * in as assign parameter is set to zero. */
+#define TCLMPI_CONV_CHECK(type,in,out,assign)                   \
+    if (Tcl_Get ## type ## FromObj(interp,in,out) != TCL_OK) {  \
+        switch (tclmpi_conv_handler) {                          \
+          case TCLMPI_TOZERO:                                   \
+              Tcl_ResetResult(interp);                          \
+              assign=0;                                         \
+              break;                                            \
+          case TCLMPI_ABORT:                                    \
+              fprintf(stderr,"Error on data element %d: %s\n",  \
+                      i, Tcl_GetStringResult(interp));          \
+              MPI_Abort(comm,i);                                \
+              break;                                            \
+          case TCLMPI_ERROR:                                    \
+          default: /* fallthrough */                            \
+              return TCL_ERROR;                                 \
+              break;                                            \
+        }                                                       \
+    }
 
 /*! Allocate and add an entry to the request map linked list
  * \return the corresponding string label or NULL.
@@ -867,6 +909,92 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
 
     Tcl_Free((char *)argv);
     Tcl_ResetResult(interp);
+    return TCL_OK;
+}
+
+/*! Set error handler for data conversions in TclMPI
+ * \param nodata ignored
+ * \param interp current Tcl interpreter
+ * \param objc number of argument objects
+ * \param objv list of argument object
+ * \return TCL_OK or TCL_ERROR
+ *
+ * This function sets what action TclMPI should take if a conversion
+ * of a data element to the requested integer or double data type fails.
+ * There are currently three handlers implemented: \ref TCLMPI_ERROR, 
+ * \ref TCLMPI_ABORT, and \ref TCLMPI_TOZERO.
+ *
+ * For \ref TCLMPI_ERROR a Tcl error is raised and TclMPI returns to the
+ * calling function. For \ref TCLMPI_ABORT an error message is written to the
+ * error output and parallel execution on the current communicator is
+ * terminated via MPI_Abort(). For \ref TCLMPI_TOZERO the error is silently
+ * ignored and the data element set to zero.
+ *
+ * There is no equivalent MPI function for this, since there are
+ * no data conversions in C or C++.
+ */
+int TclMPI_Conv_set(ClientData nodata, Tcl_Interp *interp,
+                     int objc, Tcl_Obj *const objv[])
+{
+    Tcl_Obj *result;
+    const char *handler;
+
+    if (objc != 2) {
+        Tcl_WrongNumArgs(interp,1,objv,"<handler>");
+        return TCL_ERROR;
+    }
+
+    handler=Tcl_GetString(objv[1]);
+    
+    if (strcmp(handler,"tclmpi::error") == 0)
+        tclmpi_conv_handler = TCLMPI_ERROR;
+    else if (strcmp(handler,"tclmpi::abort") == 0)
+        tclmpi_conv_handler = TCLMPI_ABORT;
+    else if (strcmp(handler,"tclmpi::tozero") == 0)
+        tclmpi_conv_handler = TCLMPI_TOZERO;
+    else {
+        Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
+                         ": unknown conversion error handler: ",handler,NULL);
+        return TCL_ERROR;
+    }
+
+    Tcl_ResetResult(interp);
+    return TCL_OK;
+}
+
+/*! Get error handler string for data conversions in TclMPI
+ * \param nodata ignored
+ * \param interp current Tcl interpreter
+ * \param objc number of argument objects
+ * \param objv list of argument object
+ * \return TCL_OK
+ *
+ * This function returns which error handler is currently active
+ * for data conversions in TclMPI. For details see TclMPI_Conv_set().
+ *
+ * There is no equivalent MPI function for this, since there are
+ * no data conversions in C or C++.
+ */
+int TclMPI_Conv_get(ClientData nodata, Tcl_Interp *interp,
+                     int objc, Tcl_Obj *const objv[])
+{
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp,0,objv,NULL);
+        return TCL_ERROR;
+    }
+
+    switch (tclmpi_conv_handler) {
+      case TCLMPI_ABORT:
+          Tcl_SetObjResult(interp,Tcl_NewStringObj("tclmpi::abort",-1));
+          break;
+      case TCLMPI_TOZERO:
+          Tcl_SetObjResult(interp,Tcl_NewStringObj("tclmpi::tozero",-1));
+          break;
+      default: /* fallthrough */
+      case TCLMPI_ERROR:
+          Tcl_SetObjResult(interp,Tcl_NewStringObj("tclmpi::error",-1));
+          break;
+    }
     return TCL_OK;
 }
 
@@ -1226,10 +1354,8 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
                 return TCL_ERROR;
             idata = (int *)Tcl_Alloc(len*sizeof(int));
             for (i=0; i < len; ++i)
-                if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                    Tcl_ResetResult(interp);
-                    idata[i]=0; /* this is non-fatal by choice */
-                }
+                TCLMPI_CONV_CHECK(Int,ilist[i],idata+i,idata[i]);
+
             MPI_Bcast(&len,1,MPI_INT,root,comm);
             ierr = MPI_Bcast(idata,len,MPI_INT,root,comm);
         } else {
@@ -1250,10 +1376,8 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
                 return TCL_ERROR;
             idata = (double *)Tcl_Alloc(len*sizeof(double));
             for (i=0; i < len; ++i)
-                if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                    Tcl_ResetResult(interp);
-                    idata[i]=0.0; /* this is non-fatal by choice */
-                }
+                TCLMPI_CONV_CHECK(Double,ilist[i],idata+i,idata[i]);
+
             MPI_Bcast(&len,1,MPI_INT,root,comm);
             ierr = MPI_Bcast(idata,len,MPI_DOUBLE,root,comm);
         } else {
@@ -1354,10 +1478,8 @@ int TclMPI_Scatter(ClientData nodata, Tcl_Interp *interp,
         if (rank == root) {
             idata = (int *)Tcl_Alloc(ilen*sizeof(int));
             for (i=0; i < ilen; ++i)
-                if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                    Tcl_ResetResult(interp);
-                    idata[i]=0; /* this is non-fatal by choice */
-                }
+                TCLMPI_CONV_CHECK(Int,ilist[i],idata+i,idata[i]);
+
             ierr=MPI_Scatter(idata,olen,MPI_INT,odata,olen,MPI_INT,root,comm);
             Tcl_Free((char *)idata);
         } else {
@@ -1389,10 +1511,8 @@ int TclMPI_Scatter(ClientData nodata, Tcl_Interp *interp,
         if (rank == root) {
             idata = (double *)Tcl_Alloc(ilen*sizeof(double));
             for (i=0; i < ilen; ++i)
-                if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                    Tcl_ResetResult(interp);
-                    idata[i]=0.0; /* this is non-fatal by choice */
-                }
+                TCLMPI_CONV_CHECK(Double,ilist[i],idata+i,idata[i]);
+
             ierr=MPI_Scatter(idata,olen,MPI_DOUBLE,
                              odata,olen,MPI_DOUBLE,root,comm);
             Tcl_Free((char *)idata);
@@ -1492,10 +1612,8 @@ int TclMPI_Allgather(ClientData nodata, Tcl_Interp *interp,
         idata = (int *)Tcl_Alloc(ilen*sizeof(int));
         odata = (int *)Tcl_Alloc(mlen*sizeof(int));
         for (i=0; i < ilen; ++i)
-            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Int,ilist[i],idata+i,idata[i]);
+
         result = Tcl_NewListObj(0,NULL);
         ierr=MPI_Allgather(idata,ilen,MPI_INT,odata,olen,MPI_INT,comm);
         for (i=0; i < mlen; ++i)
@@ -1523,10 +1641,8 @@ int TclMPI_Allgather(ClientData nodata, Tcl_Interp *interp,
         idata = (double *)Tcl_Alloc(ilen*sizeof(double));
         odata = (double *)Tcl_Alloc(mlen*sizeof(double));
         for (i=0; i < ilen; ++i)
-            if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0.0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Double,ilist[i],idata+i,idata[i]);
+
         result = Tcl_NewListObj(0,NULL);
         ierr=MPI_Allgather(idata,ilen,MPI_DOUBLE,odata,olen,MPI_DOUBLE,comm);
         for (i=0; i < mlen; ++i)
@@ -1624,10 +1740,8 @@ int TclMPI_Gather(ClientData nodata, Tcl_Interp *interp,
         mlen = olen*size;
         idata = (int *)Tcl_Alloc(ilen*sizeof(int));
         for (i=0; i < ilen; ++i)
-            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Int,ilist[i],idata+i,idata[i]);
+
         result = Tcl_NewListObj(0,NULL);
         if (rank == root) {
             odata = (int *)Tcl_Alloc(mlen*sizeof(int));
@@ -1660,10 +1774,8 @@ int TclMPI_Gather(ClientData nodata, Tcl_Interp *interp,
         mlen = olen*size;
         idata = (double *)Tcl_Alloc(ilen*sizeof(double));
         for (i=0; i < ilen; ++i)
-            if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0.0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Double,ilist[i],idata+i,idata[i]);
+
         result = Tcl_NewListObj(0,NULL);
         if (rank == root) {
             odata = (double *)Tcl_Alloc(mlen*sizeof(double));
@@ -1762,10 +1874,8 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
         idata = (int *)Tcl_Alloc(len*sizeof(int));
         odata = (int *)Tcl_Alloc(len*sizeof(int));
         for (i=0; i < len; ++i)
-            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Int,ilist[i],idata+i,idata[i]);
+
         ierr = MPI_Allreduce(idata,odata,len,MPI_INT,op,comm);
         result = Tcl_NewListObj(0,NULL);
         for (i=0; i < len; ++i)
@@ -1782,10 +1892,8 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
         idata = (double *)Tcl_Alloc(len*sizeof(double));
         odata = (double *)Tcl_Alloc(len*sizeof(double));
         for (i=0; i < len; ++i)
-            if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0.0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Double,ilist[i],idata+i,idata[i]);
+
         ierr = MPI_Allreduce(idata,odata,len,MPI_DOUBLE,op,comm);
         result = Tcl_NewListObj(0,NULL);
         for (i=0; i < len; ++i)
@@ -1810,10 +1918,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
                 return TCL_ERROR;
             }
                 
-            if (Tcl_GetIntFromObj(interp,ipair[0],&(idata[i].i1)) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i].i1=0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Int,ipair[0],&(idata[i].i1),idata[i].i1);
             if (Tcl_GetIntFromObj(interp,ipair[1],&(idata[i].i2)) != TCL_OK) {
                 Tcl_ResetResult(interp);
                 Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
@@ -1849,10 +1954,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
                 return TCL_ERROR;
             }
                 
-            if (Tcl_GetDoubleFromObj(interp,ipair[0],&(idata[i].d))!=TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i].d=0.0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Double,ipair[0],&(idata[i].d),idata[i].d);
             if (Tcl_GetIntFromObj(interp,ipair[1],&(idata[i].i)) != TCL_OK) {
                 Tcl_ResetResult(interp);
                 Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
@@ -1961,10 +2063,8 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
             odata = (int *)Tcl_Alloc(len*sizeof(int));
         else odata = NULL;
         for (i=0; i < len; ++i)
-            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Int,ilist[i],idata+i,idata[i]);
+
         ierr = MPI_Reduce(idata,odata,len,MPI_INT,op,root,comm);
         result = Tcl_NewListObj(0,NULL);
         if (rank == root)
@@ -1985,10 +2085,8 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
             odata = (double *)Tcl_Alloc(len*sizeof(double));
         else odata = NULL;
         for (i=0; i < len; ++i)
-            if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0.0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Double,ilist[i],idata+i,idata[i]);
+
         ierr = MPI_Reduce(idata,odata,len,MPI_DOUBLE,op,root,comm);
         result = Tcl_NewListObj(0,NULL);
         if (rank == root)
@@ -2018,10 +2116,7 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
                 return TCL_ERROR;
             }
                 
-            if (Tcl_GetIntFromObj(interp,ipair[0],&(idata[i].i1)) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i].i1=0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Int,ipair[0],&(idata[i].i1),idata[i].i1);
             if (Tcl_GetIntFromObj(interp,ipair[1],&(idata[i].i2)) != TCL_OK) {
                 Tcl_ResetResult(interp);
                 Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
@@ -2065,10 +2160,7 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
                 return TCL_ERROR;
             }
                 
-            if (Tcl_GetDoubleFromObj(interp,ipair[0],&(idata[i].d))!=TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i].d=0.0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Double,ipair[0],&(idata[i].d),idata[i].d);
             if (Tcl_GetIntFromObj(interp,ipair[1],&(idata[i].i)) != TCL_OK) {
                 Tcl_ResetResult(interp);
                 Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
@@ -2162,10 +2254,8 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
             return TCL_ERROR;
         idata = (int *)Tcl_Alloc(len*sizeof(int));
         for (i=0; i < len; ++i)
-            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp); /* this is non-fatal by choice */
-                idata[i]=0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Int,ilist[i],idata+i,idata[i]);
+
         ierr = MPI_Send(idata,len,MPI_INT,dest,tag,comm);
         Tcl_Free((char *)idata);
     } else if (type == TCLMPI_DOUBLE) {
@@ -2175,10 +2265,8 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
             return TCL_ERROR;
         idata = (double *)Tcl_Alloc(len*sizeof(double));
         for (i=0; i < len; ++i)
-            if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp); /* this is non-fatal by choice */
-                idata[i]=0.0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Double,ilist[i],idata+i,idata[i]);
+
         ierr = MPI_Send(idata,len,MPI_DOUBLE,dest,tag,comm);
         Tcl_Free((char *)idata);
     } else {
@@ -2273,10 +2361,8 @@ int TclMPI_Isend(ClientData nodata, Tcl_Interp *interp,
             return TCL_ERROR;
         idata = (int *)Tcl_Alloc(len*sizeof(int));
         for (i=0; i < len; ++i)
-            if (Tcl_GetIntFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Int,ilist[i],idata+i,idata[i]);
+
         req->data = idata;
         ierr = MPI_Isend(idata,len,MPI_INT,dest,tag,comm,req->req);
         data = idata;
@@ -2287,10 +2373,8 @@ int TclMPI_Isend(ClientData nodata, Tcl_Interp *interp,
             return TCL_ERROR;
         idata = (double *)Tcl_Alloc(len*sizeof(double));
         for (i=0; i < len; ++i)
-            if (Tcl_GetDoubleFromObj(interp,ilist[i],idata+i) != TCL_OK) {
-                Tcl_ResetResult(interp);
-                idata[i]=0.0; /* this is non-fatal by choice */
-            }
+            TCLMPI_CONV_CHECK(Double,ilist[i],idata+i,idata[i]);
+
         req->data = idata;
         ierr = MPI_Isend(idata,len,MPI_DOUBLE,dest,tag,comm,req->req);
         data = idata;
@@ -3034,6 +3118,10 @@ static void tclmpi_init_api(Tcl_Interp *interp)
     memset(&MPI_COMM_INVALID,255,sizeof(MPI_Comm));
 
     Tcl_CreateObjCommand(interp,"tclmpi::init",TclMPI_Init,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"tclmpi::conv_set",TclMPI_Conv_set,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"tclmpi::conv_get",TclMPI_Conv_get,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"tclmpi::finalize",TclMPI_Finalize,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);

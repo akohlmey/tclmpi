@@ -41,11 +41,15 @@ namespace eval tclmpi {
     variable maxloc  tclmpi::maxloc  ;#< maximum and location operation
     variable minloc  tclmpi::minloc  ;#< minimum and location operation
 
+    variable error   tclmpi::error   ;#< throw a Tcl error when a data conversion fails
+    variable abort   tclmpi::abort   ;#< call MPI_Abort() when a data conversion fails
+    variable tozero  tclmpi::tozero  ;#< silently assign zero for failed data conversions
+
     variable undefined  tclmpi::undefined  ;#< constant to indicate an undefined number
 
     # export all API functions
     namespace export \
-        init finalize abort \
+        init conv_set conv_get finalize abort \
         comm_size comm_rank comm_split comm_free \
         barrier bcast scatter allgather gather reduce allreduce \
         send isend recv irecv probe iprobe \
@@ -69,6 +73,38 @@ namespace eval tclmpi {
     #
     # For implementation details see TclMPI_Init().
     proc init {} {}
+
+    ## Set the error handler for TclMPI data conversions
+    # \param handler string constant for error handler
+    #
+    # This function sets what action TclMPI should take
+    # if a data conversion to tclmpi::int or tclmpi::double fails.
+    # When using data types other than tclmpi::auto, the corresponding
+    # data needs to be converted from the internal Tcl representatin to
+    # the selected native format. However, this does not always succeed
+    # for a variety of reasons. With this function TclMPI allows the 
+    # programmer to define how this is handled. 
+    # There are currently three handlers available: tclmpi::error (the
+    # default setting), tclmpi::abort, and tclmpi::tozero.
+    # For tclmpi::error a Tcl error is raised that can be intercepted
+    # with catch and TclMPI immediately returns to the calling function.
+    # For tclmpi::abort an error message is written directly to the screen
+    # and parallel execution on the current communicator is terminated via
+    # MPI_Abort(). For tclmpi::tozero the error is silently ignored and
+    # the data element set to zero. This command has no return value.
+    #
+    # For implementation details see TclMPI_Conv_set().
+    proc conv_set {handler} {}
+
+    ## Return a string constant naming the error handler for TclMPI data conversions
+    # \return string constant for error handler
+    #
+    # This function allows to query which error handler is currently
+    # active for Tcl data conversions inside TclMPI. For details on
+    # the error handlers, see tclmpi::conv_set.
+    #
+    # For implementation details see TclMPI_Conv_get().
+    proc conv_get {} {}
 
     ## Shut down the MPI environment from Tcl
     #
