@@ -8,4 +8,4 @@ compiler:
   - gcc
 
 script:
-  - make check TCLINCLUDE=-I/usr/include/tcl
+  - make TCLINCLUDE=-I/usr/include/tcl
