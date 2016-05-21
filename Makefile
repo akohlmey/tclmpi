@@ -15,7 +15,7 @@ STUBS=-DUSE_TCL_STUBS
 # platform specific compiler flags:
 ## Linux and multiple other platforms with GCC (generic)
 COMPILE=-fPIC  -O2 -Wall -W
-DYNLINK=-shared 
+DYNLINK=-shared
 ## Linux x86 32-bit:
 #COMPILE=-fPIC -m32 -O2 -Wall -W
 #DYNLINK=-shared -m32
@@ -40,8 +40,8 @@ DYNLINK=-shared
 # set, if needed to match Tcl installation
 TCLINCLUDE=-I/usr/include
 TCLLIBRARY=-L/usr/lib64 -L/usr/lib
-TCLSTUBLIB=-ltclstub8.5
-TCLLIB=-ltcl8.5 -dl
+TCLSTUBLIB=-ltclstub8.6
+TCLLIB=-ltcl8.6 -dl
 
 # set, if needed, to match MPI installation
 # not needed if MPI compiler wrappers work
