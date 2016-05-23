@@ -367,7 +367,9 @@ THE POSSIBILITY OF SUCH DAMAGE.
  * that is appended to the current result list.
  */
 
-/* fallback */
+/*! Define for backward compatibility with old MPI libraries.
+ *  We need to be able to detect the API of MPI_VERSION > 1 for
+ *  clean error handling and making MPI errors catch-able. */
 #if !defined(MPI_VERSION)
 #define MPI_VERSION 1
 #endif
