@@ -2345,6 +2345,8 @@ int TclMPI_Isend(ClientData nodata, Tcl_Interp *interp,
     req->type = type;
     ierr = MPI_SUCCESS;
     data = NULL;
+    req->len = TCLMPI_INVALID;
+    req->comm = comm;
 
     Tcl_IncrRefCount(objv[1]);
     if (type == TCLMPI_AUTO) {
@@ -2858,7 +2860,7 @@ int TclMPI_Iprobe(ClientData nodata, Tcl_Interp *interp,
  * the tclmpi_req_t object, if the receive still needs to be posted. If
  * yes, then we need to do about the same procedure as for a blocking
  * receive, i.e. call MPI_Probe to determine the size of the receive
- * buffer, allocated that buffer and the post a blocking receive. If
+ * buffer, allocate that buffer and then post a blocking receive. If
  * no, we call MPI_Wait to wait until the non-blocking receive is
  * completed. In both cases, the result needed to be converted to Tcl
  * objects and passed to the calling procedure as Tcl return
