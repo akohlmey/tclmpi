@@ -4,12 +4,8 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y tcl-dev mpi-default-bin mpi-default-dev
 
-install:
-  - export TCLVERSION=`pkg-config tcl --modversion | sed -e 's,\.[0-9]\+$,,'`
-  - export TCLINCLUDE=`pkg-config tcl --cflags`
-
 compiler:
   - gcc
 
 script:
-  - make TCLINCLUDE="${TCLINCLUDE}" TCLVERSION="${TCLVERSION}"
+  - make TCLINCLUDE="-I/usr/include/tcl" TCLVERSION="8.5"
