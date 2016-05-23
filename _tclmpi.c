@@ -1224,7 +1224,6 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
 int TclMPI_Comm_free(ClientData nodata, Tcl_Interp *interp,
                       int objc, Tcl_Obj *const objv[])
 {
-    Tcl_Obj *result;
     const char *label;
     MPI_Comm comm;
     int ierr;
@@ -2570,7 +2569,6 @@ int TclMPI_Irecv(ClientData nodata, Tcl_Interp *interp,
 {
     tclmpi_req_t *req;
     const char *reqlabel;
-    void *data;
     MPI_Comm comm;
     MPI_Status status;
     int source,tag,type,pending,len,ierr;
@@ -2654,7 +2652,7 @@ int TclMPI_Irecv(ClientData nodata, Tcl_Interp *interp,
 
         /* posting the receive failed */
         if (tclmpi_errcheck(interp,ierr,objv[0]) != TCL_OK) {
-            Tcl_Free((char *)data);
+            Tcl_Free((char *)req->data);
             tclmpi_del_req(req);
             return TCL_ERROR;
         }
