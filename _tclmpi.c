@@ -2936,8 +2936,7 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
 
         /* already posted non-blocking receive */
         if (req->data != NULL) {
-            ierr = MPI_Wait(req->req,&status);
-            
+
             if (statvar != NULL) {
                 Tcl_Obj *var;
                 int len_char,len_int,len_double;
@@ -2982,6 +2981,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
             } else {
                 result = Tcl_NewListObj(0,NULL);
             }
+            Tcl_SetObjResult(interp,result);
+
         } else {
 
             /* receive not posted so far, we can do a blocking receive now */
@@ -2997,8 +2998,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
                 else 
                     ierr=MPI_Recv(idata,len,MPI_CHAR,source,tag,req->comm,MPI_STATUS_IGNORE);
 
-                result = Tcl_NewStringObj(idata,len);
                 req->data = idata;
+                result = Tcl_NewStringObj(idata,len);
 
             } else if (req->type == TCLMPI_INT) {
                 int *idata;
