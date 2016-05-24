@@ -1,7 +1,8 @@
+## \file harness.tcl
 ###########################################################
 # Test harness for TclMPI
 #
-# Copyright (c) 2012 Axel Kohlmeyer <akohlmey@gmail.com>
+# Copyright (c) 2012,2016 Axel Kohlmeyer <akohlmey@gmail.com>
 # All Rights Reserved.
 # 
 # See the file LICENSE in the top level directory for
@@ -20,6 +21,7 @@
 # extend package search path to find TclMPI
 set auto_path [concat [file normalize ..] $auto_path]
 
+## TclMPI test harness namespace, tclmpi_test
 namespace eval tclmpi_test {
     
     set version "@VERSION@"  ;#< version of the package
