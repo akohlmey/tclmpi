@@ -1,6 +1,6 @@
 #!/usr/bin/make
 SHELL=/bin/sh
-VERSION=0.96
+VERSION=0.99
 # please adjust to your local setup
 ########### configuration section ###########
 # MPI C-compiler wrapper
@@ -42,7 +42,7 @@ TCLVERSION=8.6
 TCLINCLUDE=-I/usr/include
 TCLLIBRARY=-L/usr/lib64 -L/usr/lib
 TCLSTUBLIB=-ltclstub$(TCLVERSION)
-TCLLIB=-ltcl$(TCLVERSION) -dl
+TCLLIB=-ltcl$(TCLVERSION)
 
 # set, if needed, to match MPI installation
 # not needed if MPI compiler wrappers work
