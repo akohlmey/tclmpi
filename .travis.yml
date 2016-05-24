@@ -8,4 +8,4 @@ compiler:
   - gcc
 
 script:
-  - make TCLINCLUDE=-I/usr/include/tcl
+  - make TCLINCLUDE="-I/usr/include/tcl" TCLVERSION="8.5"

@@ -1,6 +1,6 @@
 #!/usr/bin/make
 SHELL=/bin/sh
-VERSION=0.95
+VERSION=0.96
 # please adjust to your local setup
 ########### configuration section ###########
 # MPI C-compiler wrapper
@@ -38,10 +38,11 @@ DYNLINK=-shared
 #DYNLINK= -shared 
 
 # set, if needed to match Tcl installation
+TCLVERSION=8.6
 TCLINCLUDE=-I/usr/include
 TCLLIBRARY=-L/usr/lib64 -L/usr/lib
-TCLSTUBLIB=-ltclstub8.6
-TCLLIB=-ltcl8.6 -dl
+TCLSTUBLIB=-ltclstub$(TCLVERSION)
+TCLLIB=-ltcl$(TCLVERSION) -dl
 
 # set, if needed, to match MPI installation
 # not needed if MPI compiler wrappers work
@@ -87,10 +88,10 @@ check-static: version tclmpish
 _tclmpi.so:  _tclmpi.o
 	$(LD) $(DYNLINK) $(LDFLAGS) -o $@ $^ $(DYNLIBS)
 
-_tclmpi.o: _tclmpi.c
+_tclmpi.o: _tclmpi.c pkgIndex.tcl
 	$(CC) $(CFLAGS) $(STUBS) -c $<
 
-tclmpish: _tclmpi.c
+tclmpish: _tclmpi.c pkgIndex.tcl
 	$(LD) $(CFLAGS) -DBUILD_TCLMPISH $< -o $@ $(LDFLAGS) $(LIBS)
 
 #############################################
