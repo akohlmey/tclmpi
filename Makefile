@@ -111,7 +111,7 @@ tar: doc
 	rm -rvf $(NAME)-$(VERSION)
 	mkdir $(NAME)-$(VERSION)
 	cp $(NAME)-$(VERSION)-docs.pdf $(NAME)-$(VERSION)/
-	cp Makefile *.in _tclmpi.c README INSTALL LICENSE $(NAME)-$(VERSION)
+	cp Makefile *.in _tclmpi.c README.md INSTALL LICENSE $(NAME)-$(VERSION)
 	mkdir $(NAME)-$(VERSION)/tests
 	cp tests/README $(NAME)-$(VERSION)/tests
 	cp tests/*.in $(NAME)-$(VERSION)/tests
