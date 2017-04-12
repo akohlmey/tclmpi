@@ -18,6 +18,9 @@ home page and  as a bundled PDF  file,  tclmpi_docs.pdf, as part  of the
 source package.
 
 Citing:
+If needed, you can cite TclMPI as:
+Axel Kohlmeyer. (2017). TclMPI: Release 1.0 [Data set]. Zenodo. 
+[![DOI](https://www.zenodo.org/badge/4368856.svg)](https://www.zenodo.org/badge/latestdoi/4368856)
 
 Acknowledgements:
 
