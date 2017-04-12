@@ -1,6 +1,6 @@
 #!/usr/bin/make
 SHELL=/bin/sh
-VERSION=0.99
+VERSION=1.0
 # please adjust to your local setup
 ########### configuration section ###########
 # MPI C-compiler wrapper

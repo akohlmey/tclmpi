@@ -17,6 +17,7 @@ INSTALL.   Detailed documentation is   available online from the project
 home page and  as a bundled PDF  file,  tclmpi_docs.pdf, as part  of the
 source package.
 
+Citing:
 
 Acknowledgements:
 

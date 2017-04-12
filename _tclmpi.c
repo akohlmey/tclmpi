@@ -4,7 +4,7 @@
 
 /*! \page copyright Copyright and License for TclMPI
  *
- * Copyright (c) 2012,2016 Axel Kohlmeyer <akohlmey@gmail.com>
+ * Copyright (c) 2012,2016,2017 Axel Kohlmeyer <akohlmey@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
