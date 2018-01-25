@@ -8,5 +8,5 @@ compiler:
   - gcc
 
 script:
-  - make TCLINCLUDE="-I/usr/include/tcl" TCLVERSION="8.5" check-static
+  - make TCLINCLUDE="-I/usr/include/tcl" TCLVERSION="8.6" check-static
 
