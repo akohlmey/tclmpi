@@ -20,7 +20,6 @@ jobs:
     - name: Install MPI and Tcl
       run: |
         brew install open-mpi
-        brew install tcl-tk
 
     - name: Building TclMPI via CMake
       shell: bash
