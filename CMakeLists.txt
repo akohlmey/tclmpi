@@ -14,7 +14,11 @@ set(MPI_CXX_SKIP_MPICXX TRUE)
 
 # find packages
 find_package(MPI REQUIRED)
-find_package(TCL)
+if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
+  find_package(TCL PATHS /usr/local/Cellar/tcl-tk/8.6.11 /usr/local/Cellar/tcl-tk/8.6)
+else()
+  find_package(TCL)
+endif()
 if(!TCL_FOUND)
   message(FATAL_ERROR "Must have Tcl installed to build TclMPI")
 endif()
