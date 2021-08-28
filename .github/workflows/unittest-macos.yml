@@ -26,7 +26,7 @@ jobs:
       shell: bash
       run: |
         cmake -B build .
-        cmake --build build
+        cmake --build build --verbose
 
     - name: Run Tests
       working-directory: build
