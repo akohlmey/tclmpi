@@ -14,9 +14,12 @@ set(MPI_CXX_SKIP_MPICXX TRUE)
 
 # find packages
 find_package(MPI REQUIRED)
-find_package(TCL REQUIRED)
+find_package(TCL)
+if(!TCL_FOUND)
+  message(FATAL_ERROR "Must have Tcl installed to build TclMPI")
+endif()
 if(ENABLE_TCL_STUBS)
-  find_package(TclStub REQUIRED)
+  find_package(TclStub)
 endif()
 find_package(Doxygen OPTIONAL_COMPONENTS dot)
 
