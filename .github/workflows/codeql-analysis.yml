@@ -1,0 +1,32 @@
+# GitHub action to run static code analysis on TclMPI
+name: "CodeQL Code Analysis"
+
+on:
+  push:
+    branches: [cmake-support]
+
+jobs:
+  analyze:
+    name: Analyze
+    if: ${{ github.repository == 'akohlmey/tclmpi' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v1
+      with:
+        languages: cpp
+
+    - name: Building TclMPI via CMake
+      shell: bash
+      run: |
+        cmake -B build .
+        cmake --build build --verbose
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v1
