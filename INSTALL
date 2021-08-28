@@ -1,25 +1,20 @@
 Compilation:
 
-The package currently  consist of a single C  source  file which usually
-will  be compiled for  dynamic linkage, but  can also be compiled into a
-new Tcl  interpreter  with  the  TclMPI  package  included (required  on
-platforms like Cray XT, XE, or XK machines that need static linkage) and
-two Tcl script files tclmpi.tcl and pkgIndex.tcl,  that hook it into the
-Tcl  interpreter.   The corresponding  commands   for Linux  and  MacOSX
-systems are included in the provided makefile.  All  that is required to
-compile the  package is an installed  Tcl development system for Tcl 8.4
-or   higher and reasonably   well  MPI-2 compatible installation.   When
-compiled for a  dynamically loaded  shared object (DSO),  MPI has  to be
-compiled and linked as shared libraries (this is  the default OpenMPI on
-Linux, but your mileage may vary).  To update the documentation you will
-also need doxygen 1.8 or later and its prerequistes ((pdf)latex, dvi2ps,
-ghostscript, graphviz) installed.
+The core parts  of the package consist  of a single C  source file which
+can be compiled either for dynamic linkage  or to be compiled into a new
+Tcl  interpreter with  the TclMPI  package included  and two  Tcl script
+files tclmpi.tcl and  pkgIndex.tcl, that interface the  compiled code to
+the Tcl  interpreter.  In addition a  folder with examples and  a folder
+with unittests and a custom test harness are provided.
 
-As of May 25  2012 the code has  been  tested on  32-bit and 64-bit  x86
-Linux platforms with OpenMPI, MVAPICH, Cray MPT and SGI-MPT, Tcl 8.4 and
-8.5.  OpenMPI and MVAPICH complete all tests, however MVAPICH fails some
-due to differences in the error messages (needs to  be fixed in the test
-suite).  SGI-MPT has problems with MPI_COMM_NULL (segfault).
+The TclMPI package  uses CMake for building,  installation, testing, and
+packaging.  This requires  a somewhat modern CMake  version (3.16).  You
+need  to run  CMake the  usual way  `cmake -B  build-folder .`  and then
+`cmake   --build    build-folder`,   followed   by    `cmake   --install
+build-folder`. Tcl version 8.6 with support for development is required.
+
+Documentation in HTML and PDF format is generated from doxygen and
+pdflatex, if available.
 
 To compile the package adjust the settings in  the Makefile according to
 your platform, MPI and Tcl installation.  Typical settings for Linux and
@@ -33,12 +28,16 @@ updated and "make all" will run all steps together.
 
 Installation:
 
-To install you can create a  directory, e.g.  /usr/local/libexec/tclmpi,
-and  copy the files _tclmpi.so,  tclmpi.tcl and pkgIndex.tcl into it. If
-you     then     use     the    command   'set       auto_path   [concat
-/usr/local/libexec/tclmpi $auto_path]' in  your .tclshrc or  .vmdrc, you
-can load the  tclmpi wrappers  on demand simply   by using the   command
-'package require tclmpi'. For the   static executable you only need   to
-copy  the files  tclmpi.tcl  and  pkgIndex.tcl  and then   copy tclmpish
-somewhere where it is in  your path. In  that case the startup file will
-be called .tclmpishrc or tclmpi.rc if you compile on windows.
+To install you choose a suitable prefix folder with `-DCMAKE_INSTALL_PREFIX`
+when configuring with CMake and then can use `cmake --install <builddir>`
+e.g.  /usr/local. The files _tclmpi.so,  tclmpi.tcl and pkgIndex.tcl would
+then be installed into /usr/local/lib64/tcl8.6/tclmpi1.1. To enable loading
+the plugin 'set auto_path [concat /usr/local/lib64/tcl8.6 $auto_path]' in
+your .tclshrc or set the environment variable TCLLIBPATH to include that
+folder.  One can load the  tclmpi wrappers  on demand simply   by using the   command
+'package require tclmpi'.
+
+Testing and packaging:
+
+The included unit tests can be run (in serial and parallel) using the `ctest`
+command, and the `cpack` command can be used to produce binary packages.

@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2012,2016,2017 Axel Kohlmeyer <akohlmey@gmail.com>
 # All Rights Reserved.
-# 
+#
 # See the file LICENSE in the top level directory for
 # licensing conditions.
 ###########################################################
@@ -23,8 +23,8 @@ set auto_path [concat [file normalize ..] $auto_path]
 
 ## TclMPI test harness namespace, tclmpi_test
 namespace eval tclmpi_test {
-    
-    set version "@VERSION@"  ;#< version of the package
+
+    set version "@PROJECT_VERSION@"  ;#< version of the package
 
     # define some convenience variables
     variable comm   tclmpi::comm_world ;#< shortcut for world communicator
@@ -51,7 +51,7 @@ namespace eval tclmpi_test {
 # \param cmd string representing the command. will be truncated as needed.
 # \param result string indicating the result (PASS or FAIL/reason)
 # \return the formatted string
-# 
+#
 # This function will format a test summary message, so that it does
 # not break the output on a regular terminal screen. The first column
 # will be the total number of the test computed from the sum of passed
@@ -76,7 +76,7 @@ proc tclmpi_test::test_format {kind cmd result} {
 # \param reflist list of strings that have to appear in the result
 # \param result result string
 # \return 1 if all reflist strings were found in result
-# 
+#
 # This function does an inexact comparison of the reference data
 # to the actual result. The reference is a list of strings, each
 # of which has to be matched in a case insensitive string search.
@@ -317,8 +317,8 @@ proc tclmpi_test::par_return {cmd retval {comm tclmpi::comm_world}} {
 #
 # This function executes the lists command lines passed in $cmd in parallel
 # each command taken from the list based on the rank of the individual MPI
-# task on the communicator and intercepts its resulting error message or 
-# return value using the 'catch' command. It is then checked if one of the 
+# task on the communicator and intercepts its resulting error message or
+# return value using the 'catch' command. It is then checked if one of the
 # commands failed as expected and actual return value are then compared
 # against the expected reference passed in the $retval list with similar
 # assignments to the individual ranks as the commands.
@@ -402,7 +402,7 @@ proc tclmpi_test::par_error {cmd retval {comm tclmpi::comm_world}} {
 # This function will print a nicely formatted summary
 # of the tests. If executed in parallel only the master
 # rank of the world communicator will produce output.
-# 
+#
 proc tclmpi_test::test_summary {section} {
     variable pass
     variable fail

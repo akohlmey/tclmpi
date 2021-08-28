@@ -13,3 +13,4 @@ tests/harness.tcl
 tclmpi-*.tar.gz
 tclmpi-*docs.pdf
 latex
+build*

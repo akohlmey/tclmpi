@@ -6,7 +6,7 @@ some additional  bundled   Tcl script  code,  additional  commands   are
 provided that   allow to run   Tcl scripts in  parallel via  "mpirun" or
 "mpiexec" similar to C, C++ or Fortran programs.
 
-Homepage:
+## Homepage:
 
 The main author of this package is Axel Kohlmeyer  and you can reach him
 at <akohlmey@gmail.com>.  The  official  homepage  for this  project  is
@@ -17,12 +17,12 @@ INSTALL.   Detailed documentation is   available online from the project
 home page and  as a bundled PDF  file,  tclmpi_docs.pdf, as part  of the
 source package.
 
-Citing:
+## Citing:
 If needed, you can cite TclMPI as:
-Axel Kohlmeyer. (2017). TclMPI: Release 1.0 [Data set]. Zenodo. 
+Axel Kohlmeyer. (2021). TclMPI: Release 1.1 [Data set]. Zenodo.
 [![DOI](https://www.zenodo.org/badge/4368856.svg)](https://www.zenodo.org/badge/latestdoi/4368856)
 
-Acknowledgements:
+## Acknowledgements:
 
 Thanks to Arjen Markus and Chris MacDermaid  for encouragement and (lots
 of) constructive criticism, that has  helped enourmously  to develop the

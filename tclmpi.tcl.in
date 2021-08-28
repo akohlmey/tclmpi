@@ -14,7 +14,7 @@
 ## TclMPI package namespace, tclmpi
 namespace eval tclmpi {
 
-    variable version "@VERSION@"   ;#< version number of this package
+    variable version "@PROJECT_VERSION@"   ;#< version number of this package
 
     variable auto   tclmpi::auto   ;#< constant for automatic data type
     variable int    tclmpi::int    ;#< constant for integer data type
