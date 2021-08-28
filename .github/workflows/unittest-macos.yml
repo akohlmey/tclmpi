@@ -1,5 +1,5 @@
-# GitHub action to build TclMPI on Linux and run unit tests
-name: "Unittest for Linux"
+# GitHub action to build TclMPI on macOS and run unit tests
+name: "Unittest for macOS"
 
 on:
   push:
@@ -7,9 +7,9 @@ on:
 
 jobs:
   build:
-    name: Linux Unit Test
+    name: macOS Unit Test
     if: ${{ github.repository == 'akohlmey/tclmpi' }}
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
     - name: Checkout repository
@@ -19,8 +19,8 @@ jobs:
 
     - name: Install MPI and Tcl
       run: |
-        sudo apt-get update
-        sudo apt-get install mpi-default-bin mpi-default-dev ninja-build tcl tcl-dev
+        brew install open-mpi
+        brew install tcl-tk
 
     - name: Building TclMPI via CMake
       shell: bash
