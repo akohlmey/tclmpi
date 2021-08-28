@@ -17,14 +17,11 @@ jobs:
       with:
         fetch-depth: 2
 
-    - name: Create Build Environment
-      run: mkdir build
-
     - name: Building TclMPI via CMake
       shell: bash
-      working-directory: build
       run: |
-        cmake --build . --parallel 2
+        cmake -B build .
+        cmake --build build
 
     - name: Run Tests
       working-directory: build
