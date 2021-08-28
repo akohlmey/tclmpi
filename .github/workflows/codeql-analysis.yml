@@ -17,6 +17,11 @@ jobs:
       with:
         fetch-depth: 2
 
+    - name: Install MPI and Tcl
+      run: |
+        sudo apt-get update
+        sudo apt-get install mpi-default-bin mpi-default-dev ninja-build tcl tcl-dev
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
       with:
