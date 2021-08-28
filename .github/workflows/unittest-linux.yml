@@ -9,7 +9,7 @@ jobs:
   build:
     name: Linux Unit Test
     if: ${{ github.repository == 'akohlmey/tclmpi' }}
-    runs-on: linux
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
