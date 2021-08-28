@@ -1,0 +1,32 @@
+# GitHub action to build TclMPI on Linux and run unit tests
+name: "Unittest for Linux"
+
+on:
+  push:
+    branches: [cmake-support]
+
+jobs:
+  build:
+    name: Linux Unit Test
+    if: ${{ github.repository == 'tclmpi/tclmpi' }}
+    runs-on: linux
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Create Build Environment
+      run: mkdir build
+
+    - name: Building TclMPI via CMake
+      shell: bash
+      working-directory: build
+      run: |
+        cmake --build . --parallel 2
+
+    - name: Run Tests
+      working-directory: build
+      shell: bash
+      run: ctest -V
