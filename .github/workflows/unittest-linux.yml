@@ -16,6 +16,10 @@ jobs:
       uses: actions/checkout@v2
       with:
         fetch-depth: 2
+    - name: Install MPI and Tcl
+      run: |
+        sudo apt-get update
+        sudo apt-get install mpi-default-bin mpi-default-dev ninja-build tcl tcl-dev
 
     - name: Building TclMPI via CMake
       shell: bash
