@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     name: Linux Unit Test
-    if: ${{ github.repository == 'tclmpi/tclmpi' }}
+    if: ${{ github.repository == 'akohlmey/tclmpi' }}
     runs-on: linux
 
     steps:
