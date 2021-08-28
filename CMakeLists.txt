@@ -14,11 +14,7 @@ set(MPI_CXX_SKIP_MPICXX TRUE)
 
 # find packages
 find_package(MPI REQUIRED)
-if("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-  find_package(TCL PATHS /usr/local/Cellar/tcl-tk/8.6.11 /usr/local/Cellar/tcl-tk/8.6)
-else()
-  find_package(TCL)
-endif()
+find_package(TCL)
 if(!TCL_FOUND)
   message(FATAL_ERROR "Must have Tcl installed to build TclMPI")
 endif()
@@ -119,24 +115,25 @@ add_test(NAME RunShell04
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 set_tests_properties(RunShell04 PROPERTIES
   PASS_REGULAR_EXPRESSION ".*test section 04.*total fail: 000.*")
-
-add_test(NAME RunPackage01
-  COMMAND ${CMAKE_SOURCE_DIR}/tests/test_01.tcl
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-set_tests_properties(RunPackage01 PROPERTIES
-  PASS_REGULAR_EXPRESSION ".*test section 01.*total fail: 000.*")
-add_test(NAME RunPackage02
-  COMMAND ${CMAKE_SOURCE_DIR}/tests/test_02.tcl
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-set_tests_properties(RunPackage02 PROPERTIES
-  PASS_REGULAR_EXPRESSION ".*test section 02.*total fail: 000.*")
-add_test(NAME RunPackage03
-  COMMAND mpirun -np 2 ${CMAKE_SOURCE_DIR}/tests/test_03.tcl
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-set_tests_properties(RunPackage03 PROPERTIES
-  PASS_REGULAR_EXPRESSION ".*test section 03.*total fail: 000.*")
-add_test(NAME RunPackage04
-  COMMAND mpirun -np 2 ${CMAKE_SOURCE_DIR}/tests/test_04.tcl
-  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-set_tests_properties(RunPackage04 PROPERTIES
-  PASS_REGULAR_EXPRESSION ".*test section 04.*total fail: 000.*")
+if(NOT ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"))
+  add_test(NAME RunPackage01
+    COMMAND ${CMAKE_SOURCE_DIR}/tests/test_01.tcl
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  set_tests_properties(RunPackage01 PROPERTIES
+    PASS_REGULAR_EXPRESSION ".*test section 01.*total fail: 000.*")
+  add_test(NAME RunPackage02
+    COMMAND ${CMAKE_SOURCE_DIR}/tests/test_02.tcl
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  set_tests_properties(RunPackage02 PROPERTIES
+    PASS_REGULAR_EXPRESSION ".*test section 02.*total fail: 000.*")
+  add_test(NAME RunPackage03
+    COMMAND mpirun -np 2 ${CMAKE_SOURCE_DIR}/tests/test_03.tcl
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  set_tests_properties(RunPackage03 PROPERTIES
+    PASS_REGULAR_EXPRESSION ".*test section 03.*total fail: 000.*")
+  add_test(NAME RunPackage04
+    COMMAND mpirun -np 2 ${CMAKE_SOURCE_DIR}/tests/test_04.tcl
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  set_tests_properties(RunPackage04 PROPERTIES
+    PASS_REGULAR_EXPRESSION ".*test section 04.*total fail: 000.*")
+endif()
