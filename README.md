@@ -17,6 +17,14 @@ INSTALL.   Detailed documentation is   available online from the project
 home page and  as a bundled PDF  file,  tclmpi_docs.pdf, as part  of the
 source package.
 
+## Test Status:
+
+![Linux](https://github.com/akohlmey/tclmpi/actions/workflows/unittest-linux.yml/badge.svg?branch=master)
+
+![macOS](https://github.com/akohlmey/tclmpi/actions/workflows/unittest-macos.yml/badge.svg?branch=master)
+
+![CodeQL](https://github.com/akohlmey/tclmpi/actions/workflows/codeql-analysis.yml/badge.svg?branch=master)
+
 ## Citing:
 If needed, you can cite TclMPI as:
 Axel Kohlmeyer. (2021). TclMPI: Release 1.1 [Data set]. Zenodo.
@@ -26,8 +34,13 @@ Axel Kohlmeyer. (2021). TclMPI: Release 1.1 [Data set]. Zenodo.
 
 Thanks to Arjen Markus and Chris MacDermaid  for encouragement and (lots
 of) constructive criticism, that has  helped enourmously  to develop the
-package  from a crazy idea to its current  level.  A special thanks also
+package  from a crazy idea to its current  level.  Thanks to  Alex Baker
+for motivating me to convert to using CMake as build system which makes
+building TclMPI natively on Windows much easier.
+
+A special thanks also
 goes to Karolina Sarnowska-Upton and  Andrew Grimshaw that allowed me to
 use TclMPI as an example in their MPI portability study, which helped to
 find quite a few bugs and  resolve several portability issues before the
 code was hitting the real world.
+
