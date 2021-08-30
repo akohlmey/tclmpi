@@ -4,7 +4,7 @@
 
 /*! \page copyright Copyright and License for TclMPI
  *
- * Copyright (c) 2012,2016,2017,2018,2019 Axel Kohlmeyer <akohlmey@gmail.com>
+ * Copyright (c) 2012,2016,2017,2018,2019,2020,2021 Axel Kohlmeyer <akohlmey@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
 #include <string.h>
 #include <stdio.h>
 
-/*! \page userguide TclMPI User's Guide 
+/*! \page userguide TclMPI User's Guide
  *
  * This page describes Tcl bindings for MPI. This package provides a
  * shared object that can be loaded into a Tcl interpreter to provide
@@ -58,40 +58,43 @@
  *
  * The package currently consist of a single C source file which usually
  * will be compiled for dynamic linkage, but can also be compiled into a
- * new Tcl interpreter with TclMPI included (required on platforms like
- * Cray XT, XE, or XK machines that need static linkage) and a Tcl
- * script file. The corresponding commands for Linux and MacOSX systems
- * are included in the provided makefile. All that is required to
- * compile the package is an installed Tcl development system and a
- * working MPI-2 compliant installation. When compiled for a dynamically
- * loaded shared object (DSO), MPI has to be compiled and linked as
- * shared libraries (this is the default OpenMPI on Linux, but your
- * mileage may vary). As of May 25 2012 the code has been tested on
- * 32-bit and 64-bit x86 Linux platforms with OpenMPI, MVAPICH, Cray MPT
- * and SGI-MPT. OpenMPI and MVAPICH complete all tests, however MVAPICH
- * fails some due to differences in the error messages (needs to be
- * fixed in the test suite). SGI-MPT has problems with MPI_COMM_NULL
- * (segfault).
+ * new Tcl interpreter with TclMPI included (required on some platforms
+ * that require static linkage) and a Tcl script file.
+ * In addition the package contains some examples, a simple unit test
+ * harness (implemented in Tcl) and a set of tests to be run with either
+ * one MPI rank (test01, test02) or two MPI ranks (test03, test04).
  *
- * To compile the package adjust the settings in the Makefile according
- * to your platform, MPI and Tcl installation. For most Linux
- * distributions, this requires installing not only an MPI and Tcl
- * package, but also the corresponding development packages, e.g. on
- * Fedora you need openmpi, openmpi-devel, tcl, and tcl-devel and their
- * dependencies. Then type make to compile the _tclmpi.so file or make
- * tclmpish to compile the extended Tcl shell. With make check or make
- * check-static you can run the integrated unittest package to see, if
- * everything is working as expected.
+ * The build system uses CMake (version 3.16 or later) and has been
+ * confirmed to work on Linux macOS and Windows.  The MPI library has to
+ * be at least MPI-2 standard compliant and the Tcl version should be
+ * 8.6 or later (it may work with 8.5, too).  When compiled for a
+ * dynamically loaded shared object (DSO) or DLL file, the MPI library
+ * has to be compiled and linked with support for building shared
+ * libraries as well (this is the default for OpenMPI on Linux, but your
+ * mileage may vary).
  *
- * To install you can create a directory,
- * e.g. /usr/local/libexec/tclmpi, and copy the files tclmpi.tcl,
- * _tclmpi.so and pkgIndex.tcl into it. If you then use the command set
- * auto_path [concat /usr/local/libexec/tclmpi $auto_path] in your
- * .tclshrc or .vmdrc, you can load the TclMPI wrappers on demand simply
- * by using the command package require tclmpi. For the extended shell,
- * the _tclmpi.so file can be omitted and instead tclmpish needs to be
- * copied somewhere in the search path for executable,
- * e.g. /usr/local/bin. In this case the startup script is called
+ * You need  to run  CMake the  usual way, for example with
+ * `cmake -B  build-folder -S .`, then `cmake   --build build-folder`,
+ * followed   by    `cmake   --install build-folder`.
+ * There are a few settings that can be used to adjust what is compiled
+ * and installed and where. The following settings are supported:
+ * - BUILD_TCLMPI_SHELL   Build a `tclmpish` executable as extended Tcl shell   (default: on)
+ * - ENABLE_TCL_STUBS     Use the Tcl stubs mechanism   (default: on, requires Tcl 8.6 or later)
+ * - BUILD_TESTING        Enable unit testing   (default: on)
+ * - DOWNLOAD_MPICH4WIN   Download MPICH2-1.4.1 headers and link library (default: off, Windows only)
+ * - CMAKE_INSTALL_PREFIX Path to installation location prefix (default: (platform specific))
+ *
+ * To change settings from the defaults append `-D<SETTING>=<VALUE>` to
+ * the `cmake` command line and replace `<SETTING>` and `<VALUE>` accordingly.
+ *
+ * To enable the new TclMPI package you can use the command `set
+ * auto_path [concat /usr/local/tcl8.6/ $auto_path]` in your
+ * .tclshrc (or .vmdrc or similar) file and then you can load the TclMPI
+ *  wrappers on demand simply by using the command `package require tclmpi`.
+ *  For the extended shell, the _tclmpi.so file is not use and instead
+ * tclmpish needs to run instead of tclsh.  For that you may append the `bin`
+ * folder of the installation tree to your PATH environment variable.
+ * In case of using the custom Tcl shell, the startup script would be called
  * .tclmpishrc instead of .tclshrc.
  *
  * \section devel Software Development and Bug Reports
@@ -133,8 +136,8 @@
  *
  * \subsection mypi Computation of Pi
  * This script uses TclMPI to compute the value of Pi from
- * numerical quadrature of the integral: 
-   \f[ 
+ * numerical quadrature of the integral:
+   \f[
       \pi = \int^1_0 {\frac{4}{1 + x^2}} dx
    \f]
  * \code {.tcl}
@@ -241,7 +244,7 @@
  */
 
 /*! \page devguide TclMPI Developer's Guide
- * 
+ *
  * This document explains the implementation of the Tcl bindings
  * for MPI implemented in TclMPI. The following sections will
  * document how and which MPI is mapped to Tcl and what design
@@ -273,12 +276,12 @@
  * of determining the amount of temporary storage required. The second call
  * will also use the MPI_SOURCE and MPI_TAG flags from the MPI_Status object
  * created for MPI_Probe() to make certain, the correct data is received.
- * 
+ *
  * Things get even more complicated with with non-blocking receives. Since
  * we need to know the size of the message to receive, a non-blocking receive
  * can only be posted, if the corresponding send is already pending. This is
  * being determined by calling MPI_Iprobe() and when this shows no (matching)
- * pending message, the parameters for the receive will be cached and the 
+ * pending message, the parameters for the receive will be cached and the
  * then MPI_Probe() followed by MPI_Recv() will be called as part of
  * tclmpi::wait. The blocking/non-blocking behavior of the Tcl script
  * should be very close to the corresponding C bindings, but probably not
@@ -288,7 +291,7 @@
  * All functions that are new Tcl commands follow the MPI naming
  * conventions, but using TclMPI_ as prefix instead of MPI_.
  * The corresponding Tcl commands are placed in the tclmpi namespace
- * and all lower case. Example: TclMPI_Init() is the wrapper for 
+ * and all lower case. Example: TclMPI_Init() is the wrapper for
  * MPI_Init() and is provided as command tclmpi::init.
  * Defines and constants from the MPI header file are represented in
  * TclMPI as plain strings, all lowercase and with a tclmpi:: prefix.
@@ -340,7 +343,7 @@
  * removed as needed.
  * The function \ref tclmpi_find_req is used to locate a specific request
  * and its associated data from its string label. In addition,
- * \ref tclmpi_add_req will  append a new request to the list, and 
+ * \ref tclmpi_add_req will  append a new request to the list, and
  * \ref tclmpi_del_req will remove (completed) requests.
  *
  * \subsection tcldata Mapping Data Types
@@ -350,8 +353,8 @@
  * from MPI data types to match better the spirit of Tcl scripting.
  *
  * \subsection tclerr Common Error Message Processing
- * There is a significant redundancy in checking for and reporting 
- * error conditions. For this purpose, several support functions 
+ * There is a significant redundancy in checking for and reporting
+ * error conditions. For this purpose, several support functions
  * exist.
  *
  * \ref tclmpi_errcheck verifies if calls to the MPI library were
@@ -451,7 +454,7 @@ static MPI_Comm tcl2mpi_comm(const char *label)
  *
  * This function will first call mpi2tcl_comm in order to see, if the
  * communicator handed in, is already listed and return that communicators
- * Tcl label string. If it is not yet lists, a new entry is added to the 
+ * Tcl label string. If it is not yet lists, a new entry is added to the
  * linked list and a new label of the format "tclmpi::comm%d" assigned.
  * The (global/static) variable tclmpi_comm_cntr is incremented every time
  * to make the communicator label unique.
@@ -544,7 +547,7 @@ struct tclmpi_intint {
  * TclMPI string constants representing reduction operators
  * to their corresponding MPI counterparts.
  */
-static int tclmpi_get_op(const char *opstr, MPI_Op *op) 
+static int tclmpi_get_op(const char *opstr, MPI_Op *op)
 {
     if (op == NULL) return TCL_ERROR;
 
@@ -613,7 +616,7 @@ static int tclmpi_conv_handler = TCLMPI_ERROR;
  *
  * This macro enables consistent handling of data conversions.
  * It also queries the tclmpi_conv_handler variable to jump to
- * the selected conversion error behavior. For TCLMPI_ERROR 
+ * the selected conversion error behavior. For TCLMPI_ERROR
  * (the default) a Tcl error is raised and TclMPI returns to
  * the calling function. For TCLMPI_ABORT and error message
  * is written to stderr and parallel execution on the current
@@ -644,7 +647,7 @@ static int tclmpi_conv_handler = TCLMPI_ERROR;
  *
  * This function will allocate and initialize a new linked list entry
  * for the translation between MPI requests and their string
- * representation passed to Tcl scripts. The assigned label of the 
+ * representation passed to Tcl scripts. The assigned label of the
  * for "tclmpi::req%d" will be returned. The (global/static) variable
  * tclmpi_req_cntr is incremented every time to make the communicator
  * label unique.
@@ -663,7 +666,7 @@ static const char *tclmpi_add_req()
         Tcl_Free((char *)next);
         return NULL;
     }
-    
+
     label = (char *)Tcl_Alloc(32);
     if (label == NULL) {
         Tcl_Free((char *)next->req);
@@ -685,7 +688,7 @@ static const char *tclmpi_add_req()
         while (req->next) req = req->next;
         req->next = next;
     }
-    
+
     return next->label;
 }
 
@@ -831,7 +834,7 @@ static int tclmpi_typecheck(Tcl_Interp *interp, int type,
 /*! is 1 after MPI_Init() and -1 after MPI_Finalize() */
 static int tclmpi_init_done = 0;
 
-/*! wrapper for MPI_Init() 
+/*! wrapper for MPI_Init()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -840,7 +843,7 @@ static int tclmpi_init_done = 0;
  *
  * This function does a little more work than just calling MPI_Init().
  * First of it tries to detect whether MPI_Init() has been called before
- * (from Tcl) and then creates a (catchable) Tcl error instead of an 
+ * (from Tcl) and then creates a (catchable) Tcl error instead of an
  * (uncatchable) MPI error. It will also try to pass the argument vector
  * to the script from the Tcl generated 'argv' array to the underlying
  * MPI_Init() call and reset argv as needed.
@@ -881,7 +884,7 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
     ierr = MPI_Init(&argc,&argv);
 #else
     /* XXX: this should be made dependent on whether Tcl
-       was compiled with thread support or not and how 
+       was compiled with thread support or not and how
        Tcl would handle threading in this case. */
     ierr = MPI_Init_thread(&argc,&argv,MPI_THREAD_SINGLE,&tlevel);
 #endif
@@ -923,7 +926,7 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
  *
  * This function sets what action TclMPI should take if a conversion
  * of a data element to the requested integer or double data type fails.
- * There are currently three handlers implemented: \ref TCLMPI_ERROR, 
+ * There are currently three handlers implemented: \ref TCLMPI_ERROR,
  * \ref TCLMPI_ABORT, and \ref TCLMPI_TOZERO.
  *
  * For \ref TCLMPI_ERROR a Tcl error is raised and TclMPI returns to the
@@ -947,7 +950,7 @@ int TclMPI_Conv_set(ClientData nodata, Tcl_Interp *interp,
     }
 
     handler=Tcl_GetString(objv[1]);
-    
+
     if (strcmp(handler,"tclmpi::error") == 0)
         tclmpi_conv_handler = TCLMPI_ERROR;
     else if (strcmp(handler,"tclmpi::abort") == 0)
@@ -1000,7 +1003,7 @@ int TclMPI_Conv_get(ClientData nodata, Tcl_Interp *interp,
     return TCL_OK;
 }
 
-/*! wrapper for MPI_Finalize() 
+/*! wrapper for MPI_Finalize()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -1039,7 +1042,7 @@ int TclMPI_Finalize(ClientData nodata, Tcl_Interp *interp,
 }
 
 
-/*! wrapper for MPI_Abort() 
+/*! wrapper for MPI_Abort()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -1073,7 +1076,7 @@ int TclMPI_Abort(ClientData nodata, Tcl_Interp *interp,
 }
 
 
-/*! wrapper for MPI_Comm_size() 
+/*! wrapper for MPI_Comm_size()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -1111,7 +1114,7 @@ int TclMPI_Comm_size(ClientData nodata, Tcl_Interp *interp,
 }
 
 
-/*! wrapper for MPI_Comm_rank() 
+/*! wrapper for MPI_Comm_rank()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -1149,7 +1152,7 @@ int TclMPI_Comm_rank(ClientData nodata, Tcl_Interp *interp,
 }
 
 
-/*! wrapper for MPI_Comm_split() 
+/*! wrapper for MPI_Comm_split()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -1213,7 +1216,7 @@ int TclMPI_Comm_split(ClientData nodata, Tcl_Interp *interp,
 }
 
 
-/*! wrapper for MPI_Comm_free() 
+/*! wrapper for MPI_Comm_free()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -1251,7 +1254,7 @@ int TclMPI_Comm_free(ClientData nodata, Tcl_Interp *interp,
 }
 
 
-/*! wrapper for MPI_Barrier() 
+/*! wrapper for MPI_Barrier()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -1285,24 +1288,24 @@ int TclMPI_Barrier(ClientData nodata, Tcl_Interp *interp,
 }
 
 
-/*! wrapper for MPI_Bcast() 
+/*! wrapper for MPI_Bcast()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
  * \param objv list of argument object
  * \return TCL_OK or TCL_ERROR
  *
- * This function implements a broadcast function for TclMPI. Unlike in the 
+ * This function implements a broadcast function for TclMPI. Unlike in the
  * C bindings, the length of the data is inferred from the data object
  * passed to this function and thus a 'count' argument is not needed.
- * Only a limited number of data types are currently supported, since 
+ * Only a limited number of data types are currently supported, since
  * Tcl has a limited number of "native" data types. The tclmpi::auto
  * data type transfers the internal string representation of an object,
  * while the other data types convert data to native data types as needed,
  * with all non-representable data translated into either 0 or 0.0.
  * In all cases, two broadcasts are needed. The first to transmit the
  * amount of data being sent so that a suitable receive buffer can be set up.
- * 
+ *
  * The result of the broadcast is converted back into Tcl objects and
  * passed up as result value to the calling Tcl code. If the MPI call
  * failed, an MPI error message is passed up as result instead.
@@ -1405,21 +1408,21 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
     return TCL_OK;
 }
 
-/*! wrapper for MPI_Scatter() 
+/*! wrapper for MPI_Scatter()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
  * \param objv list of argument object
  * \return TCL_OK or TCL_ERROR
  *
- * This function implements a scatter operation that distributes 
+ * This function implements a scatter operation that distributes
  * data for TclMPI.
  * This operation does not accept the tclmpi::auto data type, also support
  * for types outside of tclmpi::int and tclmpi::double is incomplete.
- * The length of the data is inferred from the data object passed to this 
+ * The length of the data is inferred from the data object passed to this
  * function and thus a 'count' argument is not needed. The number of data
  * items has to be divisible by the number of processes on the communicator.
- * 
+ *
  * The result is converted back into Tcl objects and passed up as result
  * value to the calling Tcl code. If the MPI call failed an MPI error
  * message is passed up as result instead.
@@ -1473,7 +1476,7 @@ int TclMPI_Scatter(ClientData nodata, Tcl_Interp *interp,
             Tcl_DecrRefCount(objv[1]);
             return TCL_ERROR;
         }
-        
+
         odata = (int *)Tcl_Alloc(olen*sizeof(int));
         result = Tcl_NewListObj(0,NULL);
         if (rank == root) {
@@ -1506,7 +1509,7 @@ int TclMPI_Scatter(ClientData nodata, Tcl_Interp *interp,
             Tcl_DecrRefCount(objv[1]);
             return TCL_ERROR;
         }
-        
+
         odata = (double *)Tcl_Alloc(olen*sizeof(double));
         result = Tcl_NewListObj(0,NULL);
         if (rank == root) {
@@ -1543,7 +1546,7 @@ int TclMPI_Scatter(ClientData nodata, Tcl_Interp *interp,
     return TCL_OK;
 }
 
-/*! wrapper for MPI_Allgather() 
+/*! wrapper for MPI_Allgather()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -1553,10 +1556,10 @@ int TclMPI_Scatter(ClientData nodata, Tcl_Interp *interp,
  * This function implements a gather operation that collects data for TclMPI.
  * This operation does not accept the tclmpi::auto data type, also support
  * for types outside of tclmpi::int and tclmpi::double is incomplete.
- * The length of the data is inferred from the data object passed to this 
+ * The length of the data is inferred from the data object passed to this
  * function and thus a 'count' argument is not needed. The number of data
  * items has to be the same on all processes on the communicator.
- * 
+ *
  * The result is converted back into Tcl objects and passed up as result
  * value to the calling Tcl code on all processors. If the MPI call failed,
  * an MPI error message is passed up as result instead.
@@ -1608,7 +1611,7 @@ int TclMPI_Allgather(ClientData nodata, Tcl_Interp *interp,
             Tcl_DecrRefCount(objv[1]);
             return TCL_ERROR;
         }
-        
+
         mlen = olen*size;
         idata = (int *)Tcl_Alloc(ilen*sizeof(int));
         odata = (int *)Tcl_Alloc(mlen*sizeof(int));
@@ -1637,7 +1640,7 @@ int TclMPI_Allgather(ClientData nodata, Tcl_Interp *interp,
             Tcl_DecrRefCount(objv[1]);
             return TCL_ERROR;
         }
-        
+
         mlen = olen*size;
         idata = (double *)Tcl_Alloc(ilen*sizeof(double));
         odata = (double *)Tcl_Alloc(mlen*sizeof(double));
@@ -1669,7 +1672,7 @@ int TclMPI_Allgather(ClientData nodata, Tcl_Interp *interp,
 }
 
 
-/*! wrapper for MPI_Gather() 
+/*! wrapper for MPI_Gather()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -1679,10 +1682,10 @@ int TclMPI_Allgather(ClientData nodata, Tcl_Interp *interp,
  * This function implements a gather operation that collects data for TclMPI.
  * This operation does not accept the tclmpi::auto data type, also support
  * for types outside of tclmpi::int and tclmpi::double is incomplete.
- * The length of the data is inferred from the data object passed to this 
+ * The length of the data is inferred from the data object passed to this
  * function and thus a 'count' argument is not needed. The number of data
  * items has to be the same on all processes on the communicator.
- * 
+ *
  * The result is converted back into Tcl objects and passed up as result
  * value to the calling Tcl code on the root processor. If the MPI call
  * failed, an MPI error message is passed up as result instead.
@@ -1737,7 +1740,7 @@ int TclMPI_Gather(ClientData nodata, Tcl_Interp *interp,
             Tcl_DecrRefCount(objv[1]);
             return TCL_ERROR;
         }
-        
+
         mlen = olen*size;
         idata = (int *)Tcl_Alloc(ilen*sizeof(int));
         for (i=0; i < ilen; ++i)
@@ -1771,7 +1774,7 @@ int TclMPI_Gather(ClientData nodata, Tcl_Interp *interp,
             Tcl_DecrRefCount(objv[1]);
             return TCL_ERROR;
         }
-        
+
         mlen = olen*size;
         idata = (double *)Tcl_Alloc(ilen*sizeof(double));
         for (i=0; i < ilen; ++i)
@@ -1810,7 +1813,7 @@ int TclMPI_Gather(ClientData nodata, Tcl_Interp *interp,
 }
 
 
-/*! wrapper for MPI_Allreduce() 
+/*! wrapper for MPI_Allreduce()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -1820,9 +1823,9 @@ int TclMPI_Gather(ClientData nodata, Tcl_Interp *interp,
  * This function implements a reduction plus broadcast function for TclMPI.
  * This operation does not accept the tclmpi::auto data type, also support
  * for types outside of tclmpi::int and tclmpi::double is incomplete.
- * The length of the data is inferred from the data object passed to this 
+ * The length of the data is inferred from the data object passed to this
  * function and thus a 'count' argument is not needed.
- * 
+ *
  * The result is converted back into Tcl objects and passed up as result
  * value to the calling Tcl code. If the MPI call failed, an MPI error
  * message is passed up as result instead.
@@ -1918,7 +1921,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
                          ": bad list format for loc reduction: ",opstr,NULL);
                 return TCL_ERROR;
             }
-                
+
             TCLMPI_CONV_CHECK(Int,ipair[0],&(idata[i].i1),idata[i].i1);
             if (Tcl_GetIntFromObj(interp,ipair[1],&(idata[i].i2)) != TCL_OK) {
                 Tcl_ResetResult(interp);
@@ -1937,7 +1940,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
             Tcl_ListObjAppendElement(interp,result,opair);
         }
         Tcl_Free((char *)idata);
-        Tcl_Free((char *)odata);    
+        Tcl_Free((char *)odata);
     } else if (type == TCLMPI_DOUBLE_INT) {
         Tcl_Obj **ilist, **ipair;
         tclmpi_dblint_t *idata, *odata;
@@ -1954,7 +1957,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
                          ": bad list format for loc reduction: ",opstr,NULL);
                 return TCL_ERROR;
             }
-                
+
             TCLMPI_CONV_CHECK(Double,ipair[0],&(idata[i].d),idata[i].d);
             if (Tcl_GetIntFromObj(interp,ipair[1],&(idata[i].i)) != TCL_OK) {
                 Tcl_ResetResult(interp);
@@ -1974,7 +1977,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
             Tcl_ListObjAppendElement(interp,result,opair);
         }
         Tcl_Free((char *)idata);
-        Tcl_Free((char *)odata);    
+        Tcl_Free((char *)odata);
     } else {
         Tcl_DecrRefCount(objv[1]);
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
@@ -1991,7 +1994,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
     return TCL_OK;
 }
 
-/*! wrapper for MPI_Reduce() 
+/*! wrapper for MPI_Reduce()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -2001,9 +2004,9 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
  * This function implements a reduction function for TclMPI.
  * This operation does not accept the tclmpi::auto data type, also support
  * for types outside of tclmpi::int and tclmpi::double is incomplete.
- * The length of the data is inferred from the data object passed to this 
+ * The length of the data is inferred from the data object passed to this
  * function and thus a 'count' argument is not needed.
- * 
+ *
  * The result is collected on the process with rank root and converted
  *  back into Tcl objects and passed up as result value to the calling
  * Tcl code. If the MPI call failed an MPI error message is passed up
@@ -2116,7 +2119,7 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
                          ": bad list format for loc reduction: ",opstr,NULL);
                 return TCL_ERROR;
             }
-                
+
             TCLMPI_CONV_CHECK(Int,ipair[0],&(idata[i].i1),idata[i].i1);
             if (Tcl_GetIntFromObj(interp,ipair[1],&(idata[i].i2)) != TCL_OK) {
                 Tcl_ResetResult(interp);
@@ -2140,7 +2143,7 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
         }
         Tcl_Free((char *)idata);
         if (rank == root)
-            Tcl_Free((char *)odata);    
+            Tcl_Free((char *)odata);
 
     } else if (type == TCLMPI_DOUBLE_INT) {
         Tcl_Obj **ilist, **ipair;
@@ -2160,7 +2163,7 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
                          ": bad list format for loc reduction: ",opstr,NULL);
                 return TCL_ERROR;
             }
-                
+
             TCLMPI_CONV_CHECK(Double,ipair[0],&(idata[i].d),idata[i].d);
             if (Tcl_GetIntFromObj(interp,ipair[1],&(idata[i].i)) != TCL_OK) {
                 Tcl_ResetResult(interp);
@@ -2184,7 +2187,7 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
         }
         Tcl_Free((char *)idata);
         if (rank == root)
-            Tcl_Free((char *)odata);    
+            Tcl_Free((char *)odata);
     } else {
         Tcl_DecrRefCount(objv[1]);
         Tcl_AppendResult(interp,Tcl_GetString(objv[0]),
@@ -2201,7 +2204,7 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
     return TCL_OK;
 }
 
-/*! wrapper for MPI_Send() 
+/*! wrapper for MPI_Send()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -2209,11 +2212,11 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
  * \return TCL_OK or TCL_ERROR
  *
  * This function implements a blocking send operation for TclMPI.
- * The length of the data is inferred from the data object passed to this 
+ * The length of the data is inferred from the data object passed to this
  * function and thus a 'count' argument is not needed.
  * In the case of tclmpi::auto, the string representation of the send data
  * is directly passed to MPI_Send() otherwise a copy is made and data converted.
- * 
+ *
  * If the MPI call failed, an MPI error message is passed up as result
  * instead and a Tcl error is indicated, otherwise nothing is returned.
  */
@@ -2287,7 +2290,7 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
 
 
 
-/*! wrapper for MPI_Isend() 
+/*! wrapper for MPI_Isend()
  * \param nodata ignored
  * \param interp current Tcl interpreter
  * \param objc number of argument objects
@@ -2467,9 +2470,9 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
         idata = Tcl_Alloc(len);
         tag = status.MPI_TAG; source = status.MPI_SOURCE;
 
-        if (statvar != NULL) 
+        if (statvar != NULL)
             ierr=MPI_Recv(idata,len,MPI_CHAR,source,tag,comm,&status);
-        else 
+        else
             ierr=MPI_Recv(idata,len,MPI_CHAR,source,tag,comm,MPI_STATUS_IGNORE);
 
         result = Tcl_NewStringObj(idata,len);
@@ -2661,7 +2664,7 @@ int TclMPI_Irecv(ClientData nodata, Tcl_Interp *interp,
             return TCL_ERROR;
         }
     }
-    
+
     /* return request handle */
     Tcl_SetObjResult(interp,Tcl_NewStringObj(reqlabel,-1));
     return TCL_OK;
@@ -2993,9 +2996,9 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
                 idata = Tcl_Alloc(len);
                 tag = status.MPI_TAG; source = status.MPI_SOURCE;
 
-                if (statvar != NULL) 
+                if (statvar != NULL)
                     ierr=MPI_Recv(idata,len,MPI_CHAR,source,tag,req->comm,&status);
-                else 
+                else
                     ierr=MPI_Recv(idata,len,MPI_CHAR,source,tag,req->comm,MPI_STATUS_IGNORE);
 
                 req->data = idata;
@@ -3085,7 +3088,7 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
  * tclmpi::comm_world, tclmpi::comm_self, and tclmpi::comm_null and its
  * corresponding MPI counterparts.
  */
-static void tclmpi_init_api(Tcl_Interp *interp) 
+static void tclmpi_init_api(Tcl_Interp *interp)
 {
     char *label;
     tclmpi_comm_t *comm;
@@ -3174,13 +3177,13 @@ static void tclmpi_init_api(Tcl_Interp *interp)
  *
  * This function sets up the plugin to register the various MPI wrappers
  * in this package with the Tcl interpreter.
- * 
+ *
  * Depending on the USE_TCL_STUBS define being active or not, this is
- * done using the native dynamic loader interface or the Tcl stubs 
+ * done using the native dynamic loader interface or the Tcl stubs
  * interface, which would allow to load the plugin into static executables
  * and plugins from different Tcl versions.
  *
- * In addition the linked list for translating MPI communicators is 
+ * In addition the linked list for translating MPI communicators is
  * initialized for the predefined communicators tclmpi::comm_world,
  * tclmpi::comm_self, and tclmpi::comm_null and its corresponding MPI
  * counterparts.

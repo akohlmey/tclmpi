@@ -1,0 +1,32 @@
+# GitHub action to build TclMPI on macOS and run unit tests
+name: "Unittest for macOS"
+
+on:
+  push:
+
+jobs:
+  build:
+    name: macOS Unit Test
+    if: ${{ github.repository == 'akohlmey/tclmpi' }}
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Install MPI and Tcl
+      run: |
+        brew install open-mpi
+
+    - name: Building TclMPI via CMake
+      shell: bash
+      run: |
+        cmake -B build .
+        cmake --build build --verbose
+
+    - name: Run Tests
+      working-directory: build
+      shell: bash
+      run: ctest -V

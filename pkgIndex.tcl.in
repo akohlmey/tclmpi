@@ -7,16 +7,8 @@
 # commands.  When this script is sourced, the variable $dir
 # must contain the full path name of this file's directory.
 
-# as of Tcl 8.6 we need to use "load -global" in order to support
-# OpenMPI or any other MPI library, that dynamically loads its
-# components at runtime. Since older Tcl versions do not know this
-# load flag, we have to use this hack for backward compatibility.
-set loadcmd {load}
-if {[package vsatisfies [package provide Tcl] 8.6-]} {lappend loadcmd {-global}}
-lappend loadcmd [file join $dir _tclmpi.so]
-
-package ifneeded tclmpi  @VERSION@ [list source [file join $dir tclmpi.tcl]]
-package ifneeded _tclmpi @VERSION@ $loadcmd
+package ifneeded tclmpi  @PROJECT_VERSION@ [list source [file join $dir tclmpi.tcl]]
+package ifneeded _tclmpi @PROJECT_VERSION@ [list load -global [file join $dir @TCLMPI_BINARY_MODULE@]]
 
 # Local Variables:
 # mode: tcl
