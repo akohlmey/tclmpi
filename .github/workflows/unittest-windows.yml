@@ -18,7 +18,7 @@ jobs:
         fetch-depth: 2
 
     - name: Install Tcl
-      run: choco install ActiveTcl
+      run: choco install ActiveTcl --ignore-checksums
 
     - name: Building TclMPI via CMake
       shell: bash
