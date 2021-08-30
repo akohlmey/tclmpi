@@ -25,7 +25,7 @@ jobs:
     - name: Building TclMPI via CMake
       shell: bash
       run: |
-        cmake -B build .
+        cmake -B build . -G Ninja
         cmake --build build --verbose
 
     - name: Run Tests
