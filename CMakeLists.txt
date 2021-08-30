@@ -50,7 +50,8 @@ if(BUILD_TCLMPI_SHELL)
   target_link_libraries(tclmpish PRIVATE MPI::MPI_C)
 endif()
 
-# embed version numbers
+# embed version numbers and file names
+set(TCLMPI_BINARY_MODULE _tclmpi${CMAKE_SHARED_LIBRARY_SUFFIX})
 configure_file(tclmpi.tcl.in tclmpi.tcl @ONLY)
 configure_file(pkgIndex.tcl.in pkgIndex.tcl @ONLY)
 configure_file(tests/harness.tcl.in harness.tcl @ONLY)
