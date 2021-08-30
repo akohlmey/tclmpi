@@ -3,7 +3,6 @@ name: "Unittest for macOS"
 
 on:
   push:
-    branches: [cmake-support]
 
 jobs:
   build:

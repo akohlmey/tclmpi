@@ -3,7 +3,6 @@ name: "Unittest for Linux"
 
 on:
   push:
-    branches: [cmake-support]
 
 jobs:
   build:

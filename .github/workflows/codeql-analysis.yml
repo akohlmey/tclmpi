@@ -3,7 +3,6 @@ name: "CodeQL Code Analysis"
 
 on:
   push:
-    branches: [cmake-support]
 
 jobs:
   analyze:
