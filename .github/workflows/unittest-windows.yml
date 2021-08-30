@@ -1,0 +1,29 @@
+# GitHub action to build TclMPI on Windows
+name: "Compile TclMPI on Windows"
+
+on:
+  push:
+    branches: [cmake-support]
+
+jobs:
+  build:
+    name: Windows Unit Test
+    if: ${{ github.repository == 'akohlmey/tclmpi' }}
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 2
+
+    - name: Install Tcl
+      run: choco install ActiveTcl
+
+    - name: Building TclMPI via CMake
+      shell: bash
+      run: |
+        cmake -B build  -D DOWNLOAD_MPICH4WIN=on -S .
+        cmake --build build --verbose
+
+# running Tests is not supported since we cannot properly install the MPICH runtime (yet)

@@ -6,6 +6,8 @@ project(TclMPI VERSION 1.1 DESCRIPTION "Tcl Bindings for MPI" LANGUAGES C)
 # compilation settings and options
 option(ENABLE_TCL_STUBS "Build TclMPI using the Tcl stub library" ON)
 option(BUILD_TCLMPI_SHELL "Build Tcl interpreter with TclMPI embedded" ON)
+# this is used for automated compiles and cross-compilation
+option(DOWNLOAD_MPICH4WIN "Download and use MPICH-1.4.1 on Windows" OFF)
 mark_as_advanced(TTK_STUB_LIBRARY)
 
 # tweaks
@@ -13,7 +15,29 @@ set(BUILD_SHARED_LIBS TRUE)
 set(MPI_CXX_SKIP_MPICXX TRUE)
 
 # find packages
-find_package(MPI REQUIRED)
+if((${CMAKE_SYSTEM_NAME} STREQUAL "Windows") AND DOWNLOAD_MPICH4WIN)
+  message(STATUS "Downloading and configuring MPICH-1.4.1 for Windows")
+  include(ExternalProject)
+  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    ExternalProject_Add(mpi4win_build
+      URL     https://download.lammps.org/thirdparty/mpich2-win64-devel.tar.gz
+      URL_MD5 4939fdb59d13182fd5dd65211e469f14
+      CONFIGURE_COMMAND "" BUILD_COMMAND "" INSTALL_COMMAND ""
+      BUILD_BYPRODUCTS <SOURCE_DIR>/lib/libmpi.a)
+  else()
+    message(FATAL_ERROR "Unsupported Windows platform ${CMAKE_SYSTEM_PROCESSOR}")
+  endif()
+  ExternalProject_get_property(mpi4win_build SOURCE_DIR)
+  file(MAKE_DIRECTORY "${SOURCE_DIR}/include")
+  add_library(MPI::MPI_C UNKNOWN IMPORTED)
+  set_target_properties(MPI::MPI_C PROPERTIES
+    IMPORTED_LOCATION "${SOURCE_DIR}/lib/libmpi.a"
+    INTERFACE_INCLUDE_DIRECTORIES "${SOURCE_DIR}/include"
+    INTERFACE_COMPILE_DEFINITIONS "MPICH_SKIP_MPICXX")
+  add_dependencies(MPI::MPI_C mpi4win_build)
+else()
+  find_package(MPI REQUIRED)
+endif()
 find_package(TCL)
 if(!TCL_FOUND)
   message(FATAL_ERROR "Must have Tcl installed to build TclMPI")
