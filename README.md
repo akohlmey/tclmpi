@@ -15,9 +15,7 @@ and development is [hosted on GitHub](https://github.com/akohlmey/tclmpi/).
 
 For compilation   and  installation instructions,  please see   the file
 INSTALL.   Detailed documentation is   available online from the project
-home page and  as a bundled PDF  file,
-[tclmpi_docs.pdf](, as part  of the
-source package.
+home page and [as a PDF file in the source package](https://github.com/akohlmey/tclmpi/blob/master/tclmpi_docs.pdf).
 
 ## Test Status:
 
