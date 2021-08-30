@@ -58,40 +58,43 @@
  *
  * The package currently consist of a single C source file which usually
  * will be compiled for dynamic linkage, but can also be compiled into a
- * new Tcl interpreter with TclMPI included (required on platforms like
- * Cray XT, XE, or XK machines that need static linkage) and a Tcl
- * script file. The corresponding commands for Linux and MacOSX systems
- * are included in the provided makefile. All that is required to
- * compile the package is an installed Tcl development system and a
- * working MPI-2 compliant installation. When compiled for a dynamically
- * loaded shared object (DSO), MPI has to be compiled and linked as
- * shared libraries (this is the default OpenMPI on Linux, but your
- * mileage may vary). As of May 25 2012 the code has been tested on
- * 32-bit and 64-bit x86 Linux platforms with OpenMPI, MVAPICH, Cray MPT
- * and SGI-MPT. OpenMPI and MVAPICH complete all tests, however MVAPICH
- * fails some due to differences in the error messages (needs to be
- * fixed in the test suite). SGI-MPT has problems with MPI_COMM_NULL
- * (segfault).
+ * new Tcl interpreter with TclMPI included (required on some platforms
+ * that require static linkage) and a Tcl script file.
+ * In addition the package contains some examples, a simple unit test
+ * harness (implemented in Tcl) and a set of tests to be run with either
+ * one MPI rank (test01, test02) or two MPI ranks (test03, test04).
  *
- * To compile the package adjust the settings in the Makefile according
- * to your platform, MPI and Tcl installation. For most Linux
- * distributions, this requires installing not only an MPI and Tcl
- * package, but also the corresponding development packages, e.g. on
- * Fedora you need openmpi, openmpi-devel, tcl, and tcl-devel and their
- * dependencies. Then type make to compile the _tclmpi.so file or make
- * tclmpish to compile the extended Tcl shell. With make check or make
- * check-static you can run the integrated unittest package to see, if
- * everything is working as expected.
+ * The build system uses CMake (version 3.16 or later) and has been
+ * confirmed to work on Linux macOS and Windows.  The MPI library has to
+ * be at least MPI-2 standard compliant and the Tcl version should be
+ * 8.6 or later (it may work with 8.5, too).  When compiled for a
+ * dynamically loaded shared object (DSO) or DLL file, the MPI library
+ * has to be compiled and linked with support for building shared
+ * libraries as well (this is the default for OpenMPI on Linux, but your
+ * mileage may vary).
  *
- * To install you can create a directory,
- * e.g. /usr/local/libexec/tclmpi, and copy the files tclmpi.tcl,
- * _tclmpi.so and pkgIndex.tcl into it. If you then use the command set
- * auto_path [concat /usr/local/libexec/tclmpi $auto_path] in your
- * .tclshrc or .vmdrc, you can load the TclMPI wrappers on demand simply
- * by using the command package require tclmpi. For the extended shell,
- * the _tclmpi.so file can be omitted and instead tclmpish needs to be
- * copied somewhere in the search path for executable,
- * e.g. /usr/local/bin. In this case the startup script is called
+ * You need  to run  CMake the  usual way, for example with
+ * `cmake -B  build-folder -S .`, then `cmake   --build build-folder`,
+ * followed   by    `cmake   --install build-folder`.
+ * There are a few settings that can be used to adjust what is compiled
+ * and installed and where. The following settings are supported:
+ * - BUILD_TCLMPI_SHELL   Build a `tclmpish` executable as extended Tcl shell   (default: on)
+ * - ENABLE_TCL_STUBS     Use the Tcl stubs mechanism   (default: on, requires Tcl 8.6 or later)
+ * - BUILD_TESTING        Enable unit testing   (default: on)
+ * - DOWNLOAD_MPICH4WIN   Download MPICH2-1.4.1 headers and link library (default: off, Windows only)
+ * - CMAKE_INSTALL_PREFIX Path to installation location prefix (default: (platform specific))
+ *
+ * To change settings from the defaults append `-D<SETTING>=<VALUE>` to
+ * the `cmake` command line and replace `<SETTING>` and `<VALUE>` accordingly.
+ *
+ * To enable the new TclMPI package you can use the command `set
+ * auto_path [concat /usr/local/tcl8.6/ $auto_path]` in your
+ * .tclshrc (or .vmdrc or similar) file and then you can load the TclMPI
+ *  wrappers on demand simply by using the command `package require tclmpi`.
+ *  For the extended shell, the _tclmpi.so file is not use and instead
+ * tclmpish needs to run instead of tclsh.  For that you may append the `bin`
+ * folder of the installation tree to your PATH environment variable.
+ * In case of using the custom Tcl shell, the startup script would be called
  * .tclmpishrc instead of .tclshrc.
  *
  * \section devel Software Development and Bug Reports
