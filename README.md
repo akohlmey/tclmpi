@@ -10,11 +10,13 @@ provided that   allow to run   Tcl scripts in  parallel via  "mpirun" or
 
 The main author of this package is Axel Kohlmeyer  and you can reach him
 at <akohlmey@gmail.com>.  The  official  homepage  for this  project  is
-http://sites.google.com/site/akohlmey/software/tclmpi
+[https://akohlmey.github.io/tclmpi/](https://akohlmey.github.io/tclmpi/)
+and development is [hosted on GitHub](https://github.com/akohlmey/tclmpi/).
 
 For compilation   and  installation instructions,  please see   the file
 INSTALL.   Detailed documentation is   available online from the project
-home page and  as a bundled PDF  file,  tclmpi_docs.pdf, as part  of the
+home page and  as a bundled PDF  file,
+[tclmpi_docs.pdf](, as part  of the
 source package.
 
 ## Test Status:
