@@ -33,6 +33,9 @@ add_library(_tclmpi MODULE _tclmpi.c)
 set_target_properties(_tclmpi PROPERTIES PREFIX "")
 target_include_directories(_tclmpi PRIVATE ${TCL_INCLUDE_PATH})
 target_compile_definitions(_tclmpi PRIVATE -DPACKAGE_NAME="_tclmpi" -DPACKAGE_VERSION="${CMAKE_PROJECT_VERSION}")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+  target_compile_definitions(_tclmpi PRIVATE -DMPIWRAPSTCLDLL_EXPORTS)
+endif()
 if(ENABLE_TCL_STUBS)  
   target_compile_definitions(_tclmpi PRIVATE -DUSE_TCL_STUBS)
   target_link_libraries(_tclmpi PRIVATE ${TCL_STUB_LIBRARY})
@@ -41,7 +44,7 @@ else()
 endif()
 target_link_libraries(_tclmpi PRIVATE MPI::MPI_C)
 
-  # build Tcl shell extended with MPI
+# build Tcl shell extended with MPI
 if(BUILD_TCLMPI_SHELL)
   add_executable(tclmpish _tclmpi.c)
   target_include_directories(tclmpish PRIVATE ${TCL_INCLUDE_PATH})
