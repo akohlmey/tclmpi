@@ -1,4 +1,6 @@
-/*! \file _tclmpi.c */
+/*! \file _tclmpi.c
+ * \brief This file contains the C code with the Tcl MPI wrappers
+ */
 
 /* TclMPI - A Tcl Interface to MPI */
 
@@ -73,9 +75,12 @@
  * libraries as well (this is the default for OpenMPI on Linux, but your
  * mileage may vary).
  *
- * You need  to run  CMake the  usual way, for example with
- * `cmake -B  build-folder -S .`, then `cmake   --build build-folder`,
- * followed   by    `cmake   --install build-folder`.
+ * To configure and build TclMPI you need to run CMake the usual way, for example with
+\code
+  cmake -B  build-folder -S .
+  cmake   --build build-folder
+  cmake   --install build-folder
+\endcode
  * There are a few settings that can be used to adjust what is compiled
  * and installed and where. The following settings are supported:
  * - BUILD_TCLMPI_SHELL   Build a `tclmpish` executable as extended Tcl shell   (default: on)
