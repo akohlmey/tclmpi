@@ -1,4 +1,4 @@
-## \file harness.tcl
+#X# /** \file harness.tcl
 ###########################################################
 # Test harness for TclMPI
 #
@@ -9,14 +9,15 @@
 # licensing conditions.
 ###########################################################
 
-## TclMPI test harness
-# This namespace contains several Tcl procedures that
-# are used to conduct unit tests on the TclMPI package.
-# For simplicity paths are hardcoded, so that this file
-# must not be moved around and stay in the same directory
-# as the individual tests, which in turn have to be in
-# subdirectory of the directory where the TclMPI shared
-# object and/or the tclmpish extended Tcl shell reside.
+#X# \brief This file contains the TclMPI test harness script code
+#X#
+#X# This namespace contains several Tcl procedures that
+#X# are used to conduct unit tests on the TclMPI package.
+#X# For simplicity paths are hardcoded, so that this file
+#X# must not be moved around and stay in the same directory
+#X# as the individual tests, which in turn have to be in
+#X# subdirectory of the directory where the TclMPI shared
+#X# object and/or the tclmpish extended Tcl shell reside. */
 
 # extend package search path to find TclMPI
 set auto_path [concat [file normalize ..] $auto_path]
