@@ -87,7 +87,15 @@ configure_file(tests/harness.tcl.in harness.tcl @ONLY)
 if(DOXYGEN_FOUND)
   set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${CMAKE_SOURCE_DIR}/README.md")
   set(DOXYGEN_GENERATE_LATEX TRUE)
-  doxygen_add_docs(docs README.md _tclmpi.c ${CMAKE_BINARY_DIR}/tclmpi.tcl ${CMAKE_BINARY_DIR}/harness.tcl)
+  doxygen_add_docs(docs
+    ${CMAKE_SOURCE_DIR}/README.md
+    ${CMAKE_SOURCE_DIR}/_tclmpi.c
+    ${CMAKE_BINARY_DIR}/tclmpi.dox
+    ${CMAKE_BINARY_DIR}/tclmpi.tcl
+    ${CMAKE_BINARY_DIR}/harness.dox
+    ${CMAKE_BINARY_DIR}/harness.tcl)
+  add_custom_target(tcldocs COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/extract_tcl_docs.cmake)
+  add_dependencies(docs tcldocs)
   set_property(TARGET docs APPEND PROPERTY ADDITIONAL_CLEAN_FILES latex)
   find_package(LATEX REQUIRED COMPONENTS PDFLATEX)
   if(LATEX_FOUND)
