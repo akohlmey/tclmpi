@@ -47,6 +47,7 @@
 #X#
 #X#    variable undefined  = tclmpi::undefined  ; ///< constant to indicate an undefined number
 #X#
+
 namespace eval tclmpi {
 
     variable version "@PROJECT_VERSION@"   ;# version number of this package
@@ -562,8 +563,8 @@ namespace eval tclmpi {
         }
         return $retval
     }
+
 #X# } // namespace tclmpi
-}
 
 # load the ancilliary methods from the DSO
 package require _tclmpi $::tclmpi::version
