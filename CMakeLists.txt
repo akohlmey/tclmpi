@@ -83,10 +83,35 @@ configure_file(tclmpi.tcl.in tclmpi.tcl @ONLY)
 configure_file(pkgIndex.tcl.in pkgIndex.tcl @ONLY)
 configure_file(tests/harness.tcl.in harness.tcl @ONLY)
 
+# extract documentation from Tcl files
+function(TclFileToDox infile outfile)
+  message(STATUS "Extracting documentation from Tcl file ${infile}")
+  file(READ ${infile} _one)
+  # hide semicolons so we can loop over lines by replacing EOLs with a ;
+  string(REGEX REPLACE ";" "#Y#" _two "${_one}")
+  string(REGEX REPLACE "\\\n" ";" _three "${_two}")
+  set(_all "")
+  foreach(_line ${_three})
+    # concatenate only lines with a #X# comment
+    string(FIND "${_line}" "#X#" _found)
+    if(_found GREATER -1)
+      string(REGEX REPLACE "#X#" "" _four "${_line}")
+      string(APPEND _all "${_four}\n")
+    endif()
+  endforeach()
+  # put back the semicolons and write the result to file
+  string(REGEX REPLACE "#Y#" ";" _out "${_all}")
+  message(STATUS "Writing ${outfile}")
+  file(WRITE ${outfile} "${_out}")
+endfunction(TclFileToDox)
+TclFileToDox(${CMAKE_BINARY_DIR}/tclmpi.tcl ${CMAKE_BINARY_DIR}/tclmpi.dox)
+TclFileToDox(${CMAKE_BINARY_DIR}/harness.tcl ${CMAKE_BINARY_DIR}/harness.dox)
+
 # build documentation
 if(DOXYGEN_FOUND)
   set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${CMAKE_SOURCE_DIR}/README.md")
   set(DOXYGEN_GENERATE_LATEX TRUE)
+  set(DOXYGEN_FULL_PATH_NAMES NO)
   doxygen_add_docs(docs
     ${CMAKE_SOURCE_DIR}/README.md
     ${CMAKE_SOURCE_DIR}/_tclmpi.c
@@ -94,8 +119,6 @@ if(DOXYGEN_FOUND)
     ${CMAKE_BINARY_DIR}/tclmpi.tcl
     ${CMAKE_BINARY_DIR}/harness.dox
     ${CMAKE_BINARY_DIR}/harness.tcl)
-  add_custom_target(tcldocs COMMAND ${CMAKE_COMMAND} -P ${CMAKE_SOURCE_DIR}/extract_tcl_docs.cmake)
-  add_dependencies(docs tcldocs)
   set_property(TARGET docs APPEND PROPERTY ADDITIONAL_CLEAN_FILES latex)
   find_package(LATEX REQUIRED COMPONENTS PDFLATEX)
   if(LATEX_FOUND)
