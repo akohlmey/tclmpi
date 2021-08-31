@@ -6,7 +6,7 @@
 #
 # Copyright (c) 2012 Axel Kohlmeyer <akohlmey@gmail.com>
 # All Rights Reserved.
-# 
+#
 # See the file LICENSE in the top level directory for
 # licensing conditions.
 ###########################################################
@@ -39,7 +39,7 @@ if {$tcl_version < 8.5} {
     set mpi_lor  $tclmpi::lor
     set mpi_lxor $tclmpi::lxor
     set mpi_band $tclmpi::band
-    set mpi_bor  $tclmpi::bor 
+    set mpi_bor  $tclmpi::bor
     set mpi_bxor $tclmpi::bxor
 
     set mpi_auto $tclmpi::auto

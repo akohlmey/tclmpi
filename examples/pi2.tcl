@@ -8,7 +8,7 @@ package require tclmpi 0.6
 namespace import tclmpi::*
 
 set comm       $tclmpi::comm_world
-set mpi_sum    $tclmpi::sum    
+set mpi_sum    $tclmpi::sum
 set mpi_double $tclmpi::double
 set mpi_int    $tclmpi::int
 

@@ -1,6 +1,5 @@
 /*! \file _tclmpi.c
- * \brief This file contains the C code with the Tcl MPI wrappers
- */
+ * \brief This file contains the C code with the Tcl MPI wrappers. */
 
 /* TclMPI - A Tcl Interface to MPI */
 

@@ -6,7 +6,7 @@
 #
 # Copyright (c) 2012 Axel Kohlmeyer <akohlmey@gmail.com>
 # All Rights Reserved.
-# 
+#
 # See the file LICENSE in the top level directory for
 # licensing conditions.
 ###########################################################
