@@ -153,6 +153,17 @@ set(CPACK_SOURCE_IGNORE_FILES \\.git/ "build.*/" ".*~$" ".*/.*~$")
 set(CPACK_VERBATIM_VARIABLES YES)
 include(CPack)
 
+# code checking with clang-tidy if available
+find_program(CLANG_TIDY clang-tidy DOC "clang-tidy executable")
+if("${CLANG_TIDY}" STREQUAL "CLANG_TIDY-NOTFOUND")
+  add_custom_target(tidy COMMAND ${CMAKE_COMMAND} -E echo "clang-tidy not found")
+else()
+  get_target_property(MPI_INCLUDE_PATH MPI::MPI_C INTERFACE_INCLUDE_DIRECTORIES)
+  add_custom_target(tidy
+    COMMAND ${CLANG_TIDY} ${CMAKE_SOURCE_DIR}/_tclmpi.c
+    -- -I${MPI_INCLUDE_PATH} -I${TCL_INCLUDE_PATH} "-DPACKAGE_NAME=\\\"_tclmpi\\\"" "-DPACKAGE_VERSION=\\\"${CMAKE_PROJECT_VERSION}\\\"" -DBUILD_TCLMPISH -std=c98)
+endif()
+
 # configure tests
 include(CTest)
 enable_testing()
