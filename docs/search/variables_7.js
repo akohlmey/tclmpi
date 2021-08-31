@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['tag_101',['tag',['../structtclmpi__req.html#a11307e4295ec704632bdcdc0d20e6a6c',1,'tclmpi_req']]],
-  ['type_102',['type',['../structtclmpi__req.html#a9c23fe2c323e2f401ac45c4b1f2a79d6',1,'tclmpi_req']]]
+  ['max_195',['max',['../namespacetclmpi.html#a3767e0a46abd5ad5d0e96f7446a9e6c8',1,'tclmpi']]],
+  ['maxloc_196',['maxloc',['../namespacetclmpi.html#abb84ee2bfb2dd5ef82aa012a40457879',1,'tclmpi']]],
+  ['min_197',['min',['../namespacetclmpi.html#a266f52f9ea5fe9049070d59014f86533',1,'tclmpi']]],
+  ['minloc_198',['minloc',['../namespacetclmpi.html#acbeac8154a6e3e91d5c621ede793170a',1,'tclmpi']]]
 ];

@@ -123,7 +123,9 @@ if(DOXYGEN_FOUND)
   find_package(LATEX REQUIRED COMPONENTS PDFLATEX)
   if(LATEX_FOUND)
     add_custom_command(TARGET docs POST_BUILD COMMAND make WORKING_DIRECTORY latex)
+    add_custom_command(TARGET docs POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/latex/refman.pdf ${CMAKE_SOURCE_DIR}/tclmpi_docs.pdf)
   endif()
+  add_custom_command(TARGET docs POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/html ${CMAKE_SOURCE_DIR}/docs)
 endif()
 
 # installation
