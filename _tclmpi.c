@@ -1037,16 +1037,17 @@ int TclMPI_Finalize(ClientData nodata, Tcl_Interp *interp,
 int TclMPI_Initialized(ClientData nodata, Tcl_Interp *interp,
                        int objc, Tcl_Obj *const objv[])
 {
+    Tcl_Obj *result;
     int tclmpi_init_done;
-    if (objc != 0) {
+
+    if (objc != 1) {
         Tcl_WrongNumArgs(interp,1,objv,NULL);
         return TCL_ERROR;
     }
 
     MPI_Initialized(&tclmpi_init_done);
-    if (tclmpi_init_done == 0) {
-        return TCL_ERROR;
-    }
+    result = Tcl_NewIntObj(tclmpi_init_done);
+    Tcl_SetObjResult(interp,result);
     return TCL_OK;
 }
 
@@ -1059,16 +1060,17 @@ int TclMPI_Initialized(ClientData nodata, Tcl_Interp *interp,
 int TclMPI_Finalized(ClientData nodata, Tcl_Interp *interp,
                     int objc, Tcl_Obj *const objv[])
 {
+    Tcl_Obj *result;
     int tclmpi_init_done;
-    if (objc != 0) {
+
+    if (objc != 1) {
         Tcl_WrongNumArgs(interp,1,objv,NULL);
         return TCL_ERROR;
     }
 
     MPI_Finalized(&tclmpi_init_done);
-    if (tclmpi_init_done == 0) {
-        return TCL_ERROR;
-    }
+    result = Tcl_NewIntObj(tclmpi_init_done);
+    Tcl_SetObjResult(interp,result);
     return TCL_OK;
 }
 
