@@ -30,10 +30,19 @@ run_return [list ::tclmpi::conv_get] {{tclmpi::error}}
 run_return [list ::tclmpi::conv_set tclmpi::tozero] {}
 run_return [list ::tclmpi::conv_get] {{tclmpi::tozero}}
 
+# finalize (part 1)
+run_return [list ::tclmpi::finalized] 0
+run_error  [list ::tclmpi::finalize] \
+    [list "calling ::tclmpi::finalize before tclmpi::init is erroneous"]
+
 # init
+run_return [list ::tclmpi::initialized] 0
+run_error  [list ::tclmpi::initialized 0] \
+    [list "wrong # args: should be \"::tclmpi::initialized\""]
 run_error  [list ::tclmpi::init 0] \
     [list "wrong # args: should be \"::tclmpi::init\""]
 run_return [list ::tclmpi::init] {}
+run_return [list ::tclmpi::initialized] 1
 run_error  [list ::tclmpi::init] \
     {{calling ::tclmpi::init multiple times is erroneous.}}
 
@@ -367,12 +376,16 @@ run_error  [list ::tclmpi::abort $comm comm0] \
 run_error  [list ::tclmpi::comm_free $null]  \
     {::tclmpi::comm_free: invalid communicator}
 
-# finalize
+# finalize (part 2)
+run_return [list ::tclmpi::finalized] 0
+run_error  [list ::tclmpi::finalized 0] \
+    [list "wrong # args: should be \"::tclmpi::finalized\""]
 run_error  [list ::tclmpi::finalize 0] \
     [list "wrong # args: should be \"::tclmpi::finalize\""]
 run_return [list ::tclmpi::finalize] {}
 run_error  [list ::tclmpi::finalize] \
     {{calling ::tclmpi::finalize twice is erroneous.}}
+run_return [list ::tclmpi::finalized] 1
 
 # print results and exit
 test_summary 01
