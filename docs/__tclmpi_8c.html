@@ -77,18 +77,18 @@ $(function() {
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;mpi.h&gt;</code><br />
 <code>#include &lt;tcl.h&gt;</code><br />
-<code>#include &lt;string.h&gt;</code><br />
 <code>#include &lt;stdio.h&gt;</code><br />
+<code>#include &lt;string.h&gt;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for _tclmpi.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="__tclmpi_8c__incl.png" border="0" usemap="#a__tclmpi_8c" alt=""/></div>
 <map name="a__tclmpi_8c" id="a__tclmpi_8c">
-<area shape="rect" title="This file contains the C code with the Tcl MPI wrappers." alt="" coords="110,5,185,32"/>
+<area shape="rect" title="This file contains the C code with the Tcl MPI wrappers." alt="" coords="109,5,183,32"/>
 <area shape="rect" title=" " alt="" coords="5,80,60,107"/>
 <area shape="rect" title=" " alt="" coords="84,80,131,107"/>
-<area shape="rect" title=" " alt="" coords="155,80,220,107"/>
-<area shape="rect" title=" " alt="" coords="245,80,306,107"/>
+<area shape="rect" title=" " alt="" coords="155,80,217,107"/>
+<area shape="rect" title=" " alt="" coords="241,80,307,107"/>
 </map>
 </div>
 </div><table class="memberdecls">
@@ -107,26 +107,6 @@ Classes</h2></td></tr>
 Macros</h2></td></tr>
 <tr class="memitem:a5c91138b0df2f204e494c609e15e7ee1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#a5c91138b0df2f204e494c609e15e7ee1">MPI_VERSION</a>&#160;&#160;&#160;1</td></tr>
 <tr class="separator:a5c91138b0df2f204e494c609e15e7ee1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa79d87087661e7ac451d2406b6cdcec1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#aa79d87087661e7ac451d2406b6cdcec1">TCLMPI_TOZERO</a>&#160;&#160;&#160;-4</td></tr>
-<tr class="separator:aa79d87087661e7ac451d2406b6cdcec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a28af21107816287d72747f841ef917ea"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#a28af21107816287d72747f841ef917ea">TCLMPI_ABORT</a>&#160;&#160;&#160;-3</td></tr>
-<tr class="separator:a28af21107816287d72747f841ef917ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59fd3e392fc35fdd36b59daf2a0fbba1"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#a59fd3e392fc35fdd36b59daf2a0fbba1">TCLMPI_ERROR</a>&#160;&#160;&#160;-2</td></tr>
-<tr class="separator:a59fd3e392fc35fdd36b59daf2a0fbba1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15472e35a22f55e5be6b40c31a308b0b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#a15472e35a22f55e5be6b40c31a308b0b">TCLMPI_INVALID</a>&#160;&#160;&#160;-1</td></tr>
-<tr class="separator:a15472e35a22f55e5be6b40c31a308b0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aead34b180e0dab43093d13c3f5d086bb"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#aead34b180e0dab43093d13c3f5d086bb">TCLMPI_NONE</a>&#160;&#160;&#160;0</td></tr>
-<tr class="separator:aead34b180e0dab43093d13c3f5d086bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae61d1733e69232641961370bf5a610e2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#ae61d1733e69232641961370bf5a610e2">TCLMPI_AUTO</a>&#160;&#160;&#160;1</td></tr>
-<tr class="separator:ae61d1733e69232641961370bf5a610e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae5b7012da4771a7c24d03acb7a003aa2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#ae5b7012da4771a7c24d03acb7a003aa2">TCLMPI_INT</a>&#160;&#160;&#160;2</td></tr>
-<tr class="separator:ae5b7012da4771a7c24d03acb7a003aa2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7593dc6a63482fe64138c6e03c61683d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#a7593dc6a63482fe64138c6e03c61683d">TCLMPI_INT_INT</a>&#160;&#160;&#160;3</td></tr>
-<tr class="separator:a7593dc6a63482fe64138c6e03c61683d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab31a967f19424d908b5ca1177e1743f2"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#ab31a967f19424d908b5ca1177e1743f2">TCLMPI_DOUBLE</a>&#160;&#160;&#160;4</td></tr>
-<tr class="separator:ab31a967f19424d908b5ca1177e1743f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d56d0f0fcee55a559830bbd0ca9a63b"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#a7d56d0f0fcee55a559830bbd0ca9a63b">TCLMPI_DOUBLE_INT</a>&#160;&#160;&#160;5</td></tr>
-<tr class="separator:a7d56d0f0fcee55a559830bbd0ca9a63b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af433ad7c272eec33a53ff24098a4f36d"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#af433ad7c272eec33a53ff24098a4f36d">TCLMPI_CONV_CHECK</a>(type,  in,  out,  assign)</td></tr>
 <tr class="separator:af433ad7c272eec33a53ff24098a4f36d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -151,6 +131,10 @@ Functions</h2></td></tr>
 <tr class="separator:a85c731e1706521882659eced81473680"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45ed08039c57d730f66d956e87431d7c"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#a45ed08039c57d730f66d956e87431d7c">TclMPI_Finalize</a> (ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])</td></tr>
 <tr class="separator:a45ed08039c57d730f66d956e87431d7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af143e6414be1d8e76b7dc88208df68b2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#af143e6414be1d8e76b7dc88208df68b2">TclMPI_Initialized</a> (ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])</td></tr>
+<tr class="separator:af143e6414be1d8e76b7dc88208df68b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b3afff28c4aa75821e23176db660138"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#a3b3afff28c4aa75821e23176db660138">TclMPI_Finalized</a> (ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])</td></tr>
+<tr class="separator:a3b3afff28c4aa75821e23176db660138"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae7438f828128f675a55088612321a4ba"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#ae7438f828128f675a55088612321a4ba">TclMPI_Abort</a> (ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])</td></tr>
 <tr class="separator:ae7438f828128f675a55088612321a4ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70e54af5e85f8f41107824a9ab2e7c59"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="__tclmpi_8c.html#a70e54af5e85f8f41107824a9ab2e7c59">TclMPI_Comm_size</a> (ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])</td></tr>
@@ -210,36 +194,6 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a28af21107816287d72747f841ef917ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a28af21107816287d72747f841ef917ea">&#9670;&nbsp;</a></span>TCLMPI_ABORT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TCLMPI_ABORT&#160;&#160;&#160;-3</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>abort on problems </p>
-
-</div>
-</div>
-<a id="ae61d1733e69232641961370bf5a610e2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae61d1733e69232641961370bf5a610e2">&#9670;&nbsp;</a></span>TCLMPI_AUTO</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TCLMPI_AUTO&#160;&#160;&#160;1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>the tcl native data type (string) </p>
-
-</div>
-</div>
 <a id="af433ad7c272eec33a53ff24098a4f36d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af433ad7c272eec33a53ff24098a4f36d">&#9670;&nbsp;</a></span>TCLMPI_CONV_CHECK</h2>
 
@@ -277,26 +231,17 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">if</span> (Tcl_Get ## type ## FromObj(interp,in,out) != TCL_OK) {  \</div>
-<div class="line">        switch (tclmpi_conv_handler) {                          \</div>
-<div class="line">          case <a class="code" href="__tclmpi_8c.html#aa79d87087661e7ac451d2406b6cdcec1">TCLMPI_TOZERO</a>:                                   \</div>
-<div class="line">              Tcl_ResetResult(interp);                          \</div>
-<div class="line">              assign=0;                                         \</div>
-<div class="line">              break;                                            \</div>
-<div class="line">          case <a class="code" href="__tclmpi_8c.html#a28af21107816287d72747f841ef917ea">TCLMPI_ABORT</a>:                                    \</div>
-<div class="line">              fprintf(stderr,<span class="stringliteral">&quot;Error on data element %d: %s\n&quot;</span>,  \</div>
-<div class="line">                      i, Tcl_GetStringResult(interp));          \</div>
-<div class="line">              MPI_Abort(comm,i);                                \</div>
-<div class="line">              break;                                            \</div>
-<div class="line">          case <a class="code" href="__tclmpi_8c.html#a59fd3e392fc35fdd36b59daf2a0fbba1">TCLMPI_ERROR</a>:                                    \</div>
-<div class="line">          default: <span class="comment">/* fallthrough */</span>                            \</div>
-<div class="line">              return TCL_ERROR;                                 \</div>
-<div class="line">              break;                                            \</div>
-<div class="line">        }                                                       \</div>
+<b>Value:</b><div class="fragment"><div class="line">    <span class="keywordflow">if</span> (Tcl_Get##type##FromObj(interp, in, out) != TCL_OK) {                                   \</div>
+<div class="line">        if (tclmpi_conv_handler == TCLMPI_TOZERO) {                                            \</div>
+<div class="line">            Tcl_ResetResult(interp);                                                           \</div>
+<div class="line">            assign = 0;                                                                        \</div>
+<div class="line">        } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (tclmpi_conv_handler == TCLMPI_ABORT) {                                      \</div>
+<div class="line">            fprintf(stderr, <span class="stringliteral">&quot;Error on data element %d: %s\n&quot;</span>, i, Tcl_GetStringResult(interp)); \</div>
+<div class="line">            MPI_Abort(comm, i);                                                                \</div>
+<div class="line">        } <span class="keywordflow">else</span> {                                                                               \</div>
+<div class="line">            return TCL_ERROR;                                                                  \</div>
+<div class="line">        }                                                                                      \</div>
 <div class="line">    }</div>
-<div class="ttc" id="a__tclmpi_8c_html_a28af21107816287d72747f841ef917ea"><div class="ttname"><a href="__tclmpi_8c.html#a28af21107816287d72747f841ef917ea">TCLMPI_ABORT</a></div><div class="ttdeci">#define TCLMPI_ABORT</div><div class="ttdef"><b>Definition:</b> _tclmpi.c:535</div></div>
-<div class="ttc" id="a__tclmpi_8c_html_a59fd3e392fc35fdd36b59daf2a0fbba1"><div class="ttname"><a href="__tclmpi_8c.html#a59fd3e392fc35fdd36b59daf2a0fbba1">TCLMPI_ERROR</a></div><div class="ttdeci">#define TCLMPI_ERROR</div><div class="ttdef"><b>Definition:</b> _tclmpi.c:536</div></div>
-<div class="ttc" id="a__tclmpi_8c_html_aa79d87087661e7ac451d2406b6cdcec1"><div class="ttname"><a href="__tclmpi_8c.html#aa79d87087661e7ac451d2406b6cdcec1">TCLMPI_TOZERO</a></div><div class="ttdeci">#define TCLMPI_TOZERO</div><div class="ttdef"><b>Definition:</b> _tclmpi.c:534</div></div>
 </div><!-- fragment --><p>Data conversion with with error handling </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">type</td><td>Tcl data type for calling Tcl_Get&lt;Type&gt;FromObj() </td></tr>
@@ -307,126 +252,6 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <p>This macro enables consistent handling of data conversions. It also queries the tclmpi_conv_handler variable to jump to the selected conversion error behavior. For TCLMPI_ERROR (the default) a Tcl error is raised and TclMPI returns to the calling function. For TCLMPI_ABORT and error message is written to stderr and parallel execution on the current communicator is terminated via MPI_Abort(). For TCLMPI_TOZERO the error is silently ignored and the data element handed in as assign parameter is set to zero. </p>
-
-</div>
-</div>
-<a id="ab31a967f19424d908b5ca1177e1743f2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab31a967f19424d908b5ca1177e1743f2">&#9670;&nbsp;</a></span>TCLMPI_DOUBLE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TCLMPI_DOUBLE&#160;&#160;&#160;4</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>floating point data type </p>
-
-</div>
-</div>
-<a id="a7d56d0f0fcee55a559830bbd0ca9a63b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7d56d0f0fcee55a559830bbd0ca9a63b">&#9670;&nbsp;</a></span>TCLMPI_DOUBLE_INT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TCLMPI_DOUBLE_INT&#160;&#160;&#160;5</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>data type for double/integer pair </p>
-
-</div>
-</div>
-<a id="a59fd3e392fc35fdd36b59daf2a0fbba1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a59fd3e392fc35fdd36b59daf2a0fbba1">&#9670;&nbsp;</a></span>TCLMPI_ERROR</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TCLMPI_ERROR&#160;&#160;&#160;-2</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>flag problems as Tcl errors </p>
-
-</div>
-</div>
-<a id="ae5b7012da4771a7c24d03acb7a003aa2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae5b7012da4771a7c24d03acb7a003aa2">&#9670;&nbsp;</a></span>TCLMPI_INT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TCLMPI_INT&#160;&#160;&#160;2</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>data type for integers </p>
-
-</div>
-</div>
-<a id="a7593dc6a63482fe64138c6e03c61683d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7593dc6a63482fe64138c6e03c61683d">&#9670;&nbsp;</a></span>TCLMPI_INT_INT</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TCLMPI_INT_INT&#160;&#160;&#160;3</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>data type for pairs of integers </p>
-
-</div>
-</div>
-<a id="a15472e35a22f55e5be6b40c31a308b0b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a15472e35a22f55e5be6b40c31a308b0b">&#9670;&nbsp;</a></span>TCLMPI_INVALID</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TCLMPI_INVALID&#160;&#160;&#160;-1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>not ready to handle data </p>
-
-</div>
-</div>
-<a id="aead34b180e0dab43093d13c3f5d086bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aead34b180e0dab43093d13c3f5d086bb">&#9670;&nbsp;</a></span>TCLMPI_NONE</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TCLMPI_NONE&#160;&#160;&#160;0</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>no data type assigned </p>
-
-</div>
-</div>
-<a id="aa79d87087661e7ac451d2406b6cdcec1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa79d87087661e7ac451d2406b6cdcec1">&#9670;&nbsp;</a></span>TCLMPI_TOZERO</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">#define TCLMPI_TOZERO&#160;&#160;&#160;-4</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>convert problematic data items to zero </p>
 
 </div>
 </div>
@@ -1081,8 +906,8 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>TCL_OK or TCL_ERROR</dd></dl>
-<p>This function sets what action TclMPI should take if a conversion of a data element to the requested integer or double data type fails. There are currently three handlers implemented: <a class="el" href="__tclmpi_8c.html#a59fd3e392fc35fdd36b59daf2a0fbba1">TCLMPI_ERROR</a>, <a class="el" href="__tclmpi_8c.html#a28af21107816287d72747f841ef917ea">TCLMPI_ABORT</a>, and <a class="el" href="__tclmpi_8c.html#aa79d87087661e7ac451d2406b6cdcec1">TCLMPI_TOZERO</a>.</p>
-<p>For <a class="el" href="__tclmpi_8c.html#a59fd3e392fc35fdd36b59daf2a0fbba1">TCLMPI_ERROR</a> a Tcl error is raised and TclMPI returns to the calling function. For <a class="el" href="__tclmpi_8c.html#a28af21107816287d72747f841ef917ea">TCLMPI_ABORT</a> an error message is written to the error output and parallel execution on the current communicator is terminated via MPI_Abort(). For <a class="el" href="__tclmpi_8c.html#aa79d87087661e7ac451d2406b6cdcec1">TCLMPI_TOZERO</a> the error is silently ignored and the data element set to zero.</p>
+<p>This function sets what action TclMPI should take if a conversion of a data element to the requested integer or double data type fails. There are currently three handlers implemented: TCLMPI_ERROR, TCLMPI_ABORT, and TCLMPI_TOZERO.</p>
+<p>For TCLMPI_ERROR a Tcl error is raised and TclMPI returns to the calling function. For TCLMPI_ABORT an error message is written to the error output and parallel execution on the current communicator is terminated via MPI_Abort(). For TCLMPI_TOZERO the error is silently ignored and the data element set to zero.</p>
 <p>There is no equivalent MPI function for this, since there are no data conversions in C or C++. </p>
 
 </div>
@@ -1135,6 +960,48 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>TCL_OK or TCL_ERROR</dd></dl>
 <p>This function does a little more than just calling MPI_Finalize(). It also tries to detect whether MPI_Init() or MPI_Finialize() have been called before (from Tcl) and then creates a (catchable) Tcl error instead of an (uncatchable) MPI error. </p>
+
+</div>
+</div>
+<a id="a3b3afff28c4aa75821e23176db660138"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b3afff28c4aa75821e23176db660138">&#9670;&nbsp;</a></span>TclMPI_Finalized()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TclMPI_Finalized </td>
+          <td>(</td>
+          <td class="paramtype">ClientData&#160;</td>
+          <td class="paramname"><em>nodata</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Tcl_Interp *&#160;</td>
+          <td class="paramname"><em>interp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>objc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Tcl_Obj *const&#160;</td>
+          <td class="paramname"><em>objv</em>[]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>wrapper for MPI_Finalized() </p><dl class="section return"><dt>Returns</dt><dd>TCL_OK or TCL_ERROR</dd></dl>
+<p>This function checks whether the MPI environment has been shut down. </p>
 
 </div>
 </div>
@@ -1238,6 +1105,48 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>TCL_OK or TCL_ERROR</dd></dl>
 <p>This function does a little more work than just calling MPI_Init(). First of it tries to detect whether MPI_Init() has been called before (from Tcl) and then creates a (catchable) Tcl error instead of an (uncatchable) MPI error. It will also try to pass the argument vector to the script from the Tcl generated 'argv' array to the underlying MPI_Init() call and reset argv as needed. </p>
+
+</div>
+</div>
+<a id="af143e6414be1d8e76b7dc88208df68b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af143e6414be1d8e76b7dc88208df68b2">&#9670;&nbsp;</a></span>TclMPI_Initialized()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int TclMPI_Initialized </td>
+          <td>(</td>
+          <td class="paramtype">ClientData&#160;</td>
+          <td class="paramname"><em>nodata</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Tcl_Interp *&#160;</td>
+          <td class="paramname"><em>interp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>objc</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Tcl_Obj *const&#160;</td>
+          <td class="paramname"><em>objv</em>[]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>wrapper for MPI_Initialized() </p><dl class="section return"><dt>Returns</dt><dd>TCL_OK or TCL_ERROR</dd></dl>
+<p>This function checks whether the MPI environment has been initialized. </p>
 
 </div>
 </div>
