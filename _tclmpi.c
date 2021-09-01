@@ -835,10 +835,6 @@ static int tclmpi_typecheck(Tcl_Interp *interp, int type,
     } else return TCL_OK;
 }
 
-
-/*! is 1 after MPI_Init() and -1 after MPI_Finalize() */
-static int tclmpi_init_done = 0;
-
 /*! wrapper for MPI_Init()
  * \param nodata ignored
  * \param interp current Tcl interpreter
@@ -858,6 +854,7 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
 {
     Tcl_Obj *result,*argobj,**args;
     int argc,narg,i,ierr,tlevel;
+    int tclmpi_init_done;
     char **argv;
 
     if (objc != 1) {
@@ -879,6 +876,7 @@ int TclMPI_Init(ClientData nodata, Tcl_Interp *interp,
     Tcl_IncrRefCount(argobj);
     argv[0] = Tcl_GetString(argobj);
 
+    MPI_Initialized(&tclmpi_init_done);
     if (tclmpi_init_done != 0) {
         Tcl_AppendResult(interp,"Calling ",Tcl_GetString(objv[0]),
                          " multiple times is erroneous.",NULL);
@@ -1006,26 +1004,71 @@ int TclMPI_Conv_get(ClientData nodata, Tcl_Interp *interp,
 int TclMPI_Finalize(ClientData nodata, Tcl_Interp *interp,
                     int objc, Tcl_Obj *const objv[])
 {
+    int tclmpi_init_done;
     if (objc != 1) {
         Tcl_WrongNumArgs(interp,1,objv,NULL);
         return TCL_ERROR;
     }
 
-    if (tclmpi_init_done < 0) {
-        Tcl_AppendResult(interp,"Calling ",Tcl_GetString(objv[0]),
-                         " twice is erroneous.",NULL);
+    MPI_Finalized(&tclmpi_init_done);
+    if (tclmpi_init_done != 0) {
+        Tcl_AppendResult(interp,"Calling ",Tcl_GetString(objv[0])," twice is erroneous.",NULL);
         return TCL_ERROR;
     }
 
+    MPI_Initialized(&tclmpi_init_done);
     if (tclmpi_init_done == 0) {
-        Tcl_AppendResult(interp,"Calling ",Tcl_GetString(objv[0]),
-                         " before tclmpi::init is erroneous.",NULL);
+        Tcl_AppendResult(interp,"Calling ",Tcl_GetString(objv[0])," before tclmpi::init is erroneous.",NULL);
         return TCL_ERROR;
     }
 
     MPI_Finalize();
     tclmpi_init_done=-1;
 
+    return TCL_OK;
+}
+
+
+/*! wrapper for MPI_Initialized()
+ * \return TCL_OK or TCL_ERROR
+ *
+ * This function checks whether the MPI environment has been initialized.
+ */
+int TclMPI_Initialized(ClientData nodata, Tcl_Interp *interp,
+                       int objc, Tcl_Obj *const objv[])
+{
+    int tclmpi_init_done;
+    if (objc != 0) {
+        Tcl_WrongNumArgs(interp,1,objv,NULL);
+        return TCL_ERROR;
+    }
+
+    MPI_Initialized(&tclmpi_init_done);
+    if (tclmpi_init_done == 0) {
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+
+/*! wrapper for MPI_Finalized()
+ * \return TCL_OK or TCL_ERROR
+ *
+ * This function checks whether the MPI environment has been shut down.
+ */
+int TclMPI_Finalized(ClientData nodata, Tcl_Interp *interp,
+                    int objc, Tcl_Obj *const objv[])
+{
+    int tclmpi_init_done;
+    if (objc != 0) {
+        Tcl_WrongNumArgs(interp,1,objv,NULL);
+        return TCL_ERROR;
+    }
+
+    MPI_Finalized(&tclmpi_init_done);
+    if (tclmpi_init_done == 0) {
+        return TCL_ERROR;
+    }
     return TCL_OK;
 }
 
@@ -3097,11 +3140,15 @@ static void tclmpi_init_api(Tcl_Interp *interp)
 
     Tcl_CreateObjCommand(interp,"tclmpi::init",TclMPI_Init,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"tclmpi::initialized",TclMPI_Initialized,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"tclmpi::conv_set",TclMPI_Conv_set,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"tclmpi::conv_get",TclMPI_Conv_get,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"tclmpi::finalize",TclMPI_Finalize,
+                         (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
+    Tcl_CreateObjCommand(interp,"tclmpi::finalized",TclMPI_Finalized,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
     Tcl_CreateObjCommand(interp,"tclmpi::abort",TclMPI_Abort,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
