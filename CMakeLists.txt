@@ -161,7 +161,8 @@ else()
   get_target_property(MPI_INCLUDE_PATH MPI::MPI_C INTERFACE_INCLUDE_DIRECTORIES)
   add_custom_target(tidy
     COMMAND ${CLANG_TIDY} ${CMAKE_SOURCE_DIR}/_tclmpi.c
-    -- -I${MPI_INCLUDE_PATH} -I${TCL_INCLUDE_PATH} "-DPACKAGE_NAME=\\\"_tclmpi\\\"" "-DPACKAGE_VERSION=\\\"${CMAKE_PROJECT_VERSION}\\\"" -DBUILD_TCLMPISH -std=c98)
+    -checks=-*,clang-analyzer-*,-clang-analyzer-cplusplus*,mpi-*,portability-*
+    -- -I${MPI_INCLUDE_PATH} -I${TCL_INCLUDE_PATH} "-DPACKAGE_NAME=\\\"_tclmpi\\\"" "-DPACKAGE_VERSION=\\\"${CMAKE_PROJECT_VERSION}\\\"" -DBUILD_TCLMPISH -std=c99)
 endif()
 
 # configure tests

@@ -398,6 +398,8 @@ static tclmpi_comm_t *first_comm = NULL;
 static tclmpi_comm_t *last_comm = NULL;
 /*! Communicator counter. Incremented to get unique strings */
 static int tclmpi_comm_cntr = 0;
+/*! Size of stringbuffer for tclmpi labels */
+static const int TCLMPI_LABEL_SIZE = 32;
 
 /*! Additional global communicator to detect unlisted communicators */
 static MPI_Comm MPI_COMM_INVALID;
@@ -476,8 +478,8 @@ static const char *tclmpi_add_comm(MPI_Comm comm)
     next->next = NULL;
     next->comm = comm;
     next->valid = 1;
-    label = (char *)Tcl_Alloc(32);
-    sprintf(label,"tclmpi::comm%d",tclmpi_comm_cntr);
+    label = (char *)Tcl_Alloc(TCLMPI_LABEL_SIZE);
+    snprintf(label,TCLMPI_LABEL_SIZE,"tclmpi::comm%d",tclmpi_comm_cntr);
     next->label = label;
     ++tclmpi_comm_cntr;
     last_comm->next = next;
@@ -531,16 +533,16 @@ struct tclmpi_intint {
 
 /* some symbolic constants. some have multiple uses. */
 
-#define TCLMPI_TOZERO    -4  /*!< convert problematic data items to zero */
-#define TCLMPI_ABORT     -3  /*!< abort on problems */
-#define TCLMPI_ERROR     -2  /*!< flag problems as Tcl errors */
-#define TCLMPI_INVALID   -1  /*!< not ready to handle data */
-#define TCLMPI_NONE       0  /*!< no data type assigned */
-#define TCLMPI_AUTO       1  /*!< the tcl native data type (string) */
-#define TCLMPI_INT        2  /*!< data type for integers */
-#define TCLMPI_INT_INT    3  /*!< data type for pairs of integers */
-#define TCLMPI_DOUBLE     4  /*!< floating point data type */
-#define TCLMPI_DOUBLE_INT 5  /*!< data type for double/integer pair */
+static const int TCLMPI_TOZERO    = -4;  /*!< convert problematic data items to zero */
+static const int TCLMPI_ABORT     = -3;  /*!< abort on problems */
+static const int TCLMPI_ERROR     = -2;  /*!< flag problems as Tcl errors */
+static const int TCLMPI_INVALID   = -1;  /*!< not ready to handle data */
+static const int TCLMPI_NONE      =  0;  /*!< no data type assigned */
+static const int TCLMPI_AUTO      =  1;  /*!< the tcl native data type (string) */
+static const int TCLMPI_INT       =  2;  /*!< data type for integers */
+static const int TCLMPI_INT_INT   =  3;  /*!< data type for pairs of integers */
+static const int TCLMPI_DOUBLE    =  4;  /*!< floating point data type */
+static const int TCLMPI_DOUBLE_INT = 5;  /*!< data type for double/integer pair */
 
 /*! Translate TclMPI strings to MPI constants for reductions
  * \param opstr string constant describing the operator
@@ -627,22 +629,17 @@ static int tclmpi_conv_handler = TCLMPI_ERROR;
  * communicator is terminated via MPI_Abort(). For TCLMPI_TOZERO
  * the error is silently ignored and the data element handed
  * in as assign parameter is set to zero. */
-#define TCLMPI_CONV_CHECK(type,in,out,assign)                   \
+#define TCLMPI_CONV_CHECK(type,in,out,assign)           \
     if (Tcl_Get ## type ## FromObj(interp,in,out) != TCL_OK) {  \
-        switch (tclmpi_conv_handler) {                          \
-          case TCLMPI_TOZERO:                                   \
-              Tcl_ResetResult(interp);                          \
-              assign=0;                                         \
-              break;                                            \
-          case TCLMPI_ABORT:                                    \
-              fprintf(stderr,"Error on data element %d: %s\n",  \
-                      i, Tcl_GetStringResult(interp));          \
-              MPI_Abort(comm,i);                                \
-              break;                                            \
-          case TCLMPI_ERROR:                                    \
-          default: /* fallthrough */                            \
-              return TCL_ERROR;                                 \
-              break;                                            \
+        if (tclmpi_conv_handler == TCLMPI_TOZERO) {             \
+            Tcl_ResetResult(interp);                            \
+            assign=0;                                           \
+        } else if (tclmpi_conv_handler == TCLMPI_ABORT) {       \
+            fprintf(stderr,"Error on data element %d: %s\n",    \
+                    i, Tcl_GetStringResult(interp));            \
+            MPI_Abort(comm,i);                                  \
+        } else {                                                \
+            return TCL_ERROR;                                   \
         }                                                       \
     }
 
@@ -671,14 +668,14 @@ static const char *tclmpi_add_req()
         return NULL;
     }
 
-    label = (char *)Tcl_Alloc(32);
+    label = (char *)Tcl_Alloc(TCLMPI_LABEL_SIZE);
     if (label == NULL) {
         Tcl_Free((char *)next->req);
         Tcl_Free((char *)next);
         return NULL;
     }
 
-    sprintf(label,"tclmpi::req%d",tclmpi_req_cntr);
+    snprintf(label,TCLMPI_LABEL_SIZE,"tclmpi::req%d",tclmpi_req_cntr);
     next->label = label;
     next->type = TCLMPI_NONE;
     next->len = TCLMPI_INVALID;
@@ -992,17 +989,12 @@ int TclMPI_Conv_get(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    switch (tclmpi_conv_handler) {
-      case TCLMPI_ABORT:
-          Tcl_SetObjResult(interp,Tcl_NewStringObj("tclmpi::abort",-1));
-          break;
-      case TCLMPI_TOZERO:
-          Tcl_SetObjResult(interp,Tcl_NewStringObj("tclmpi::tozero",-1));
-          break;
-      default: /* fallthrough */
-      case TCLMPI_ERROR:
-          Tcl_SetObjResult(interp,Tcl_NewStringObj("tclmpi::error",-1));
-          break;
+    if (tclmpi_conv_handler == TCLMPI_ABORT) {
+        Tcl_SetObjResult(interp,Tcl_NewStringObj("tclmpi::abort",-1));
+    } else if (tclmpi_conv_handler == TCLMPI_TOZERO) {
+        Tcl_SetObjResult(interp,Tcl_NewStringObj("tclmpi::tozero",-1));
+    } else {
+        Tcl_SetObjResult(interp,Tcl_NewStringObj("tclmpi::error",-1));
     }
     return TCL_OK;
 }
@@ -1319,7 +1311,7 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
 {
     Tcl_Obj *result = NULL;
     MPI_Comm comm;
-    int i,rank,root,type,len,ierr;
+    int i,rank,root,type,len,ierr = MPI_SUCCESS;
 
     if (objc != 5) {
         Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <root> <comm>");
@@ -1337,7 +1329,6 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp,
     if (tclmpi_commcheck(interp,comm,objv[0],objv[4]) != TCL_OK)
         return TCL_ERROR;
 
-    ierr = MPI_SUCCESS;
     MPI_Comm_rank(comm,&rank);
 
     if (type == TCLMPI_AUTO) {
@@ -1436,7 +1427,7 @@ int TclMPI_Scatter(ClientData nodata, Tcl_Interp *interp,
 {
     Tcl_Obj *result = NULL;
     MPI_Comm comm;
-    int i,type,root,size,rank,ilen,olen,ierr;
+    int i,type,root,size,rank,ilen,olen,ierr = MPI_SUCCESS;
 
     if (objc != 5) {
         Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <root> <comm>");
@@ -1463,7 +1454,6 @@ int TclMPI_Scatter(ClientData nodata, Tcl_Interp *interp,
     }
     MPI_Comm_size(comm,&size);
     MPI_Comm_rank(comm,&rank);
-    ierr = MPI_SUCCESS;
     Tcl_IncrRefCount(objv[1]);
 
     if (type == TCLMPI_INT) {
@@ -1573,7 +1563,7 @@ int TclMPI_Allgather(ClientData nodata, Tcl_Interp *interp,
 {
     Tcl_Obj *result = NULL;
     MPI_Comm comm;
-    int i,type,size,rank,ilen,olen,mlen,ierr;
+    int i,type,size,rank,ilen,olen,mlen,ierr = MPI_SUCCESS;
 
     if (objc != 4) {
         Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <comm>");
@@ -1598,7 +1588,6 @@ int TclMPI_Allgather(ClientData nodata, Tcl_Interp *interp,
 
     MPI_Comm_size(comm,&size);
     MPI_Comm_rank(comm,&rank);
-    ierr = MPI_SUCCESS;
     Tcl_IncrRefCount(objv[1]);
 
     if (type == TCLMPI_INT) {
@@ -1699,7 +1688,7 @@ int TclMPI_Gather(ClientData nodata, Tcl_Interp *interp,
 {
     Tcl_Obj *result = NULL;
     MPI_Comm comm;
-    int i,type,root,size,rank,ilen,olen,mlen,ierr;
+    int i,type,root,size,rank,ilen,olen,mlen,ierr = MPI_SUCCESS;
 
     if (objc != 5) {
         Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <root> <comm>");
@@ -1727,7 +1716,6 @@ int TclMPI_Gather(ClientData nodata, Tcl_Interp *interp,
 
     MPI_Comm_size(comm,&size);
     MPI_Comm_rank(comm,&rank);
-    ierr = MPI_SUCCESS;
     Tcl_IncrRefCount(objv[1]);
 
     if (type == TCLMPI_INT) {
@@ -1841,7 +1829,7 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
     const char *opstr;
     MPI_Comm comm;
     MPI_Op op;
-    int i,type,len,ierr;
+    int i,type,len,ierr = MPI_SUCCESS;
 
     if (objc != 5) {
         Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <op> <comm>");
@@ -1871,7 +1859,6 @@ int TclMPI_Allreduce(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     }
 
-    ierr = MPI_SUCCESS;
     Tcl_IncrRefCount(objv[1]);
 
     if (type == TCLMPI_INT) {
@@ -2023,7 +2010,7 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
     const char *opstr;
     MPI_Comm comm;
     MPI_Op op;
-    int i,type,root,rank,len,ierr;
+    int i,type,root,rank,len,ierr = MPI_SUCCESS;
 
     if (objc != 6) {
         Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <op> <root> <comm>");
@@ -2058,7 +2045,6 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp,
     }
 
     MPI_Comm_rank(comm,&rank);
-    ierr = MPI_SUCCESS;
     Tcl_IncrRefCount(objv[1]);
 
     if (type == TCLMPI_INT) {
@@ -2228,7 +2214,7 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
                 int objc, Tcl_Obj *const objv[])
 {
     MPI_Comm comm;
-    int i,dest,tag,type,len,ierr;
+    int i,dest,tag,type,len,ierr = MPI_SUCCESS;
 
     if (objc != 6) {
         Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <dest> <tag> <comm>");
@@ -2247,8 +2233,6 @@ int TclMPI_Send(ClientData nodata, Tcl_Interp *interp,
         return TCL_ERROR;
     if (Tcl_GetIntFromObj(interp,objv[4],&tag) != TCL_OK)
         return TCL_ERROR;
-
-    ierr = MPI_SUCCESS;
 
     Tcl_IncrRefCount(objv[1]);
     if (type == TCLMPI_AUTO) {
@@ -2322,7 +2306,7 @@ int TclMPI_Isend(ClientData nodata, Tcl_Interp *interp,
     const char *reqlabel;
     void *data;
     MPI_Comm comm;
-    int i,dest,tag,type,len,ierr;
+    int i,dest,tag,type,len,ierr = MPI_SUCCESS;
 
     if (objc != 6) {
         Tcl_WrongNumArgs(interp,1,objv,"<data> <type> <dest> <tag> <comm>");
@@ -2350,7 +2334,6 @@ int TclMPI_Isend(ClientData nodata, Tcl_Interp *interp,
     }
     req = tclmpi_find_req(reqlabel);
     req->type = type;
-    ierr = MPI_SUCCESS;
     data = NULL;
     req->len = TCLMPI_INVALID;
     req->comm = comm;
@@ -2435,7 +2418,8 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
     const char *statvar;
     MPI_Comm comm;
     MPI_Status status;
-    int i,source,tag,type,len,ierr;
+    int i,source,tag,type,len,ierr = MPI_SUCCESS;
+    memset(&status,0,sizeof(MPI_Status));
 
     if ((objc < 5) || (objc > 6)) {
         Tcl_WrongNumArgs(interp,1,objv,
@@ -2464,9 +2448,7 @@ int TclMPI_Recv(ClientData nodata, Tcl_Interp *interp,
     if (objc > 5) statvar = Tcl_GetString(objv[5]);
     else statvar = NULL;
 
-    ierr = MPI_SUCCESS;
     len = 0;
-
     if (type == TCLMPI_AUTO) {
         char *idata;
         MPI_Probe(source,tag,comm,&status);
@@ -2582,7 +2564,7 @@ int TclMPI_Irecv(ClientData nodata, Tcl_Interp *interp,
     const char *reqlabel;
     MPI_Comm comm;
     MPI_Status status;
-    int source,tag,type,pending,len,ierr;
+    int source,tag,type,pending,len,ierr = MPI_SUCCESS;
 
     if ((objc < 4) || (objc > 5)) {
         Tcl_WrongNumArgs(interp,1,objv,"<type> <source> <tag> <comm>");
@@ -2622,7 +2604,6 @@ int TclMPI_Irecv(ClientData nodata, Tcl_Interp *interp,
     /* indicate receive */
     req->len = TCLMPI_NONE;
 
-    ierr = MPI_SUCCESS;
     pending = len = 0;
 
     /* check if a matching send is already posted and ready to be received */
@@ -2700,7 +2681,7 @@ int TclMPI_Probe(ClientData nodata, Tcl_Interp *interp,
     const char *statvar;
     MPI_Comm comm;
     MPI_Status status;
-    int source,tag,ierr;
+    int source,tag,ierr = MPI_SUCCESS;
 
     if ((objc < 4) || (objc > 5)) {
         Tcl_WrongNumArgs(interp,1,objv,"<source> <tag> <comm> ?status?");
@@ -2887,7 +2868,7 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
     const char *statvar;
     tclmpi_req_t *req;
     MPI_Status status;
-    int ierr;
+    int ierr = MPI_SUCCESS;
 
     if ((objc < 2) || (objc > 3)) {
         Tcl_WrongNumArgs(interp,1,objv,"<request> ?status?");
@@ -2900,7 +2881,6 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp,
 
     if (objc > 4) statvar = Tcl_GetString(objv[4]);
     else statvar = NULL;
-    ierr = MPI_SUCCESS;
 
     /* handle non-blocking send requests */
     if (req->len == TCLMPI_INVALID) {
@@ -3102,8 +3082,8 @@ static void tclmpi_init_api(Tcl_Interp *interp)
     comm->next = NULL;
     comm->valid = 1;
     comm->comm = MPI_COMM_WORLD;
-    label = (char *)Tcl_Alloc(32);
-    strcpy(label,"tclmpi::comm_world");
+    label = (char *)Tcl_Alloc(TCLMPI_LABEL_SIZE);
+    strncpy(label,"tclmpi::comm_world",TCLMPI_LABEL_SIZE);
     comm->label = label;
     first_comm = comm;
 
@@ -3111,8 +3091,8 @@ static void tclmpi_init_api(Tcl_Interp *interp)
     comm->next = NULL;
     comm->valid = 1;
     comm->comm = MPI_COMM_SELF;
-    label = (char *)Tcl_Alloc(32);
-    strcpy(label,"tclmpi::comm_self");
+    label = (char *)Tcl_Alloc(TCLMPI_LABEL_SIZE);
+    strncpy(label,"tclmpi::comm_self",TCLMPI_LABEL_SIZE);
     comm->label = label;
     first_comm->next = comm;
 
@@ -3120,12 +3100,12 @@ static void tclmpi_init_api(Tcl_Interp *interp)
     comm->next = NULL;
     comm->valid = 1;
     comm->comm = MPI_COMM_NULL;
-    label = (char *)Tcl_Alloc(32);
-    strcpy(label,"tclmpi::comm_null");
+    label = (char *)Tcl_Alloc(TCLMPI_LABEL_SIZE);
+    strncpy(label,"tclmpi::comm_null",TCLMPI_LABEL_SIZE);
     comm->label = label;
     first_comm->next->next = comm;
     last_comm = comm;
-    memset(&MPI_COMM_INVALID,255,sizeof(MPI_Comm));
+    memset(&MPI_COMM_INVALID,0xff,sizeof(MPI_Comm));
 
     Tcl_CreateObjCommand(interp,"tclmpi::init",TclMPI_Init,
                          (ClientData)NULL,(Tcl_CmdDeleteProc*)NULL);
