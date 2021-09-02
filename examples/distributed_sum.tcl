@@ -5,7 +5,7 @@
 #
 
 set auto_path [concat [file normalize ..] $auto_path]
-package require tclmpi 0.9
+package require tclmpi
 
 # simplify code through namespace
 namespace import tclmpi::*
@@ -19,7 +19,6 @@ set mpi_auto   $tclmpi::auto
 
 # backward compatibility
 set tv microseconds
-if {$tcl_version < 8.5} { set tv clicks }
 
 # sum --
 #     Sum the data

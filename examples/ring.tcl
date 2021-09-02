@@ -2,7 +2,7 @@
 # ring example
 
 set auto_path [concat [file normalize ..] $auto_path]
-package require tclmpi 0.8
+package require tclmpi
 
 # error helper
 proc abend {test rank msg} {
@@ -14,10 +14,7 @@ proc abend {test rank msg} {
   }
 }
 
-# backward compatibility
 set tv microseconds
-if {$tcl_version < 8.5} { set tv clicks }
-
 set master 0
 set tstart [clock $tv]
 

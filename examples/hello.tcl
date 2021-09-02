@@ -4,7 +4,7 @@
 # point Tcl to the directory with pkgIndex.tcl
 # and load the TclMPI package.
 set auto_path [concat [file normalize ..] $auto_path]
-package require tclmpi 0.6
+package require tclmpi
 
 # initialize TclMPI
 ::tclmpi::init

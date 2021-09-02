@@ -2,7 +2,7 @@
 # compute pi
 
 set auto_path [concat [file normalize ..] $auto_path]
-package require tclmpi 0.6
+package require tclmpi
 
 # simplify code through namespace
 namespace import tclmpi::*
@@ -22,10 +22,7 @@ proc abend {test rank msg} {
   }
 }
 
-# backward compatibility
 set tv microseconds
-if {$tcl_version < 8.5} { set tv clicks }
-
 set master 0
 set tstart [clock $tv]
 
