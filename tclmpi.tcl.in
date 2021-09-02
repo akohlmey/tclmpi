@@ -93,7 +93,7 @@ namespace eval tclmpi {
         wait waitall
 
     #X# /** Initialize the MPI environment from Tcl
-    #X#  *
+    #X#
     #X#  * This command initializes the MPI environment. Needs to be called
     #X#  * before any other TclMPI commands. MPI can be initialized at most
     #X#  * once, so calling ::tclmpi::init multiple times is an error.
@@ -102,8 +102,22 @@ namespace eval tclmpi {
     #X#  * flags and will remove them. The global variable $argc will be adjusted
     #X#  * accordingly. This command takes no arguments and has no return value.
     #X#  *
+    #X#  * \file tclmpi.tcl
     #X#  * For implementation details see TclMPI_Init(). */
     #X#  proc init() {}
+
+    #X# /** Check if MPI environment is initialized from Tcl
+    #X#  \return boolean value of whether MPI has been initialized
+    #X#
+    #X#  * This command checks if ::tclmpi::init has already been called
+    #X#  * or whether the MPI environment has been set up otherwise.
+    #X#  * Since initializing MPI multiple times is an error, you can call
+    #X#  * this function to determine whether you need to call ::tclmpi::init
+    #X#  * in your Tcl script. This command takes no arguments.
+    #X#  *
+    #X#  * \file tclmpi.tcl
+    #X#  * For implementation details see TclMPI_Initalized(). */
+    #X#  proc initialized() {}
 
     #X# /** Set the error handler for TclMPI data conversions
     #X#  * \param handler string constant for error handler
@@ -148,6 +162,20 @@ namespace eval tclmpi {
     #X#  *
     #X#  * For implementation details see TclMPI_Finalize(). */
     #X#  proc finalize() {}
+
+    #X# /** Check if MPI environment was finalized from Tcl
+    #X#  \return boolean value of whether MPI has been shut down
+    #X#
+    #X#  * This command checks if ::tclmpi::finalize has already been called
+    #X#  * or whether the MPI environment has been shut down otherwise.
+    #X#  * Since initializing MPI multiple times is an error, you can call
+    #X#  * this function to determine whether you need to call ::tclmpi::finalize
+    #X#  * and whether it is (still) allowed to call ::tclmpi::init
+    #X#  * in your Tcl script. This command takes no arguments.
+    #X#  *
+    #X#  * \file tclmpi.tcl
+    #X#  * For implementation details see TclMPI_Finalized(). */
+    #X#  proc finalized() {}
 
     #X# /** Terminates the MPI environment from Tcl
     #X#  * \param comm Tcl representation of an MPI communicator
