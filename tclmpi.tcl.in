@@ -1,6 +1,3 @@
-#X# /** \file tclmpi.tcl
-#X#  \brief This file contains the Tcl script parts of the tclmpi namespace and
-#X#   the embedded documentation of the Tcl API of TclMPI. */
 ###########################################################
 # TclMPI - MPI bindings for Tcl
 #
@@ -12,42 +9,6 @@
 ###########################################################
 
 if {$tcl_version < 8.6} { return -code error "Tcl version 8.6 or later is required" }
-#X# /** TclMPI package Tcl namespace */
-#X# namespace tclmpi {
-#X#    variable version = "@PROJECT_VERSION@"; ///< version number of this package
-#X#
-#X#    variable auto   = tclmpi::auto   ; ///< constant for automatic data type
-#X#    variable int    = tclmpi::int    ; ///< constant for integer data type
-#X#    variable intint = tclmpi::intint ; ///< constant for integer pair data type
-#X#    variable double = tclmpi::double ; ///< constant for double data type
-#X#    variable dblint = tclmpi::dblint ; ///< constant for double/int pair data type
-#X#
-#X#    variable comm_world = tclmpi::comm_world ; ///< constant for world communicator
-#X#    variable comm_self  = tclmpi::comm_self  ; ///< constant for self communicator
-#X#    variable comm_null  = tclmpi::comm_null  ; ///< constant empty communicator
-#X#
-#X#    variable any_source = tclmpi::any_source ; ///< constant to accept messages from any source rank
-#X#    variable any_tag    = tclmpi::any_tag    ; ///< constant to accept messages with any tag
-#X#
-#X#    variable sum     = tclmpi::sum     ; ///< summation operation
-#X#    variable prod    = tclmpi::prod    ; ///< product operation
-#X#    variable max     = tclmpi::max     ; ///< maximum operation
-#X#    variable min     = tclmpi::min     ; ///< minimum operation
-#X#    variable land    = tclmpi::land    ; ///< logical and operation
-#X#    variable band    = tclmpi::band    ; ///< bitwise and operation
-#X#    variable lor     = tclmpi::lor     ; ///< logical or operation
-#X#    variable bor     = tclmpi::bor     ; ///< bitwise or operation
-#X#    variable lxor    = tclmpi::lxor    ; ///< logical xor operation
-#X#    variable bxor    = tclmpi::bxor    ; ///< bitwise xor operation
-#X#    variable maxloc  = tclmpi::maxloc  ; ///< maximum and location operation
-#X#    variable minloc  = tclmpi::minloc  ; ///< minimum and location operation
-#X#
-#X#    variable error   = tclmpi::error   ; ///< throw a Tcl error when a data conversion fails
-#X#    variable abort   = tclmpi::abort   ; ///< call MPI_Abort() when a data conversion fails
-#X#    variable tozero  = tclmpi::tozero  ; ///< silently assign zero for failed data conversions
-#X#
-#X#    variable undefined  = tclmpi::undefined  ; ///< constant to indicate an undefined number
-#X#
 
 namespace eval tclmpi {
 
@@ -85,506 +46,6 @@ namespace eval tclmpi {
 
     variable undefined  tclmpi::undefined  ;# constant to indicate an undefined number
 
-    # export all API functions
-    namespace export \
-        init conv_set conv_get finalize abort \
-        comm_size comm_rank comm_split comm_free \
-        barrier bcast scatter allgather gather reduce allreduce \
-        send isend recv irecv probe iprobe \
-        wait waitall
-
-    #X# /** Initialize the MPI environment from Tcl
-    #X#
-    #X#  * This command initializes the MPI environment. Needs to be called
-    #X#  * before any other TclMPI commands. MPI can be initialized at most
-    #X#  * once, so calling ::tclmpi::init multiple times is an error.
-    #X#  * Like in the C bindings for MPI, ::tclmpi::init will scan the argument
-    #X#  * vector, the global variable $argv, for any MPI implementation specific
-    #X#  * flags and will remove them. The global variable $argc will be adjusted
-    #X#  * accordingly. This command takes no arguments and has no return value.
-    #X#  *
-    #X#  * \file tclmpi.tcl
-    #X#  * For implementation details see TclMPI_Init(). */
-    #X#  proc init() {}
-
-    #X# /** Check if MPI environment is initialized from Tcl
-    #X#  \return boolean value of whether MPI has been initialized
-    #X#
-    #X#  * This command checks if ::tclmpi::init has already been called
-    #X#  * or whether the MPI environment has been set up otherwise.
-    #X#  * Since initializing MPI multiple times is an error, you can call
-    #X#  * this function to determine whether you need to call ::tclmpi::init
-    #X#  * in your Tcl script. This command takes no arguments.
-    #X#  *
-    #X#  * \file tclmpi.tcl
-    #X#  * For implementation details see TclMPI_Initalized(). */
-    #X#  proc initialized() {}
-
-    #X# /** Set the error handler for TclMPI data conversions
-    #X#  * \param handler string constant for error handler
-    #X#  *
-    #X#  * This function sets what action TclMPI should take
-    #X#  * if a data conversion to tclmpi::int or tclmpi::double fails.
-    #X#  * When using data types other than tclmpi::auto, the corresponding
-    #X#  * data needs to be converted from the internal Tcl representatin to
-    #X#  * the selected native format. However, this does not always succeed
-    #X#  * for a variety of reasons. With this function TclMPI allows the
-    #X#  * programmer to define how this is handled.
-    #X#  * There are currently three handlers available: tclmpi::error (the
-    #X#  * default setting), tclmpi::abort, and tclmpi::tozero.
-    #X#  * For tclmpi::error a Tcl error is raised that can be intercepted
-    #X#  * with catch and TclMPI immediately returns to the calling function.
-    #X#  * For tclmpi::abort an error message is written directly to the screen
-    #X#  * and parallel execution on the current communicator is terminated via
-    #X#  * MPI_Abort(). For tclmpi::tozero the error is silently ignored and
-    #X#  * the data element set to zero. This command has no return value.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Conv_set(). */
-    #X# proc conv_set(handler) {}
-
-    #X# /** Return a string constant naming the error handler for TclMPI data conversions
-    #X#  * \return string constant for error handler
-    #X#  *
-    #X#  * This function allows to query which error handler is currently
-    #X#  * active for Tcl data conversions inside TclMPI. For details on
-    #X#  * the error handlers, see tclmpi::conv_set.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Conv_get(). */
-    #X#  proc conv_get(handler) {}
-
-    #X# /** Shut down the MPI environment from Tcl
-    #X#  *
-    #X#  * This command closes the MPI environment and cleans up all MPI
-    #X#  * states. All processes much call this routine before exiting.
-    #X#  * Calling this function before calling ::tclmpi::init is an error.
-    #X#  * After calling this function, no more TclMPI commands including
-    #X#  * ::tclmpi::finalize and ::tclmpi::init may be used. This command
-    #X#  * takes no arguments and has no return value.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Finalize(). */
-    #X#  proc finalize() {}
-
-    #X# /** Check if MPI environment was finalized from Tcl
-    #X#  \return boolean value of whether MPI has been shut down
-    #X#
-    #X#  * This command checks if ::tclmpi::finalize has already been called
-    #X#  * or whether the MPI environment has been shut down otherwise.
-    #X#  * Since initializing MPI multiple times is an error, you can call
-    #X#  * this function to determine whether you need to call ::tclmpi::finalize
-    #X#  * and whether it is (still) allowed to call ::tclmpi::init
-    #X#  * in your Tcl script. This command takes no arguments.
-    #X#  *
-    #X#  * \file tclmpi.tcl
-    #X#  * For implementation details see TclMPI_Finalized(). */
-    #X#  proc finalized() {}
-
-    #X# /** Terminates the MPI environment from Tcl
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \param errorcode an integer that will be returned as exit code to the OS
-    #X#  *
-    #X#  * This command makes a best attempt to abort all tasks sharing the
-    #X#  * communicator and exit with the provided error code. Only one task
-    #X#  * needs to call ::tclmpi::abort. This command terminates the
-    #X#  * program, so there can be no return value.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Abort(). */
-    #X#  proc abort(comm, errorcode) {}
-
-    #X# /** Returns the number of processes involved in an MPI communicator
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \return number of MPI processes on communicator
-    #X#  *
-    #X#  * This function indicates the number of processes involved in a
-    #X#  * communicator. For tclmpi::comm_world, it indicates the total
-    #X#  * number of processes available. This call is often used in
-    #X#  * combination with ::tclmpi::comm_rank to determine the amount of
-    #X#  * concurrency available for a specific library or
-    #X#  * program. ::tclmpi::comm_rank indicates the rank of the process that
-    #X#  * calls it in the range from 0...size-1, where size is the return
-    #X#  * value of tclmpi::comm_size.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Comm_size(). */
-    #X#  proc comm_size(comm) {}
-
-    #X# /** Returns the rank of the current process in an MPI communicator
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \return rank on the communicator (integer between 0 and size-1)
-    #X#  *
-    #X#  * This function gives the rank of the process in the particular
-    #X#  * communicator. Many programs will be written with a manager-worker
-    #X#  * model, where one process (such as the rank-zero process) will play
-    #X#  * a supervisory role, and the other processes will serve as compute
-    #X#  * nodes. In this framework, ::tclmpi::comm_size and ::tclmpi::comm_rank
-    #X#  * are useful for determining the roles of the various processes of
-    #X#  * a communicator.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Comm_rank(). */
-    #X#  proc comm_rank(comm) {}
-
-    #X# /** Creates new communicators based on "color" and "key" flags
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \param color subset assignment (non-negative integer or tclmpi::undefined)
-    #X#  * \param key relative rank assignment (integer)
-    #X#  * \return Tcl representation of the newly created MPI communicator
-    #X#  *
-    #X#  * This function partitions the group associated with comm into
-    #X#  * disjoint subgroups, one for each value of color. Each subgroup
-    #X#  * contains all processes of the same color. Within each subgroup,
-    #X#  * the processes are ranked in the order defined by the value of the
-    #X#  * argument key, with ties broken according to their rank in the
-    #X#  * old group. A new communicator is created for each subgroup and
-    #X#  * returned in newcomm. A process may supply the color value
-    #X#  * tclmpi::undefined, in which case the function returns tclmpi::comm_null.
-    #X#  * This is a collective call, but each process is permitted to provide
-    #X#  * different values for color and key.
-    #X#  *
-    #X#  * The following example shows how to construct a communicator where
-    #X#  * the ranks are reversed in comparison to the world communicator.
-    #X#  * \code
-    #X#  * set comm tclmpi::comm_world
-    #X#  * set size [::tclmpi::comm_size $comm]
-    #X#  * set key -[::tclmpi::comm_rank $comm]
-    #X#  * set revcomm [::tclmpi::comm_split $comm 1 $key]
-    #X#  * \endcode
-    #X#  *
-    #X#  * For implementation details see TclMPI_Comm_split(). */
-    #X# proc comm_split(comm, color, key) {}
-
-    #X# /** Deletes a dynamically created communicator and frees its resources
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  *
-    #X#  * This operation marks the MPI communicator associated with it Tcl
-    #X#  * representation comm for deallocation by the underlying MPI library.
-    #X#  * Any pending communications using this communicator will still
-    #X#  * complete normally.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Comm_free(). */
-    #X# proc comm_free(comm) {}
-
-    #X# /** Synchronize MPI processes
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  *
-    #X#  * Blocks the caller until all processes sharing the communicator
-    #X#  * have called it; the call returns at any process only after \b all
-    #X#  * processes have entered the call and thus effectively synchronizes
-    #X#  * the processes. This function has no return value.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Barrier(). */
-    #X#  proc barrier(comm) {}
-
-    #X# /** Broadcasts data from one process to all processes on the communicator
-    #X#  * \param data data to be broadcast (Tcl data object)
-    #X#  * \param type data type to be used (string constant)
-    #X#  * \param root rank of process that is providing the data (integer)
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \return data that was broadcast
-    #X#  *
-    #X#  * This command broadcasts the provided data object (list or single
-    #X#  * number or string) from the process with rank root on the
-    #X#  * communicator comm to all processes sharing the communicator. The
-    #X#  * data argument has to be present on all processes but will be
-    #X#  * ignored on all but the root process. The data resulting from the
-    #X#  * broadcast will be stored in the return value of the command on \b
-    #X#  * all processes. This is important when the data type is not
-    #X#  * tclmpi::auto, since using other data types may incur an
-    #X#  * irreversible conversion of the data elements.
-    #X#  * This function call is an implicit synchronization.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Bcast(). */
-    #X# proc bcast(data, type, root, comm) {}
-
-    #X# /** Distributes data from one process to all processes on the communicator
-    #X#  * \param data data to be distributed (Tcl data object)
-    #X#  * \param type data type to be used (string constant)
-    #X#  * \param root rank of process that is providing the data (integer)
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \return data that was distributed
-    #X#  *
-    #X#  * This command distributes the provided list of data from the process
-    #X#  * with rank root on the communicator comm to all processes sharing
-    #X#  * the communicator. The data argument has to be present on all
-    #X#  * processes but will be ignored on all but the root process.
-    #X#  * The data resulting from the scatter will be stored in the
-    #X#  * return value of the command. The data will be distributed evenly,
-    #X#  * so the length of the list has to be divisible by the number of
-    #X#  * processes on the communicator.
-    #X#  * This procedure is the reverse operation of tclmpi::gather.
-    #X#  * This function call is an implicit synchronization.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Scatter(). */
-    #X# proc scatter(data, type, root, comm) {}
-
-    #X# /** Collects data from all processes on the communicator
-    #X#  * \param data data to be distributed (Tcl data object)
-    #X#  * \param type data type to be used (string constant)
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \return data that was collected or empty
-    #X#  *
-    #X#  * This command collects data the provided list from all processes
-    #X#  * sharing the communicator. The data argument has to be present
-    #X#  * on all processes and has to be of the same length.  The data
-    #X#  * resulting from the gather will be stored in the return value
-    #X#  * of the command for all processes.  This function call is an
-    #X#  * implicit synchronization.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Allgather(). */
-    #X# proc allgather(data, type, comm) {}
-
-    #X# /** Collects data from all processes on the communicator
-    #X#  * \param data data to be distributed (Tcl data object)
-    #X#  * \param type data type to be used (string constant)
-    #X#  * \param root rank of process that will receive the data (integer)
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \return data that was collected or empty
-    #X#  *
-    #X#  * This command collects data the provided list from the process
-    #X#  * with rank root on the communicator comm to all processes sharing
-    #X#  * the communicator. The data argument has to be present on all
-    #X#  * processes and has to be of the same length.
-    #X#  * The data resulting from the gather will be stored in the
-    #X#  * return value of the command on the root process.
-    #X#  * This function call is an implicit synchronization.
-    #X#  * This procedure is the reverse operation of tclmpi::scatter.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Gather(). */
-    #X# proc gather(data, type, root, comm) {}
-
-    #X# /** Combines data from all processes and distributes the result back to them
-    #X#  * \param data data to be reduced (Tcl data object)
-    #X#  * \param type data type to be used (string constant)
-    #X#  * \param op reduction operation (string constant)
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \return data resulting from the reduction operation
-    #X#  *
-    #X#  * This command performs a global reduction operation op on the
-    #X#  * provided data object across all processes participating in the
-    #X#  * communicator comm. If data is a list, then the reduction will be
-    #X#  * done across each respective entry of the same list index. The
-    #X#  * result is distributed to all processes and used as return value of
-    #X#  * the command. This command only supports the data types
-    #X#  * tclmpi::int and tclmpi::double and tclmpi::intint for operations
-    #X#  * tclmpi::maxloc and tclmpi::minloc. The following reduction
-    #X#  * operations are supported: tclmpi::max (maximum), tclmpi::min
-    #X#  * (minimum), tclmpi::sum (sum), tclmpi::prod (product),
-    #X#  * tclmpi::land (logical and), tclmpi::band (bitwise and),
-    #X#  * tclmpi::lor (logical or), tclmpi::bor (bitwise or),
-    #X#  * tclmpi::lxor (logical exclusive or), tclmpi::bxor (bitwise
-    #X#  * exclusive or), tclmpi::maxloc (max value and location),
-    #X#  * tclmpi::minloc (min value and location).
-    #X#  * This function call is an implicit synchronization.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Allreduce(). */
-    #X# proc allreduce(data, type, op, comm) {}
-
-    #X# /** Combines data from all processes on one process
-    #X#  * \param data data to be reduced (Tcl data object)
-    #X#  * \param type data type to be used (string constant)
-    #X#  * \param op reduction operation (string constant)
-    #X#  * \param root rank of process that is receiving the result (integer)
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \return data resulting from the reduction operation
-    #X#  *
-    #X#  * This command performs a global reduction operation op on the
-    #X#  * provided data object across all processes participating in the
-    #X#  * communicator comm. If data is a list, then the reduction will be
-    #X#  * done across each respective entry of the same list index. The
-    #X#  * result is collect on the process with rank root and used as
-    #X#  * return value of the command. For all other processes the return
-    #X#  * value is empty. This command only supports the data types
-    #X#  * tclmpi::int and tclmpi::double and tclmpi::intint for operations
-    #X#  * tclmpi::maxloc and tclmpi::minloc. The following reduction
-    #X#  * operations are supported: tclmpi::max (maximum), tclmpi::min
-    #X#  * (minimum), tclmpi::sum (sum), tclmpi::prod (product),
-    #X#  * tclmpi::land (logical and), tclmpi::band (bitwise and),
-    #X#  * tclmpi::lor (logical or), tclmpi::bor (bitwise or),
-    #X#  * tclmpi::lxor (logical exclusive or), tclmpi::bxor (bitwise
-    #X#  * exclusive or), tclmpi::maxloc (max value and location),
-    #X#  * tclmpi::minloc (min value and location).
-    #X#  * This function call is an implicit synchronization.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Reduce(). */
-    #X# proc reduce(data, type, op, root, comm) {}
-
-    #X# /** Perform a blocking send
-    #X#  * \param data data to be sent (Tcl data object)
-    #X#  * \param type data type to be used (string constant)
-    #X#  * \param dest rank of destination process (non-negative integer)
-    #X#  * \param tag message identification tag (integer)
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  *
-    #X#  * This function performs a regular \b blocking send to process rank
-    #X#  * dest on communicator comm. The choice of data type determines how
-    #X#  * data is being sent and thus unlike in the C-bindings the
-    #X#  * corresponding receive has to use the same data data type.
-    #X#  * As a blocking call, the function will only return when all data is sent.
-    #X#  * This function has no return value.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Send(). */
-    #X# proc send(data, type, dest, tag, comm) {}
-
-    #X# /** Perform a non-blocking send
-    #X#  * \param data data to be sent (Tcl data object)
-    #X#  * \param type data type to be used (string constant)
-    #X#  * \param dest rank of destination process (non-negative integer)
-    #X#  * \param tag message identification tag (integer)
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \return Tcl representation of generated MPI request
-    #X#  *
-    #X#  * This function performs a regular \b non-blocking send to process rank
-    #X#  * dest on communicator comm. The choice of data type determines how
-    #X#  * data is being sent and thus unlike in the C-bindings the
-    #X#  * corresponding receive has to use the same data data type.
-    #X#  * As a non-blocking call, the function will return immediately.
-    #X#  * The return value is a string representing the generated MPI request
-    #X#  * and it can be passed to a call to ::tclmpi::wait in order to wait
-    #X#  * for its completion and release all reserved storage associated with
-    #X#  * the request.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Isend(). */
-    #X# proc isend(data, type, dest, tag, comm) {}
-
-    #X# /** Perform a blocking receive
-    #X#  * \param type data type to be used (string constant)
-    #X#  * \param source rank of sending process or tclmpi::any_source
-    #X#  * \param tag message identification tag or tclmpi::any_tag
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \param status variable name for status array (string)
-    #X#  * \return the received data
-    #X#  *
-    #X#  * This procedure provides a blocking receive operation, i.e. it only
-    #X#  * returns \b after the message is received in full. The received data
-    #X#  * will be passed as return value. The type argument has to match
-    #X#  * that of the corresponding send command. Instead of using a specific
-    #X#  * source rank, the constant tclmpi::any_source can be used and
-    #X#  * similarly tclmpi::any_tag as tag. This way the receive operation
-    #X#  * will not select a message based on source rank or tag, respectively.
-    #X#  * The (optional) status argument would be the name of a variable in
-    #X#  * which status information about the receive will be stored in the
-    #X#  * form of an array. The associative array has the entries MPI_SOURCE
-    #X#  * (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size of
-    #X#  * message in bytes), COUNT_INT (size of message in tclmpi::int units),
-    #X#  * COUNT_DOUBLE (size of message in tclmpi::double units).
-    #X#  *
-    #X#  * For implementation details see TclMPI_Recv(). */
-    #X# proc recv(type, source, tag, comm, status = {}) {}
-
-    #X# /** Initiate a non-blocking receive
-    #X#  * \param type data type to be used (string constant)
-    #X#  * \param source rank of sending process or tclmpi::any_source
-    #X#  * \param tag message identification tag or tclmpi::any_tag
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \return Tcl representation of generated MPI request
-    #X#  *
-    #X#  * This procedure provides a non-blocking receive operation, i.e. it
-    #X#  * returns \b immediately. The call does not return any data but a
-    #X#  * request handle of the form tclmpi::req#, with # being a unique
-    #X#  * integer number. This request handle is best stored in a variable
-    #X#  * and needs to be passed to a ::tclmpi::wait call to wait for completion
-    #X#  * of the receive and pass the data to the calling code as return value
-    #X#  * of the wait call. The type argument has to match that of the
-    #X#  * corresponding send command. Instead of a specific source rank, the
-    #X#  * constant tclmpi::any_source can be used and similarly
-    #X#  * tclmpi::any_tag as tag, to not select on source rank or tag,
-    #X#  * respectively.
-    #X#  *
-    #X#  * For implementation details see TclMPI_Irecv(). */
-    #X# proc irecv(type, source, tag, comm) {}
-
-    #X# /** Blocking test for a message
-    #X#  * \param source rank of sending process or tclmpi::any_source
-    #X#  * \param tag message identification tag or tclmpi::any_tag
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \param status variable name for status array (string)
-    #X#  * \return empty
-    #X#  *
-    #X#  * This function allows to check for an incoming message on the
-    #X#  * communicator comm without actually receiving it. Nevertheless,
-    #X#  * this call is blocking, i.e. it will not return unless there is
-    #X#  * actually a message pending that matches the requirements of source
-    #X#  * rank and message tag. Instead of a specific source rank, the
-    #X#  * constant tclmpi::any_source can be used and similarly tclmpi::any_tag
-    #X#  * as tag, to accept send requests from any rank or tag, respectively.
-    #X#  * The (optional) status argument would be the name of a variable in
-    #X#  * which status information about the message will be stored in the
-    #X#  * form of an array. This associative array has the entries MPI_SOURCE
-    #X#  * (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size of
-    #X#  * message in bytes), COUNT_INT (size of message in tclmpi::int units),
-    #X#  * COUNT_DOUBLE (size of message in tclmpi::double units).
-    #X#  *
-    #X#  * For implementation details see TclMPI_Probe(). */
-    #X# proc probe(source, tag, comm, status = {}) {}
-
-    #X# /** Non-blocking test for a message
-    #X#  * \param source rank of sending process or tclmpi::any_source
-    #X#  * \param tag message identification tag or tclmpi::any_tag
-    #X#  * \param comm Tcl representation of an MPI communicator
-    #X#  * \param status variable name for status array (string)
-    #X#  * \return 1 or 0 depending on whether a pending request was detected
-    #X#  *
-    #X#  * This function allows to check for an incoming message on the
-    #X#  * communicator comm without actually receiving it. Unlike
-    #X#  * ::tclmpi::probe, this call is non-blocking, i.e. it will return
-    #X#  * immediately and report whether there is a message pending or not
-    #X#  * in its return value (1 or 0, respectively). Instead of a specific
-    #X#  * source rank, the constant tclmpi::any_source can be used and
-    #X#  * similarly tclmpi::any_tag as tag, to test for send requests from
-    #X#  * any rank or tag, respectively.  The (optional) status argument
-    #X#  * would be the name of a variable in which status information about
-    #X#  * the message will be stored in the form of an array. This
-    #X#  * associative array has the entries MPI_SOURCE (rank of sender),
-    #X#  * MPI_TAG (tag of message), COUNT_CHAR (size of message in bytes),
-    #X#  * COUNT_INT (size of message in tclmpi::int units), COUNT_DOUBLE
-    #X#  * (size of message in tclmpi::double units).
-    #X#  *
-    #X#  * For implementation details see TclMPI_Iprobe(). */
-
-    #X# /** Wait for MPI request completion
-    #X#  * \param request Tcl representation of an MPI request
-    #X#  * \param status variable name for status array (string)
-    #X#  * \return empty or received data that was associated with the request
-    #X#  *
-    #X#  * This function takes a communication request created by a
-    #X#  * non-blocking send or receive call (tclmpi::isend or tclmpi::irecv)
-    #X#  * and waits for its completion. In case of a send, it will merely
-    #X#  * wait until the matching communication is completed and any
-    #X#  * resources associated with the request will be releaseed. If the
-    #X#  * request was generated by a non-blocking receive call, tclmpi::wait
-    #X#  * will hand the received data to the calling routine in its return
-    #X#  * value.  The (optional) status argument would be the name of a
-    #X#  * variable in which the resulting status information will be stored
-    #X#  * in the form of an associative array. The associative array will
-    #X#  * have the entries MPI_SOURCE (rank of sender), MPI_TAG (tag of
-    #X#  * message), COUNT_CHAR (size of message in bytes), COUNT_INT (size
-    #X#  * of message in tclmpi::int units), COUNT_DOUBLE (size of message in
-    #X#  * tclmpi::double units).
-    #X#  *
-    #X#  * For implementation details see TclMPI_Wait(). */
-    #X# proc wait(request, status = {}) {}
-
-    #X# /** Wait for multiple MPI request completions
-    #X#  * \param requests List of Tcl representations of an MPI request
-    #X#  * \param status variable name for array with list of statuses (string)
-    #X#  * \return empty or list of received data that was associated with the request
-    #X#  *
-    #X#  * This function takes a list communication requests created by
-    #X#  * non-blocking send or receive call (tclmpi::isend or tclmpi::irecv)
-    #X#  * and waits for the completion of all of them. In case of a send,
-    #X#  * it will merely
-    #X#  * wait until the matching communication is completed and any
-    #X#  * resources associated with the request will be releaseed. If the
-    #X#  * request was generated by a non-blocking receive call, tclmpi::wait
-    #X#  * will hand the received data to the calling routine in its return
-    #X#  * value.  The (optional) status argument would be the name of a
-    #X#  * variable in which the resulting status information will be stored
-    #X#  * in the form of an associative array. The associative array will
-    #X#  * have the entries MPI_SOURCE (rank of sender), MPI_TAG (tag of
-    #X#  * message), COUNT_CHAR (size of message in bytes), COUNT_INT (size
-    #X#  * of message in tclmpi::int units), COUNT_DOUBLE (size of message in
-    #X#  * tclmpi::double units) and the results will be stored as lists
-    #X#  * with the information in the same order as the list of requests.
-    #X#  *
-    #X#  * This call is implemented in Tcl as a wrapper around tclmpi::wait */
-    #X#  proc waitall(requests, status = {}) {}
     proc waitall {requests {status {}}} {
         set retval {}
         foreach req {$requests} {
@@ -593,11 +54,551 @@ namespace eval tclmpi {
         return $retval
     }
 
-#X# } // namespace tclmpi
+    # export all API functions
+    namespace export \
+        init conv_set conv_get finalize abort \
+        comm_size comm_rank comm_split comm_free \
+        barrier bcast scatter allgather gather reduce allreduce \
+        send isend recv irecv probe iprobe \
+        wait waitall
+}
 
 # load the ancilliary methods from the DSO
 package require _tclmpi $::tclmpi::version
 package provide tclmpi $tclmpi::version
+
+# doxygen docs for the Tcl commands.
+# commented out and disguised as C++ docs
+# since doxygen no longer supports Tcl.
+
+#X# /** TclMPI package Tcl namespace */
+#X# namespace tclmpi {
+#X#    variable version = "@PROJECT_VERSION@"; ///< version number of this package
+#X#
+#X#    variable auto   = tclmpi::auto   ; ///< constant for automatic data type
+#X#    variable int    = tclmpi::int    ; ///< constant for integer data type
+#X#    variable intint = tclmpi::intint ; ///< constant for integer pair data type
+#X#    variable double = tclmpi::double ; ///< constant for double data type
+#X#    variable dblint = tclmpi::dblint ; ///< constant for double/int pair data type
+#X#
+#X#    variable comm_world = tclmpi::comm_world ; ///< constant for world communicator
+#X#    variable comm_self  = tclmpi::comm_self  ; ///< constant for self communicator
+#X#    variable comm_null  = tclmpi::comm_null  ; ///< constant empty communicator
+#X#
+#X#    variable any_source = tclmpi::any_source ; ///< constant to accept messages from any source rank
+#X#    variable any_tag    = tclmpi::any_tag    ; ///< constant to accept messages with any tag
+#X#
+#X#    variable sum     = tclmpi::sum     ; ///< summation operation
+#X#    variable prod    = tclmpi::prod    ; ///< product operation
+#X#    variable max     = tclmpi::max     ; ///< maximum operation
+#X#    variable min     = tclmpi::min     ; ///< minimum operation
+#X#    variable land    = tclmpi::land    ; ///< logical and operation
+#X#    variable band    = tclmpi::band    ; ///< bitwise and operation
+#X#    variable lor     = tclmpi::lor     ; ///< logical or operation
+#X#    variable bor     = tclmpi::bor     ; ///< bitwise or operation
+#X#    variable lxor    = tclmpi::lxor    ; ///< logical xor operation
+#X#    variable bxor    = tclmpi::bxor    ; ///< bitwise xor operation
+#X#    variable maxloc  = tclmpi::maxloc  ; ///< maximum and location operation
+#X#    variable minloc  = tclmpi::minloc  ; ///< minimum and location operation
+#X#
+#X#    variable error   = tclmpi::error   ; ///< throw a Tcl error when a data conversion fails
+#X#    variable abort   = tclmpi::abort   ; ///< call MPI_Abort() when a data conversion fails
+#X#    variable tozero  = tclmpi::tozero  ; ///< silently assign zero for failed data conversions
+#X#
+#X#    variable undefined  = tclmpi::undefined  ; ///< constant to indicate an undefined number
+#X# }
+
+#X# namespace tclmpi {
+#X# /** Initialize the MPI environment from Tcl
+#X#  * 
+#X#  * This command initializes the MPI environment. Needs to be called
+#X#  * before any other TclMPI commands. MPI can be initialized at most
+#X#  * once, so calling ::tclmpi::init multiple times is an error.
+#X#  * Like in the C bindings for MPI, ::tclmpi::init will scan the argument
+#X#  * vector, the global variable $argv, for any MPI implementation specific
+#X#  * flags and will remove them. The global variable $argc will be adjusted
+#X#  * accordingly. This command takes no arguments and has no return value.
+#X#  *
+#X#  * For implementation details see TclMPI_Init(). */
+#X#  proc init() {}
+
+#X# /** Check if MPI environment is initialized from Tcl
+#X#  \return boolean value of whether MPI has been initialized
+#X#
+#X#  * This command checks if ::tclmpi::init has already been called
+#X#  * or whether the MPI environment has been set up otherwise.
+#X#  * Since initializing MPI multiple times is an error, you can call
+#X#  * this function to determine whether you need to call ::tclmpi::init
+#X#  * in your Tcl script. This command takes no arguments.
+#X#  *
+#X#  * For implementation details see TclMPI_Initalized(). */
+#X#  proc initialized() {}
+
+#X# /** Set the error handler for TclMPI data conversions
+#X#  * \param handler string constant for error handler
+#X#  *
+#X#  * This function sets what action TclMPI should take
+#X#  * if a data conversion to tclmpi::int or tclmpi::double fails.
+#X#  * When using data types other than tclmpi::auto, the corresponding
+#X#  * data needs to be converted from the internal Tcl representatin to
+#X#  * the selected native format. However, this does not always succeed
+#X#  * for a variety of reasons. With this function TclMPI allows the
+#X#  * programmer to define how this is handled.
+#X#  * There are currently three handlers available: tclmpi::error (the
+#X#  * default setting), tclmpi::abort, and tclmpi::tozero.
+#X#  * For tclmpi::error a Tcl error is raised that can be intercepted
+#X#  * with catch and TclMPI immediately returns to the calling function.
+#X#  * For tclmpi::abort an error message is written directly to the screen
+#X#  * and parallel execution on the current communicator is terminated via
+#X#  * MPI_Abort(). For tclmpi::tozero the error is silently ignored and
+#X#  * the data element set to zero. This command has no return value.
+#X#  *
+#X#  * For implementation details see TclMPI_Conv_set(). */
+#X# proc conv_set(handler) {}
+
+#X# /** Return a string constant naming the error handler for TclMPI data conversions
+#X#  * \return string constant for error handler
+#X#  *
+#X#  * This function allows to query which error handler is currently
+#X#  * active for Tcl data conversions inside TclMPI. For details on
+#X#  * the error handlers, see tclmpi::conv_set.
+#X#  *
+#X#  * For implementation details see TclMPI_Conv_get(). */
+#X#  proc conv_get(handler) {}
+
+#X# /** Shut down the MPI environment from Tcl
+#X#  *
+#X#  * This command closes the MPI environment and cleans up all MPI
+#X#  * states. All processes much call this routine before exiting.
+#X#  * Calling this function before calling ::tclmpi::init is an error.
+#X#  * After calling this function, no more TclMPI commands including
+#X#  * ::tclmpi::finalize and ::tclmpi::init may be used. This command
+#X#  * takes no arguments and has no return value.
+#X#  *
+#X#  * For implementation details see TclMPI_Finalize(). */
+#X#  proc finalize() {}
+
+#X# /** Check if MPI environment was finalized from Tcl
+#X#  \return boolean value of whether MPI has been shut down
+#X#
+#X#  * This command checks if ::tclmpi::finalize has already been called
+#X#  * or whether the MPI environment has been shut down otherwise.
+#X#  * Since initializing MPI multiple times is an error, you can call
+#X#  * this function to determine whether you need to call ::tclmpi::finalize
+#X#  * and whether it is (still) allowed to call ::tclmpi::init
+#X#  * in your Tcl script. This command takes no arguments.
+#X#  *
+#X#  * For implementation details see TclMPI_Finalized(). */
+#X#  proc finalized() {}
+
+#X# /** Terminates the MPI environment from Tcl
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \param errorcode an integer that will be returned as exit code to the OS
+#X#  *
+#X#  * This command makes a best attempt to abort all tasks sharing the
+#X#  * communicator and exit with the provided error code. Only one task
+#X#  * needs to call ::tclmpi::abort. This command terminates the
+#X#  * program, so there can be no return value.
+#X#  *
+#X#  * For implementation details see TclMPI_Abort(). */
+#X#  proc abort(comm, errorcode) {}
+
+#X# /** Returns the number of processes involved in an MPI communicator
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \return number of MPI processes on communicator
+#X#  *
+#X#  * This function indicates the number of processes involved in a
+#X#  * communicator. For tclmpi::comm_world, it indicates the total
+#X#  * number of processes available. This call is often used in
+#X#  * combination with ::tclmpi::comm_rank to determine the amount of
+#X#  * concurrency available for a specific library or
+#X#  * program. ::tclmpi::comm_rank indicates the rank of the process that
+#X#  * calls it in the range from 0...size-1, where size is the return
+#X#  * value of tclmpi::comm_size.
+#X#  *
+#X#  * For implementation details see TclMPI_Comm_size(). */
+#X#  proc comm_size(comm) {}
+
+#X# /** Returns the rank of the current process in an MPI communicator
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \return rank on the communicator (integer between 0 and size-1)
+#X#  *
+#X#  * This function gives the rank of the process in the particular
+#X#  * communicator. Many programs will be written with a manager-worker
+#X#  * model, where one process (such as the rank-zero process) will play
+#X#  * a supervisory role, and the other processes will serve as compute
+#X#  * nodes. In this framework, ::tclmpi::comm_size and ::tclmpi::comm_rank
+#X#  * are useful for determining the roles of the various processes of
+#X#  * a communicator.
+#X#  *
+#X#  * For implementation details see TclMPI_Comm_rank(). */
+#X#  proc comm_rank(comm) {}
+
+#X# /** Creates new communicators based on "color" and "key" flags
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \param color subset assignment (non-negative integer or tclmpi::undefined)
+#X#  * \param key relative rank assignment (integer)
+#X#  * \return Tcl representation of the newly created MPI communicator
+#X#  *
+#X#  * This function partitions the group associated with comm into
+#X#  * disjoint subgroups, one for each value of color. Each subgroup
+#X#  * contains all processes of the same color. Within each subgroup,
+#X#  * the processes are ranked in the order defined by the value of the
+#X#  * argument key, with ties broken according to their rank in the
+#X#  * old group. A new communicator is created for each subgroup and
+#X#  * returned in newcomm. A process may supply the color value
+#X#  * tclmpi::undefined, in which case the function returns tclmpi::comm_null.
+#X#  * This is a collective call, but each process is permitted to provide
+#X#  * different values for color and key.
+#X#  *
+#X#  * The following example shows how to construct a communicator where
+#X#  * the ranks are reversed in comparison to the world communicator.
+#X#  * \code
+#X#  * set comm tclmpi::comm_world
+#X#  * set size [::tclmpi::comm_size $comm]
+#X#  * set key -[::tclmpi::comm_rank $comm]
+#X#  * set revcomm [::tclmpi::comm_split $comm 1 $key]
+#X#  * \endcode
+#X#  *
+#X#  * For implementation details see TclMPI_Comm_split(). */
+#X# proc comm_split(comm, color, key) {}
+
+#X# /** Deletes a dynamically created communicator and frees its resources
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  *
+#X#  * This operation marks the MPI communicator associated with it Tcl
+#X#  * representation comm for deallocation by the underlying MPI library.
+#X#  * Any pending communications using this communicator will still
+#X#  * complete normally.
+#X#  *
+#X#  * For implementation details see TclMPI_Comm_free(). */
+#X# proc comm_free(comm) {}
+
+#X# /** Synchronize MPI processes
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  *
+#X#  * Blocks the caller until all processes sharing the communicator
+#X#  * have called it; the call returns at any process only after \b all
+#X#  * processes have entered the call and thus effectively synchronizes
+#X#  * the processes. This function has no return value.
+#X#  *
+#X#  * For implementation details see TclMPI_Barrier(). */
+#X#  proc barrier(comm) {}
+
+#X# /** Broadcasts data from one process to all processes on the communicator
+#X#  * \param data data to be broadcast (Tcl data object)
+#X#  * \param type data type to be used (string constant)
+#X#  * \param root rank of process that is providing the data (integer)
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \return data that was broadcast
+#X#  *
+#X#  * This command broadcasts the provided data object (list or single
+#X#  * number or string) from the process with rank root on the
+#X#  * communicator comm to all processes sharing the communicator. The
+#X#  * data argument has to be present on all processes but will be
+#X#  * ignored on all but the root process. The data resulting from the
+#X#  * broadcast will be stored in the return value of the command on \b
+#X#  * all processes. This is important when the data type is not
+#X#  * tclmpi::auto, since using other data types may incur an
+#X#  * irreversible conversion of the data elements.
+#X#  * This function call is an implicit synchronization.
+#X#  *
+#X#  * For implementation details see TclMPI_Bcast(). */
+#X# proc bcast(data, type, root, comm) {}
+
+#X# /** Distributes data from one process to all processes on the communicator
+#X#  * \param data data to be distributed (Tcl data object)
+#X#  * \param type data type to be used (string constant)
+#X#  * \param root rank of process that is providing the data (integer)
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \return data that was distributed
+#X#  *
+#X#  * This command distributes the provided list of data from the process
+#X#  * with rank root on the communicator comm to all processes sharing
+#X#  * the communicator. The data argument has to be present on all
+#X#  * processes but will be ignored on all but the root process.
+#X#  * The data resulting from the scatter will be stored in the
+#X#  * return value of the command. The data will be distributed evenly,
+#X#  * so the length of the list has to be divisible by the number of
+#X#  * processes on the communicator.
+#X#  * This procedure is the reverse operation of tclmpi::gather.
+#X#  * This function call is an implicit synchronization.
+#X#  *
+#X#  * For implementation details see TclMPI_Scatter(). */
+#X# proc scatter(data, type, root, comm) {}
+
+#X# /** Collects data from all processes on the communicator
+#X#  * \param data data to be distributed (Tcl data object)
+#X#  * \param type data type to be used (string constant)
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \return data that was collected or empty
+#X#  *
+#X#  * This command collects data the provided list from all processes
+#X#  * sharing the communicator. The data argument has to be present
+#X#  * on all processes and has to be of the same length.  The data
+#X#  * resulting from the gather will be stored in the return value
+#X#  * of the command for all processes.  This function call is an
+#X#  * implicit synchronization.
+#X#  *
+#X#  * For implementation details see TclMPI_Allgather(). */
+#X# proc allgather(data, type, comm) {}
+
+#X# /** Collects data from all processes on the communicator
+#X#  * \param data data to be distributed (Tcl data object)
+#X#  * \param type data type to be used (string constant)
+#X#  * \param root rank of process that will receive the data (integer)
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \return data that was collected or empty
+#X#  *
+#X#  * This command collects data the provided list from the process
+#X#  * with rank root on the communicator comm to all processes sharing
+#X#  * the communicator. The data argument has to be present on all
+#X#  * processes and has to be of the same length.
+#X#  * The data resulting from the gather will be stored in the
+#X#  * return value of the command on the root process.
+#X#  * This function call is an implicit synchronization.
+#X#  * This procedure is the reverse operation of tclmpi::scatter.
+#X#  *
+#X#  * For implementation details see TclMPI_Gather(). */
+#X# proc gather(data, type, root, comm) {}
+
+#X# /** Combines data from all processes and distributes the result back to them
+#X#  * \param data data to be reduced (Tcl data object)
+#X#  * \param type data type to be used (string constant)
+#X#  * \param op reduction operation (string constant)
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \return data resulting from the reduction operation
+#X#  *
+#X#  * This command performs a global reduction operation op on the
+#X#  * provided data object across all processes participating in the
+#X#  * communicator comm. If data is a list, then the reduction will be
+#X#  * done across each respective entry of the same list index. The
+#X#  * result is distributed to all processes and used as return value of
+#X#  * the command. This command only supports the data types
+#X#  * tclmpi::int and tclmpi::double and tclmpi::intint for operations
+#X#  * tclmpi::maxloc and tclmpi::minloc. The following reduction
+#X#  * operations are supported: tclmpi::max (maximum), tclmpi::min
+#X#  * (minimum), tclmpi::sum (sum), tclmpi::prod (product),
+#X#  * tclmpi::land (logical and), tclmpi::band (bitwise and),
+#X#  * tclmpi::lor (logical or), tclmpi::bor (bitwise or),
+#X#  * tclmpi::lxor (logical exclusive or), tclmpi::bxor (bitwise
+#X#  * exclusive or), tclmpi::maxloc (max value and location),
+#X#  * tclmpi::minloc (min value and location).
+#X#  * This function call is an implicit synchronization.
+#X#  *
+#X#  * For implementation details see TclMPI_Allreduce(). */
+#X# proc allreduce(data, type, op, comm) {}
+
+#X# /** Combines data from all processes on one process
+#X#  * \param data data to be reduced (Tcl data object)
+#X#  * \param type data type to be used (string constant)
+#X#  * \param op reduction operation (string constant)
+#X#  * \param root rank of process that is receiving the result (integer)
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \return data resulting from the reduction operation
+#X#  *
+#X#  * This command performs a global reduction operation op on the
+#X#  * provided data object across all processes participating in the
+#X#  * communicator comm. If data is a list, then the reduction will be
+#X#  * done across each respective entry of the same list index. The
+#X#  * result is collect on the process with rank root and used as
+#X#  * return value of the command. For all other processes the return
+#X#  * value is empty. This command only supports the data types
+#X#  * tclmpi::int and tclmpi::double and tclmpi::intint for operations
+#X#  * tclmpi::maxloc and tclmpi::minloc. The following reduction
+#X#  * operations are supported: tclmpi::max (maximum), tclmpi::min
+#X#  * (minimum), tclmpi::sum (sum), tclmpi::prod (product),
+#X#  * tclmpi::land (logical and), tclmpi::band (bitwise and),
+#X#  * tclmpi::lor (logical or), tclmpi::bor (bitwise or),
+#X#  * tclmpi::lxor (logical exclusive or), tclmpi::bxor (bitwise
+#X#  * exclusive or), tclmpi::maxloc (max value and location),
+#X#  * tclmpi::minloc (min value and location).
+#X#  * This function call is an implicit synchronization.
+#X#  *
+#X#  * For implementation details see TclMPI_Reduce(). */
+#X# proc reduce(data, type, op, root, comm) {}
+
+#X# /** Perform a blocking send
+#X#  * \param data data to be sent (Tcl data object)
+#X#  * \param type data type to be used (string constant)
+#X#  * \param dest rank of destination process (non-negative integer)
+#X#  * \param tag message identification tag (integer)
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  *
+#X#  * This function performs a regular \b blocking send to process rank
+#X#  * dest on communicator comm. The choice of data type determines how
+#X#  * data is being sent and thus unlike in the C-bindings the
+#X#  * corresponding receive has to use the same data data type.
+#X#  * As a blocking call, the function will only return when all data is sent.
+#X#  * This function has no return value.
+#X#  *
+#X#  * For implementation details see TclMPI_Send(). */
+#X# proc send(data, type, dest, tag, comm) {}
+
+#X# /** Perform a non-blocking send
+#X#  * \param data data to be sent (Tcl data object)
+#X#  * \param type data type to be used (string constant)
+#X#  * \param dest rank of destination process (non-negative integer)
+#X#  * \param tag message identification tag (integer)
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \return Tcl representation of generated MPI request
+#X#  *
+#X#  * This function performs a regular \b non-blocking send to process rank
+#X#  * dest on communicator comm. The choice of data type determines how
+#X#  * data is being sent and thus unlike in the C-bindings the
+#X#  * corresponding receive has to use the same data data type.
+#X#  * As a non-blocking call, the function will return immediately.
+#X#  * The return value is a string representing the generated MPI request
+#X#  * and it can be passed to a call to ::tclmpi::wait in order to wait
+#X#  * for its completion and release all reserved storage associated with
+#X#  * the request.
+#X#  *
+#X#  * For implementation details see TclMPI_Isend(). */
+#X# proc isend(data, type, dest, tag, comm) {}
+
+#X# /** Perform a blocking receive
+#X#  * \param type data type to be used (string constant)
+#X#  * \param source rank of sending process or tclmpi::any_source
+#X#  * \param tag message identification tag or tclmpi::any_tag
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \param status variable name for status array (string)
+#X#  * \return the received data
+#X#  *
+#X#  * This procedure provides a blocking receive operation, i.e. it only
+#X#  * returns \b after the message is received in full. The received data
+#X#  * will be passed as return value. The type argument has to match
+#X#  * that of the corresponding send command. Instead of using a specific
+#X#  * source rank, the constant tclmpi::any_source can be used and
+#X#  * similarly tclmpi::any_tag as tag. This way the receive operation
+#X#  * will not select a message based on source rank or tag, respectively.
+#X#  * The (optional) status argument would be the name of a variable in
+#X#  * which status information about the receive will be stored in the
+#X#  * form of an array. The associative array has the entries MPI_SOURCE
+#X#  * (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size of
+#X#  * message in bytes), COUNT_INT (size of message in tclmpi::int units),
+#X#  * COUNT_DOUBLE (size of message in tclmpi::double units).
+#X#  *
+#X#  * For implementation details see TclMPI_Recv(). */
+#X# proc recv(type, source, tag, comm, status = {}) {}
+
+#X# /** Initiate a non-blocking receive
+#X#  * \param type data type to be used (string constant)
+#X#  * \param source rank of sending process or tclmpi::any_source
+#X#  * \param tag message identification tag or tclmpi::any_tag
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \return Tcl representation of generated MPI request
+#X#  *
+#X#  * This procedure provides a non-blocking receive operation, i.e. it
+#X#  * returns \b immediately. The call does not return any data but a
+#X#  * request handle of the form tclmpi::req#, with # being a unique
+#X#  * integer number. This request handle is best stored in a variable
+#X#  * and needs to be passed to a ::tclmpi::wait call to wait for completion
+#X#  * of the receive and pass the data to the calling code as return value
+#X#  * of the wait call. The type argument has to match that of the
+#X#  * corresponding send command. Instead of a specific source rank, the
+#X#  * constant tclmpi::any_source can be used and similarly
+#X#  * tclmpi::any_tag as tag, to not select on source rank or tag,
+#X#  * respectively.
+#X#  *
+#X#  * For implementation details see TclMPI_Irecv(). */
+#X# proc irecv(type, source, tag, comm) {}
+
+#X# /** Blocking test for a message
+#X#  * \param source rank of sending process or tclmpi::any_source
+#X#  * \param tag message identification tag or tclmpi::any_tag
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \param status variable name for status array (string)
+#X#  * \return empty
+#X#  *
+#X#  * This function allows to check for an incoming message on the
+#X#  * communicator comm without actually receiving it. Nevertheless,
+#X#  * this call is blocking, i.e. it will not return unless there is
+#X#  * actually a message pending that matches the requirements of source
+#X#  * rank and message tag. Instead of a specific source rank, the
+#X#  * constant tclmpi::any_source can be used and similarly tclmpi::any_tag
+#X#  * as tag, to accept send requests from any rank or tag, respectively.
+#X#  * The (optional) status argument would be the name of a variable in
+#X#  * which status information about the message will be stored in the
+#X#  * form of an array. This associative array has the entries MPI_SOURCE
+#X#  * (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size of
+#X#  * message in bytes), COUNT_INT (size of message in tclmpi::int units),
+#X#  * COUNT_DOUBLE (size of message in tclmpi::double units).
+#X#  *
+#X#  * For implementation details see TclMPI_Probe(). */
+#X# proc probe(source, tag, comm, status = {}) {}
+
+#X# /** Non-blocking test for a message
+#X#  * \param source rank of sending process or tclmpi::any_source
+#X#  * \param tag message identification tag or tclmpi::any_tag
+#X#  * \param comm Tcl representation of an MPI communicator
+#X#  * \param status variable name for status array (string)
+#X#  * \return 1 or 0 depending on whether a pending request was detected
+#X#  *
+#X#  * This function allows to check for an incoming message on the
+#X#  * communicator comm without actually receiving it. Unlike
+#X#  * ::tclmpi::probe, this call is non-blocking, i.e. it will return
+#X#  * immediately and report whether there is a message pending or not
+#X#  * in its return value (1 or 0, respectively). Instead of a specific
+#X#  * source rank, the constant tclmpi::any_source can be used and
+#X#  * similarly tclmpi::any_tag as tag, to test for send requests from
+#X#  * any rank or tag, respectively.  The (optional) status argument
+#X#  * would be the name of a variable in which status information about
+#X#  * the message will be stored in the form of an array. This
+#X#  * associative array has the entries MPI_SOURCE (rank of sender),
+#X#  * MPI_TAG (tag of message), COUNT_CHAR (size of message in bytes),
+#X#  * COUNT_INT (size of message in tclmpi::int units), COUNT_DOUBLE
+#X#  * (size of message in tclmpi::double units).
+#X#  *
+#X#  * For implementation details see TclMPI_Iprobe(). */
+
+#X# /** Wait for MPI request completion
+#X#  * \param request Tcl representation of an MPI request
+#X#  * \param status variable name for status array (string)
+#X#  * \return empty or received data that was associated with the request
+#X#  *
+#X#  * This function takes a communication request created by a
+#X#  * non-blocking send or receive call (tclmpi::isend or tclmpi::irecv)
+#X#  * and waits for its completion. In case of a send, it will merely
+#X#  * wait until the matching communication is completed and any
+#X#  * resources associated with the request will be releaseed. If the
+#X#  * request was generated by a non-blocking receive call, tclmpi::wait
+#X#  * will hand the received data to the calling routine in its return
+#X#  * value.  The (optional) status argument would be the name of a
+#X#  * variable in which the resulting status information will be stored
+#X#  * in the form of an associative array. The associative array will
+#X#  * have the entries MPI_SOURCE (rank of sender), MPI_TAG (tag of
+#X#  * message), COUNT_CHAR (size of message in bytes), COUNT_INT (size
+#X#  * of message in tclmpi::int units), COUNT_DOUBLE (size of message in
+#X#  * tclmpi::double units).
+#X#  *
+#X#  * For implementation details see TclMPI_Wait(). */
+#X# proc wait(request, status = {}) {}
+
+#X# /** Wait for multiple MPI request completions
+#X#  * \param requests List of Tcl representations of an MPI request
+#X#  * \param status variable name for array with list of statuses (string)
+#X#  * \return empty or list of received data that was associated with the request
+#X#  *
+#X#  * This function takes a list communication requests created by
+#X#  * non-blocking send or receive call (tclmpi::isend or tclmpi::irecv)
+#X#  * and waits for the completion of all of them. In case of a send,
+#X#  * it will merely
+#X#  * wait until the matching communication is completed and any
+#X#  * resources associated with the request will be releaseed. If the
+#X#  * request was generated by a non-blocking receive call, tclmpi::wait
+#X#  * will hand the received data to the calling routine in its return
+#X#  * value.  The (optional) status argument would be the name of a
+#X#  * variable in which the resulting status information will be stored
+#X#  * in the form of an associative array. The associative array will
+#X#  * have the entries MPI_SOURCE (rank of sender), MPI_TAG (tag of
+#X#  * message), COUNT_CHAR (size of message in bytes), COUNT_INT (size
+#X#  * of message in tclmpi::int units), COUNT_DOUBLE (size of message in
+#X#  * tclmpi::double units) and the results will be stored as lists
+#X#  * with the information in the same order as the list of requests.
+#X#  *
+#X#  * This call is implemented in Tcl as a wrapper around tclmpi::wait */
+#X#  proc waitall(requests, status = {}) {}
+#X# }
 
 # Local Variables:
 # mode: tcl

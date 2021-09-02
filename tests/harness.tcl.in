@@ -1,4 +1,3 @@
-#X# /** \file harness.tcl
 ###########################################################
 # Test harness for TclMPI
 #
@@ -8,16 +7,6 @@
 # See the file LICENSE in the top level directory for
 # licensing conditions.
 ###########################################################
-
-#X# \brief This file contains the TclMPI test harness script code
-#X#
-#X# This namespace contains several Tcl procedures that
-#X# are used to conduct unit tests on the TclMPI package.
-#X# For simplicity paths are hardcoded, so that this file
-#X# must not be moved around and stay in the same directory
-#X# as the individual tests, which in turn have to be in
-#X# subdirectory of the directory where the TclMPI shared
-#X# object and/or the tclmpish extended Tcl shell reside. */
 
 # extend package search path to find TclMPI
 set auto_path [concat [file normalize ..] $auto_path]
@@ -46,6 +35,39 @@ namespace eval tclmpi_test {
     namespace export ser_init par_init test_summary \
         run_return run_error par_return par_error
 }
+
+# doxygen docs for the Tcl commands.
+# commented out and disguised as C++ docs
+# since doxygen no longer supports Tcl.
+
+#X# /** TclMPI test harness implementation namespace
+#X#
+#X# This namespace contains several Tcl procedures that
+#X# are used to conduct unit tests on the TclMPI package.
+#X# For simplicity paths are hardcoded, so that this file
+#X# must not be moved around and stay in the same directory
+#X# as the individual tests, which in turn have to be in a
+#X# subdirectory of the directory where the TclMPI shared
+#X# object and/or the tclmpish extended Tcl shell reside. */
+#X#
+#X# namespace tclmpi_test {
+#X#    set version "@PROJECT_VERSION@"  ; ///< version of the package
+#X#
+#X#    # define some convenience variables
+#X#    variable comm =  tclmpi::comm_world ; ///< shortcut for world communicator
+#X#
+#X#    variable master = 0              ; ///< rank of MPI master process
+#X#    variable rank   = 0              ; ///< rank of this MPI process on $comm
+#X#    variable size   = 1              ; ///< number of processes on $comm
+#X#    variable int    = tclmpi::int    ; ///< shortcut for tclmpi::int data type
+#X#    variable intint = tclmpi::intint ; ///< shortcut for tclmpi::intint data type
+#X#    variable maxloc = tclmpi::maxloc ; ///< shortcut for tclmpi::maxloc operator
+#X#    variable minloc = tclmpi::minloc ; ///< shortcut for tclmpi::minloc operator
+#X#
+#X#    # counters for successful and failed tests
+#X#    variable pass = 0                ; ///< counter for successful tests
+#X#    variable fail = 0                ; ///< counter for failed tests
+#X# }
 
 ## format output
 # \param kind string representing the kind of test (max 11 chars).
