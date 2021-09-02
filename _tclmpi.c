@@ -837,6 +837,48 @@ static int tclmpi_typecheck(Tcl_Interp *interp, int type, Tcl_Obj *obj0, Tcl_Obj
         return TCL_OK;
 }
 
+/*! wrapper for MPI_Initialized()
+ * \return TCL_OK or TCL_ERROR
+ *
+ * This function checks whether the MPI environment has been initialized.
+ */
+int TclMPI_Initialized(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+    Tcl_Obj *result;
+    int tclmpi_init_done;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, NULL);
+        return TCL_ERROR;
+    }
+
+    MPI_Initialized(&tclmpi_init_done);
+    result = Tcl_NewIntObj(tclmpi_init_done);
+    Tcl_SetObjResult(interp, result);
+    return TCL_OK;
+}
+
+/*! wrapper for MPI_Finalized()
+ * \return TCL_OK or TCL_ERROR
+ *
+ * This function checks whether the MPI environment has been shut down.
+ */
+int TclMPI_Finalized(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+    Tcl_Obj *result;
+    int tclmpi_init_done;
+
+    if (objc != 1) {
+        Tcl_WrongNumArgs(interp, 1, objv, NULL);
+        return TCL_ERROR;
+    }
+
+    MPI_Finalized(&tclmpi_init_done);
+    result = Tcl_NewIntObj(tclmpi_init_done);
+    Tcl_SetObjResult(interp, result);
+    return TCL_OK;
+}
+
 /*! wrapper for MPI_Init()
  * \param nodata ignored
  * \param interp current Tcl interpreter
@@ -1017,48 +1059,6 @@ int TclMPI_Finalize(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *co
     MPI_Finalize();
     tclmpi_init_done = -1;
 
-    return TCL_OK;
-}
-
-/*! wrapper for MPI_Initialized()
- * \return TCL_OK or TCL_ERROR
- *
- * This function checks whether the MPI environment has been initialized.
- */
-int TclMPI_Initialized(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-    Tcl_Obj *result;
-    int tclmpi_init_done;
-
-    if (objc != 1) {
-        Tcl_WrongNumArgs(interp, 1, objv, NULL);
-        return TCL_ERROR;
-    }
-
-    MPI_Initialized(&tclmpi_init_done);
-    result = Tcl_NewIntObj(tclmpi_init_done);
-    Tcl_SetObjResult(interp, result);
-    return TCL_OK;
-}
-
-/*! wrapper for MPI_Finalized()
- * \return TCL_OK or TCL_ERROR
- *
- * This function checks whether the MPI environment has been shut down.
- */
-int TclMPI_Finalized(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-    Tcl_Obj *result;
-    int tclmpi_init_done;
-
-    if (objc != 1) {
-        Tcl_WrongNumArgs(interp, 1, objv, NULL);
-        return TCL_ERROR;
-    }
-
-    MPI_Finalized(&tclmpi_init_done);
-    result = Tcl_NewIntObj(tclmpi_init_done);
-    Tcl_SetObjResult(interp, result);
     return TCL_OK;
 }
 
