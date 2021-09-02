@@ -13,9 +13,12 @@ at <akohlmey@gmail.com>.  The  official  homepage  for this  project  is
 [https://akohlmey.github.io/tclmpi/](https://akohlmey.github.io/tclmpi/)
 and development is [hosted on GitHub](https://github.com/akohlmey/tclmpi/).
 
-For compilation   and  installation instructions,  please see   the file
-INSTALL.   Detailed documentation is   available online from the project
-home page and [as a PDF file in the source package](https://github.com/akohlmey/tclmpi/blob/master/tclmpi_docs.pdf).
+For basic compilation and installation instructions, please see the file
+INSTALL. More detailed documentation is available online from the
+[User's Guide](https://akohlmey.github.io/tclmpi/userguide.html).
+
+Information about the implementation and design of the package are in the
+[Developer's Guide](https://akohlmey.github.io/tclmpi/devguide.html).
 
 ## Test Status:
 

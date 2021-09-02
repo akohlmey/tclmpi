@@ -40,6 +40,17 @@
 #include <string.h>
 
 /*! \page userguide TclMPI User's Guide
+ * - \ref userguide
+ *   - \ref compile
+ *   - \ref tclmpi - TclMPI Tcl API
+ *   - \ref examples
+ *   - \ref devel
+ * - \ref devguide
+ *   - \ref design
+ *   - \ref naming
+ *   - \ref _tclmpi.c - TclMPI C API
+ *   - \ref Internal
+ *   - \ref tclmpi_test - TclMPI unit test scripts
  *
  * This page describes Tcl bindings for MPI. This package provides a
  * shared object that can be loaded into a Tcl interpreter to provide
@@ -248,6 +259,17 @@
  */
 
 /*! \page devguide TclMPI Developer's Guide
+ * - \ref userguide
+ *   - \ref compile
+ *   - \ref tclmpi - TclMPI Tcl API
+ *   - \ref examples
+ *   - \ref devel
+ * - \ref devguide
+ *   - \ref design
+ *   - \ref naming
+ *   - \ref _tclmpi.c - TclMPI C API
+ *   - \ref Internal
+ *   - \ref tclmpi_test - TclMPI unit test scripts
  *
  * This document explains the implementation of the Tcl bindings
  * for MPI implemented in TclMPI. The following sections will
