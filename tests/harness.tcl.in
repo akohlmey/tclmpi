@@ -69,18 +69,20 @@ namespace eval tclmpi_test {
 #X#    variable fail = 0                ; ///< counter for failed tests
 #X# }
 
-## format output
-# \param kind string representing the kind of test (max 11 chars).
-# \param cmd string representing the command. will be truncated as needed.
-# \param result string indicating the result (PASS or FAIL/reason)
-# \return the formatted string
-#
-# This function will format a test summary message, so that it does
-# not break the output on a regular terminal screen. The first column
-# will be the total number of the test computed from the sum of passed
-# and failed tests, followed by a string describing the test type,
-# the command executed and a result string. The command string in the
-# middle will be truncated as needed to not break the format.
+#X# namespace tclmpi_test {
+#X# /** format output
+#X#  * \param kind string representing the kind of test (max 11 chars).
+#X#  * \param cmd string representing the command. will be truncated as needed.
+#X#  * \param result string indicating the result (PASS or FAIL/reason)
+#X#  * \return the formatted string
+#X#  *
+#X#  * This function will format a test summary message, so that it does
+#X#  * not break the output on a regular terminal screen. The first column
+#X#  * will be the total number of the test computed from the sum of passed
+#X#  * and failed tests, followed by a string describing the test type,
+#X#  * the command executed and a result string. The command string in the
+#X#  * middle will be truncated as needed to not break the format. */
+#X# proc test_format(kind, cmd, result) {}
 proc tclmpi_test::test_format {kind cmd result} {
     variable pass
     variable fail
@@ -95,15 +97,16 @@ proc tclmpi_test::test_format {kind cmd result} {
     return $string
 }
 
-## partial result and error message comparison
-# \param reflist list of strings that have to appear in the result
-# \param result result string
-# \return 1 if all reflist strings were found in result
-#
-# This function does an inexact comparison of the reference data
-# to the actual result. The reference is a list of strings, each
-# of which has to be matched in a case insensitive string search.
-# The function returns a 1 if all tests did match.
+#X# /** partial result and error message comparison
+#X#  * \param reflist list of strings that have to appear in the result
+#X#  * \param result result string
+#X#  * \return 1 if all reflist strings were found in result
+#X#  *
+#X#  * This function does an inexact comparison of the reference data
+#X#  * to the actual result. The reference is a list of strings, each
+#X#  * of which has to be matched in a case insensitive string search.
+#X#  * The function returns a 1 if all tests did match.*/
+#X# proc compare(reflist, result) {}
 proc tclmpi_test::compare {reflist result} {
     set count 0
 
@@ -122,16 +125,16 @@ proc tclmpi_test::compare {reflist result} {
     }
 }
 
-
-## init for serial tests
-# \param args all parameters are ignored
-# \return empty
-#
-# This function will perform a simple init test requesting the tclmpi
-# package and matching it against the current verison number. It will
-# also initialize some commonly used global variables.
-# If called from a parallel environment, it will only execute and
-# produce output on the master process
+#X# /** init for serial tests
+#X#  * \param args all parameters are ignored
+#X#  * \return empty
+#X#  *
+#X#  * This function will perform a simple init test requesting the tclmpi
+#X#  * package and matching it against the current verison number. It will
+#X#  * also initialize some commonly used global variables.
+#X#  * If called from a parallel environment, it will only execute and
+#X#  * produce output on the master process */
+#X# proc ser_init(args) {}
 proc tclmpi_test::ser_init {args} {
     variable version
     variable rank
@@ -155,13 +158,14 @@ proc tclmpi_test::ser_init {args} {
     return {}
 }
 
-## init for parallel tests
-# \param args all parameters are ignored
-# \return empty
-#
-# This function will perform an initialization of the parallel environment
-# for subsequent parallel tests. It also initializes the global variables
-# $rank and $size.
+#X# /** init for parallel tests
+#X#  * \param args all parameters are ignored
+#X#  * \return empty
+#X#  *
+#X#  * This function will perform an initialization of the parallel environment
+#X#  * for subsequent parallel tests. It also initializes the global variables
+#X#  * $rank and $size. */
+#X# proc par_init(args) {}
 proc tclmpi_test::par_init {args} {
     variable comm
     variable rank
@@ -177,18 +181,19 @@ proc tclmpi_test::par_init {args} {
     ser_init
 }
 
-## run a serial test that is expected to succeed
-# \param cmd string or list with the command to execute
-# \param retval expected return value contents
-# \return empty
-#
-# This function executes the command line passed in $cmd and intercepts its
-# resulting return value using the 'catch' command. The actual return value is
-# then compared against the expected reference passed in $retval. The
-# test is passed if the two strings match, otherwise failure is reported
-# and both the expected and actual results are printed. Also an unexpectedly
-# failure of the command is reported as failure and the resulting error
-# message is reported for debugging.
+#X# /** run a serial test that is expected to succeed
+#X#  * \param cmd string or list with the command to execute
+#X#  * \param retval expected return value contents
+#X#  * \return empty
+#X#  *
+#X#  * This function executes the command line passed in $cmd and intercepts its
+#X#  * resulting return value using the 'catch' command. The actual return value is
+#X#  * then compared against the expected reference passed in $retval. The
+#X#  * test is passed if the two strings match, otherwise failure is reported
+#X#  * and both the expected and actual results are printed. Also an unexpectedly
+#X#  * failure of the command is reported as failure and the resulting error
+#X#  * message is reported for debugging. */
+#X# proc run_return(cmd,retval) {}
 proc tclmpi_test::run_return {cmd retval} {
     variable pass
     variable fail
@@ -211,18 +216,19 @@ proc tclmpi_test::run_return {cmd retval} {
     return {}
 }
 
-## run a serial test that is expected to fail
-# \param cmd string or list with the command to execute
-# \param errormsg expected error message contents
-# \return empty
-#
-# This function executes the command line passed in $cmd and intercepts its
-# resulting error using the 'catch' command. The actual error message is
-# then compared against the expected reference passed in $errormsg. The
-# test is passed if the two strings match, otherwise failure is reported
-# and both the expected and actual error messages are printed. Also an
-# unexpectedly successful execution is considered a failure and its result
-# reported for reference.
+#X# /** run a serial test that is expected to fail
+#X#  * \param cmd string or list with the command to execute
+#X#  * \param errormsg expected error message contents
+#X#  * \return empty
+#X#  *
+#X#  * This function executes the command line passed in $cmd and intercepts its
+#X#  * resulting error using the 'catch' command. The actual error message is
+#X#  * then compared against the expected reference passed in $errormsg. The
+#X#  * test is passed if the two strings match, otherwise failure is reported
+#X#  * and both the expected and actual error messages are printed. Also an
+#X#  * unexpectedly successful execution is considered a failure and its result
+#X#  * reported for reference. */
+#X# proc run_error(cmd, errormsg) {}
 proc tclmpi_test::run_error {cmd errormsg} {
     variable pass
     variable fail
@@ -245,22 +251,23 @@ proc tclmpi_test::run_error {cmd errormsg} {
     return {}
 }
 
-## run a parallel test that is expected to succeed
-# \param cmd list of strings or lists with the commands to execute
-# \param retval list of the expected return values
-# \param comm communicator. defaults to world communicator
-# \return empty
-#
-# This function executes the lists command lines passed in $cmd in parallel
-# each command taken from the list based on the rank of the individual MPI
-# task on the communicator and intercepts its resulting return value using
-# the 'catch' command. The actual return value is then compared against the
-# expected reference passed in the $retval list, similarly assigned to the
-# individual ranks as the commands. The result is compared on all ranks and
-# if one of the commands failed or the actual return value is not equal to the
-# expected one, failure is reported and both, expected and and actual results
-# are printed on one of the failing ranks. The error reporting expects that
-# the MPI communicator remains usable after failure.
+#X# /** run a parallel test that is expected to succeed
+#X#  * \param cmd list of strings or lists with the commands to execute
+#X#  * \param retval list of the expected return values
+#X#  * \param comm communicator. defaults to world communicator
+#X#  * \return empty
+#X#  *
+#X#  * This function executes the lists command lines passed in $cmd in parallel
+#X#  * each command taken from the list based on the rank of the individual MPI
+#X#  * task on the communicator and intercepts its resulting return value using
+#X#  * the 'catch' command. The actual return value is then compared against the
+#X#  * expected reference passed in the $retval list, similarly assigned to the
+#X#  * individual ranks as the commands. The result is compared on all ranks and
+#X#  * if one of the commands failed or the actual return value is not equal to the
+#X#  * expected one, failure is reported and both, expected and and actual results
+#X#  * are printed on one of the failing ranks. The error reporting expects that
+#X#  * the MPI communicator remains usable after failure. */
+#X# proc par_return(cmd, retval, comm = tclmpi::comm_world) {}
 proc tclmpi_test::par_return {cmd retval {comm tclmpi::comm_world}} {
     variable pass
     variable fail
@@ -332,21 +339,22 @@ proc tclmpi_test::par_return {cmd retval {comm tclmpi::comm_world}} {
     return {}
 }
 
-## run a parallel test that is expected to produce a Tcl error
-# \param cmd list of strings or lists with the commands to execute
-# \param retval list of the expected error message(s) or return values
-# \param comm communicator. defaults to world communicator
-# \return empty
-#
-# This function executes the lists command lines passed in $cmd in parallel
-# each command taken from the list based on the rank of the individual MPI
-# task on the communicator and intercepts its resulting error message or
-# return value using the 'catch' command. It is then checked if one of the
-# commands failed as expected and actual return value are then compared
-# against the expected reference passed in the $retval list with similar
-# assignments to the individual ranks as the commands.
-# If one of the strings does not match or all command unexpectedly succeeded
-# failure is reported otherwise success.
+#X# /** run a parallel test that is expected to produce a Tcl error
+#X#  * \param cmd list of strings or lists with the commands to execute
+#X#  * \param retval list of the expected error message(s) or return values
+#X#  * \param comm communicator. defaults to world communicator
+#X#  * \return empty
+#X#  *
+#X#  * This function executes the lists command lines passed in $cmd in parallel
+#X#  * each command taken from the list based on the rank of the individual MPI
+#X#  * task on the communicator and intercepts its resulting error message or
+#X#  * return value using the 'catch' command. It is then checked if one of the
+#X#  * commands failed as expected and actual return value are then compared
+#X#  * against the expected reference passed in the $retval list with similar
+#X#  * assignments to the individual ranks as the commands.
+#X#  * If one of the strings does not match or all command unexpectedly succeeded
+#X#  * failure is reported otherwise success. */
+#X# proc par_error(cmd, retval, comm = tclmpi::comm_world) {}
 proc tclmpi_test::par_error {cmd retval {comm tclmpi::comm_world}} {
     variable pass
     variable fail
@@ -418,14 +426,15 @@ proc tclmpi_test::par_error {cmd retval {comm tclmpi::comm_world}} {
     return {}
 }
 
-## print result summary
-# \param section number of the test section
-# \return empty
-#
-# This function will print a nicely formatted summary
-# of the tests. If executed in parallel only the master
-# rank of the world communicator will produce output.
-#
+#X# /** print result summary
+#X#  * \param section number of the test section
+#X#  * \return empty
+#X#  *
+#X#  * This function will print a nicely formatted summary
+#X#  * of the tests. If executed in parallel only the master
+#X#  * rank of the world communicator will produce output.
+#X#  */
+#X# proc test_summary(section) {}
 proc tclmpi_test::test_summary {section} {
     variable pass
     variable fail
@@ -443,6 +452,7 @@ proc tclmpi_test::test_summary {section} {
     return {}
 }
 
+#X# }
 # Local Variables:
 # mode: tcl
 # End:

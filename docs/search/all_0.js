@@ -1,5 +1,9 @@
 var searchData=
 [
-  ['_5ftclmpi_2ec_0',['_tclmpi.c',['../__tclmpi_8c.html',1,'']]],
-  ['_5ftclmpi_5finit_1',['_tclmpi_Init',['../__tclmpi_8c.html#afdd248adc0056d24402df33fbd799997',1,'_tclmpi.c']]]
+  ['abort_0',['abort',['../namespacetclmpi.html#a9c1e420dc3ea882e07f110fe1d8bc6f9',1,'tclmpi::abort()'],['../namespacetclmpi.html#a7bda40588519630ec39f969136ad3a3e',1,'tclmpi::abort(comm, errorcode)']]],
+  ['allgather_1',['allgather',['../namespacetclmpi.html#a5f6c41e625b6409e08e244c73c082e40',1,'tclmpi']]],
+  ['allreduce_2',['allreduce',['../namespacetclmpi.html#a998d0b06c32b2c14cd116e536916b0c0',1,'tclmpi']]],
+  ['any_5fsource_3',['any_source',['../namespacetclmpi.html#a8d0e8f8a25eb30932be9e710c66656a1',1,'tclmpi']]],
+  ['any_5ftag_4',['any_tag',['../namespacetclmpi.html#a488279f50d255d389bf3d665e0aadb96',1,'tclmpi']]],
+  ['auto_5',['auto',['../namespacetclmpi.html#ab65b00584fb79d516e653ea35dece54e',1,'tclmpi']]]
 ];

@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['valid_108',['valid',['../structtclmpi__comm.html#a22589cea424ec5c5c1403a611a3ff94e',1,'tclmpi_comm']]],
-  ['version_109',['version',['../namespacetclmpi.html#acadac9b95778c630ff23bdda29752803',1,'tclmpi::version()'],['../namespacetclmpi__test.html#a364d080c650a9f927e718f6fc981cadd',1,'tclmpi_test::version()']]]
+  ['wait_86',['wait',['../namespacetclmpi.html#a3b6ece078454ce26880f0b57ac827d21',1,'tclmpi']]],
+  ['waitall_87',['waitall',['../namespacetclmpi.html#a8ed3dd65dbb7aa24554593dd57801278',1,'tclmpi']]]
 ];

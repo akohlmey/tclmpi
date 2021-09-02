@@ -60,7 +60,7 @@ target_compile_definitions(_tclmpi PRIVATE -DPACKAGE_NAME="_tclmpi" -DPACKAGE_VE
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
   target_compile_definitions(_tclmpi PRIVATE -DMPIWRAPSTCLDLL_EXPORTS)
 endif()
-if(ENABLE_TCL_STUBS)  
+if(ENABLE_TCL_STUBS)
   target_compile_definitions(_tclmpi PRIVATE -DUSE_TCL_STUBS)
   target_link_libraries(_tclmpi PRIVATE ${TCL_STUB_LIBRARY})
 else()
@@ -110,8 +110,15 @@ TclFileToDox(${CMAKE_BINARY_DIR}/harness.tcl ${CMAKE_BINARY_DIR}/harness.dox)
 # build documentation
 if(DOXYGEN_FOUND)
   set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${CMAKE_SOURCE_DIR}/README.md")
-  set(DOXYGEN_GENERATE_LATEX TRUE)
+  set(DOXYGEN_GENERATE_LATEX YES)
   set(DOXYGEN_FULL_PATH_NAMES NO)
+  set(DOXYGEN_SHOW_FILES NO)
+  set(DOXYGEN_HTML_COLORSTYLE_HUE 224)
+  set(DOXYGEN_HTML_COLORSTYLE_SAT 137)
+  set(DOXYGEN_HTML_COLORSTYLE_GAMMA 103)
+  set(DOXYGEN_GENERATE_TREEVIEW YES)
+  set(DOXYGEN_TREEVIEW_WIDTH 200)
+
   doxygen_add_docs(docs
     ${CMAKE_SOURCE_DIR}/README.md
     ${CMAKE_SOURCE_DIR}/_tclmpi.c

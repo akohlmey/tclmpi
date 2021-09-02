@@ -1,4 +1,6 @@
 var searchData=
 [
-  ['_5ftclmpi_5finit_119',['_tclmpi_Init',['../__tclmpi_8c.html#afdd248adc0056d24402df33fbd799997',1,'_tclmpi.c']]]
+  ['abort_94',['abort',['../namespacetclmpi.html#a7bda40588519630ec39f969136ad3a3e',1,'tclmpi']]],
+  ['allgather_95',['allgather',['../namespacetclmpi.html#a5f6c41e625b6409e08e244c73c082e40',1,'tclmpi']]],
+  ['allreduce_96',['allreduce',['../namespacetclmpi.html#a998d0b06c32b2c14cd116e536916b0c0',1,'tclmpi']]]
 ];

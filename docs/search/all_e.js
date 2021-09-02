@@ -1,8 +1,16 @@
 var searchData=
 [
-  ['scatter_61',['scatter',['../namespacetclmpi.html#a870f349667d1b02bba5b69f5290f9c1a',1,'tclmpi']]],
-  ['send_62',['send',['../namespacetclmpi.html#afa26b910b215c10d29296fc9f006de9c',1,'tclmpi']]],
-  ['size_63',['size',['../namespacetclmpi__test.html#a0e3bf0b41cfd74e3b7293716d5c0db65',1,'tclmpi_test']]],
-  ['source_64',['source',['../structtclmpi__req.html#a4dc0852645227f3248c4abe4f0bb7cb8',1,'tclmpi_req']]],
-  ['sum_65',['sum',['../namespacetclmpi.html#aad9805ece4968fe938730f442cea8de8',1,'tclmpi']]]
+  ['tag_70',['tag',['../structtclmpi__req.html#a11307e4295ec704632bdcdc0d20e6a6c',1,'tclmpi_req']]],
+  ['tclmpi_71',['tclmpi',['../namespacetclmpi.html',1,'']]],
+  ['tclmpi_20developer_27s_20guide_72',['TclMPI Developer&apos;s Guide',['../devguide.html',1,'']]],
+  ['tclmpi_20user_27s_20guide_73',['TclMPI User&apos;s Guide',['../userguide.html',1,'']]],
+  ['tclmpi_5fcomm_74',['tclmpi_comm',['../structtclmpi__comm.html',1,'']]],
+  ['tclmpi_5fdblint_75',['tclmpi_dblint',['../structtclmpi__dblint.html',1,'']]],
+  ['tclmpi_5fintint_76',['tclmpi_intint',['../structtclmpi__intint.html',1,'']]],
+  ['tclmpi_5freq_77',['tclmpi_req',['../structtclmpi__req.html',1,'']]],
+  ['tclmpi_5ftest_78',['tclmpi_test',['../namespacetclmpi__test.html',1,'']]],
+  ['test_5fformat_79',['test_format',['../namespacetclmpi__test.html#a2b34b1d3dcad80f5af1d4de40c138788',1,'tclmpi_test']]],
+  ['test_5fsummary_80',['test_summary',['../namespacetclmpi__test.html#a933b52337ae42dc050bb64ee772d470f',1,'tclmpi_test']]],
+  ['tozero_81',['tozero',['../namespacetclmpi.html#a0339477a80f9289c9eb75541e95987a6',1,'tclmpi']]],
+  ['type_82',['type',['../structtclmpi__req.html#a9c23fe2c323e2f401ac45c4b1f2a79d6',1,'tclmpi_req']]]
 ];
