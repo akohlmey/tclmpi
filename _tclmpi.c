@@ -121,7 +121,7 @@
  * \code {.tcl}
  #!/bin/sh \
  exec tclsh "$0" "$@"
- package require tclmpi 0.9
+ package require tclmpi 1.1
 
  # initialize MPI
  ::tclmpi::init
@@ -147,7 +147,7 @@
  * \code {.tcl}
  #!/bin/sh \
  exec tclsh "$0" "$@"
- package require tclmpi 0.9
+ package require tclmpi 1.1
 
  # initialize MPI
  ::tclmpi::init
@@ -189,7 +189,7 @@
  * \code {.tcl}
  #!/bin/sh \
  exec tclsh "$0" "$@"
- package require tclmpi 0.9
+ package require tclmpi 1.1
 
  # data summation helper function
  proc sum {data} {
