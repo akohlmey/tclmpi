@@ -11,6 +11,7 @@
 # licensing conditions.
 ###########################################################
 
+if {$tcl_version < 8.6} { return -code error "Tcl version 8.6 or later is required" }
 #X# /** TclMPI package Tcl namespace */
 #X# namespace tclmpi {
 #X#    variable version = "@PROJECT_VERSION@"; ///< version number of this package
