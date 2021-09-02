@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['finalize_125',['finalize',['../namespacetclmpi.html#a1884bbfe279e65b586e5558b338ef7b2',1,'tclmpi']]]
+  ['finalize_131',['finalize',['../namespacetclmpi.html#a1884bbfe279e65b586e5558b338ef7b2',1,'tclmpi']]],
+  ['finalized_132',['finalized',['../namespacetclmpi.html#a8f773467fc20df1edabc451484d437e1',1,'tclmpi']]]
 ];

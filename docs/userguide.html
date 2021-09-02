@@ -67,7 +67,24 @@ $(function() {
 <div class="title">TclMPI User's Guide </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This page describes Tcl bindings for MPI. This package provides a shared object that can be loaded into a Tcl interpreter to provide additional commands that act as an interface to an underlying MPI implementation. This allows to run Tcl scripts in parallel via mpirun or mpiexec similar to C, C++ or Fortran programs and communicate via wrappers to MPI function call.</p>
+<div class="textblock"><ul>
+<li><a class="el" href="userguide.html">TclMPI User's Guide</a><ul>
+<li><a class="el" href="userguide.html#compile">Compilation and Installation</a></li>
+<li><a class="el" href="namespacetclmpi.html">tclmpi</a> - TclMPI Tcl API</li>
+<li><a class="el" href="userguide.html#examples">Example Programs</a></li>
+<li><a class="el" href="userguide.html#devel">Software Development and Bug Reports</a></li>
+</ul>
+</li>
+<li><a class="el" href="devguide.html">TclMPI Developer's Guide</a><ul>
+<li><a class="el" href="devguide.html#design">Overall Design and Differences to the MPI C-bindings</a></li>
+<li><a class="el" href="devguide.html#naming">Naming Conventions</a></li>
+<li><a class="el" href="__tclmpi_8c.html">_tclmpi.c</a> - TclMPI C API</li>
+<li><a class="el" href="devguide.html#Internal">TclMPI Support Functions</a></li>
+<li><a class="el" href="namespacetclmpi__test.html">tclmpi_test</a> - TclMPI unit test scripts</li>
+</ul>
+</li>
+</ul>
+<p>This page describes Tcl bindings for MPI. This package provides a shared object that can be loaded into a Tcl interpreter to provide additional commands that act as an interface to an underlying MPI implementation. This allows to run Tcl scripts in parallel via mpirun or mpiexec similar to C, C++ or Fortran programs and communicate via wrappers to MPI function call.</p>
 <p>The original motivation for writing this package was to complement a Tcl wrapper for the LAMMPS molecular dynamics simulation software, but also allow using the VMD molecular visualization and analysis package in parallel without having to recompile VMD and using a convenient API to people that already know how to program parallel programs with MPI in C, C++ or Fortran.</p>
 <h1><a class="anchor" id="compile"></a>
 Compilation and Installation</h1>
@@ -95,7 +112,7 @@ Example Programs</h1>
 Hello World</h2>
 <p>This is the TclMPI version of "hello world". </p><div class="fragment"><div class="line">#!/bin/sh \</div>
 <div class="line">exec tclsh &quot;$0&quot; &quot;$@&quot;</div>
-<div class="line">package require tclmpi 0.9</div>
+<div class="line">package require tclmpi 1.1</div>
 <div class="line"> </div>
 <div class="line"># initialize MPI</div>
 <div class="line">::tclmpi::init</div>
@@ -117,7 +134,7 @@ Computation of Pi</h2>
 </p>
  <div class="fragment"><div class="line">#!/bin/sh \</div>
 <div class="line">exec tclsh &quot;$0&quot; &quot;$@&quot;</div>
-<div class="line">package require tclmpi 0.9</div>
+<div class="line">package require tclmpi 1.1</div>
 <div class="line"> </div>
 <div class="line"># initialize MPI</div>
 <div class="line">::tclmpi::init</div>
@@ -155,7 +172,7 @@ Distributed Sum</h2>
 <p>This is a small example version that distributes a data set and computes the sum across all elements in parallel.</p>
 <div class="fragment"><div class="line">#!/bin/sh \</div>
 <div class="line">exec tclsh &quot;$0&quot; &quot;$@&quot;</div>
-<div class="line">package require tclmpi 0.9</div>
+<div class="line">package require tclmpi 1.1</div>
 <div class="line"> </div>
 <div class="line"># data summation helper function</div>
 <div class="line">proc sum {data} {</div>

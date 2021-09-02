@@ -1,6 +1,8 @@
 var searchData=
 [
-  ['recv_52',['recv',['../namespacetclmpi.html#a7d7dd86f25e6c531231e4c4eabf22117',1,'tclmpi']]],
-  ['reduce_53',['reduce',['../namespacetclmpi.html#ab5ec7d759969d89d83525e3806ea041b',1,'tclmpi']]],
-  ['req_54',['req',['../structtclmpi__req.html#a0967cb5fa962318d094388161b635592',1,'tclmpi_req']]]
+  ['scatter_61',['scatter',['../namespacetclmpi.html#a870f349667d1b02bba5b69f5290f9c1a',1,'tclmpi']]],
+  ['send_62',['send',['../namespacetclmpi.html#afa26b910b215c10d29296fc9f006de9c',1,'tclmpi']]],
+  ['size_63',['size',['../namespacetclmpi__test.html#a0e3bf0b41cfd74e3b7293716d5c0db65',1,'tclmpi_test']]],
+  ['source_64',['source',['../structtclmpi__req.html#a4dc0852645227f3248c4abe4f0bb7cb8',1,'tclmpi_req']]],
+  ['sum_65',['sum',['../namespacetclmpi.html#aad9805ece4968fe938730f442cea8de8',1,'tclmpi']]]
 ];

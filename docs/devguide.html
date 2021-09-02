@@ -67,14 +67,31 @@ $(function() {
 <div class="title">TclMPI Developer's Guide </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>This document explains the implementation of the Tcl bindings for MPI implemented in TclMPI. The following sections will document how and which MPI is mapped to Tcl and what design choices were made.</p>
+<div class="textblock"><ul>
+<li><a class="el" href="userguide.html">TclMPI User's Guide</a><ul>
+<li><a class="el" href="userguide.html#compile">Compilation and Installation</a></li>
+<li><a class="el" href="namespacetclmpi.html">tclmpi</a> - TclMPI Tcl API</li>
+<li><a class="el" href="userguide.html#examples">Example Programs</a></li>
+<li><a class="el" href="userguide.html#devel">Software Development and Bug Reports</a></li>
+</ul>
+</li>
+<li><a class="el" href="devguide.html">TclMPI Developer's Guide</a><ul>
+<li><a class="el" href="devguide.html#design">Overall Design and Differences to the MPI C-bindings</a></li>
+<li><a class="el" href="devguide.html#naming">Naming Conventions</a></li>
+<li><a class="el" href="__tclmpi_8c.html">_tclmpi.c</a> - TclMPI C API</li>
+<li><a class="el" href="devguide.html#Internal">TclMPI Support Functions</a></li>
+<li><a class="el" href="namespacetclmpi__test.html">tclmpi_test</a> - TclMPI unit test scripts</li>
+</ul>
+</li>
+</ul>
+<p>This document explains the implementation of the Tcl bindings for MPI implemented in TclMPI. The following sections will document how and which MPI is mapped to Tcl and what design choices were made.</p>
 <h1><a class="anchor" id="design"></a>
 Overall Design and Differences to the MPI C-bindings</h1>
 <p>To be consistent with typical Tcl conventions all commands and constants in lower case and prefixed with tclmpi, so that clashes with existing programs are reduced. This is not yet set up to be a proper namespace, but that may happen at a later point, if the need arises. The overall philosophy of the bindings is to make the API similar to the MPI one (e.g. maintain the order of arguments), but don't stick to it slavishly and do things the Tcl way wherever justified. Convenience and simplicity take precedence over performance. If performance matters that much, one would write the entire code C/C++ or Fortran and not Tcl. The biggest visible change is that for sending data around, receive buffers will be automatically set up to handle the entire message. Thus the typical "count" arguments of the C/C++ or Fortran bindings for MPI is not required, and the received data will be the return value of the corresponding command. This is consistent with the automatic memory management in Tcl, but this convenience and consistency will affect performance and the semantics. For example calls to <a class="el" href="namespacetclmpi.html#abd8a5649a21edb8bb9923c373cd4cb38">tclmpi::bcast</a> will be converted into <em>two</em> calls to MPI_Bcast(); the first will broadcast the size of the data set being sent (so that a sufficiently sized buffers can be allocated) and then the second call will finally send the data for real. Similarly, <a class="el" href="namespacetclmpi.html#a7d7dd86f25e6c531231e4c4eabf22117">tclmpi::recv</a> will be converted into calling MPI_Probe() and then MPI_Recv() for the purpose of determining the amount of temporary storage required. The second call will also use the MPI_SOURCE and MPI_TAG flags from the MPI_Status object created for MPI_Probe() to make certain, the correct data is received.</p>
 <p>Things get even more complicated with with non-blocking receives. Since we need to know the size of the message to receive, a non-blocking receive can only be posted, if the corresponding send is already pending. This is being determined by calling MPI_Iprobe() and when this shows no (matching) pending message, the parameters for the receive will be cached and the then MPI_Probe() followed by MPI_Recv() will be called as part of <a class="el" href="namespacetclmpi.html#a3b6ece078454ce26880f0b57ac827d21">tclmpi::wait</a>. The blocking/non-blocking behavior of the Tcl script should be very close to the corresponding C bindings, but probably not as efficient.</p>
 <h1><a class="anchor" id="naming"></a>
 Naming Conventions</h1>
-<p>All functions that are new Tcl commands follow the MPI naming conventions, but using TclMPI_ as prefix instead of MPI_. The corresponding Tcl commands are placed in the tclmpi namespace and all lower case. Example: <a class="el" href="__tclmpi_8c.html#a738cbe476e7ccfd4aced07b4dd433587">TclMPI_Init()</a> is the wrapper for MPI_Init() and is provided as command tclmpi::init. Defines and constants from the MPI header file are represented in TclMPI as plain strings, all lowercase and with a tclmpi:: prefix. Thus MPI_COMM_WORLD becomes <a class="el" href="namespacetclmpi.html#a59fb2c1ff4f847ecb1e4fe4fa5b89b9e" title="constant for world communicator">tclmpi::comm_world</a> and MPI_INT becomes <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a>.</p>
+<p>All functions that are new Tcl commands follow the MPI naming conventions, but using TclMPI_ as prefix instead of MPI_. The corresponding Tcl commands are placed in the tclmpi namespace and all lower case. Example: <a class="el" href="__tclmpi_8c.html#a738cbe476e7ccfd4aced07b4dd433587">TclMPI_Init()</a> is the wrapper for MPI_Init() and is provided as command <a class="el" href="namespacetclmpi.html#a2afa6bd54eb108e1e6155259132edf44">tclmpi::init</a>. Defines and constants from the MPI header file are represented in TclMPI as plain strings, all lowercase and with a tclmpi:: prefix. Thus MPI_COMM_WORLD becomes <a class="el" href="namespacetclmpi.html#a59fb2c1ff4f847ecb1e4fe4fa5b89b9e" title="constant for world communicator">tclmpi::comm_world</a> and MPI_INT becomes <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a>.</p>
 <p>Functions that are internal to the plugin as well as static variables are prefixed with all lower case, i.e. tclmpi_. Those functions have to be declared static.</p>
 <p>All string constants are also declared as namespace variables, e.g. $tclmpi::comm_world, so that shortcut notations are possible as shown in the following example: </p><div class="fragment"><div class="line">namespace upvar tclmpi comm_world comm</div>
 <div class="line">namespace upvar tclmpi int        mpi_int</div>
