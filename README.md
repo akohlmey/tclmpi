@@ -6,7 +6,7 @@ some additional  bundled   Tcl script  code,  additional  commands   are
 provided that   allow to run   Tcl scripts in  parallel via  "mpirun" or
 "mpiexec" similar to C, C++ or Fortran programs.
 
-## Homepage:
+## Homepage
 
 The main author of this package is Axel Kohlmeyer  and you can reach him
 at <akohlmey@gmail.com>.  The  official  homepage  for this  project  is
@@ -20,19 +20,19 @@ INSTALL. More detailed documentation is available online from the
 Information about the implementation and design of the package are in the
 [Developer's Guide](https://akohlmey.github.io/tclmpi/devguide.html).
 
-## Test Status:
+## Test Status
 
 [![Linux](https://github.com/akohlmey/tclmpi/actions/workflows/unittest-linux.yml/badge.svg?branch=master)](https://github.com/akohlmey/tclmpi/actions/workflows/unittest-linux.yml)
 [![macOS](https://github.com/akohlmey/tclmpi/actions/workflows/unittest-macos.yml/badge.svg?branch=master)](https://github.com/akohlmey/tclmpi/actions/workflows/unittest-macos.yml)
 [![CodeQL](https://github.com/akohlmey/tclmpi/actions/workflows/codeql-analysis.yml/badge.svg?branch=master)](https://github.com/akohlmey/tclmpi/actions/workflows/codeql-analysis.yml)
 
-## Citing:
+## Citing
 
 You can cite TclMPI as:
 
 Axel Kohlmeyer. (2021). TclMPI: Release 1.1 [Data set]. Zenodo. [![DOI](https://www.zenodo.org/badge/4368856.svg)](https://www.zenodo.org/badge/latestdoi/4368856)
 
-## Acknowledgements:
+## Acknowledgements
 
 Thanks to Arjen Markus and Chris MacDermaid  for encouragement and (lots
 of) constructive criticism, that has  helped enourmously  to develop the
