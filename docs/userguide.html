@@ -90,7 +90,7 @@ $(document).ready(function(){initNavTree('userguide.html',''); initResizable(); 
 <div class="textblock"><p>This page describes Tcl bindings for MPI. This package provides a shared object that can be loaded into a Tcl interpreter to provide additional commands that act as an interface to an underlying MPI implementation. This allows to run Tcl scripts in parallel via mpirun or mpiexec similar to C, C++ or Fortran programs and communicate via wrappers to MPI function call.</p>
 <p>The original motivation for writing this package was to complement a Tcl wrapper for the LAMMPS molecular dynamics simulation software, but also allow using the VMD molecular visualization and analysis package in parallel without having to recompile VMD and using a convenient API to people that already know how to program parallel programs with MPI in C, C++ or Fortran.</p>
 <h1><a class="anchor" id="compile"></a>
-Compilation and Installation</h1>
+Compilation</h1>
 <p>The package currently consist of a single C source file which usually will be compiled for dynamic linkage, but can also be compiled into a new Tcl interpreter with TclMPI included (required on some platforms that require static linkage) and a Tcl script file. In addition the package contains some examples, a simple unit test harness (implemented in Tcl) and a set of tests to be run with either one MPI rank (test01, test02) or two MPI ranks (test03, test04).</p>
 <p>The build system uses CMake (version 3.16 or later) and has been confirmed to work on Linux macOS and Windows. The MPI library has to be at least MPI-2 standard compliant and the Tcl version should be 8.6 or later (it may work with 8.5, too). When compiled for a dynamically loaded shared object (DSO) or DLL file, the MPI library has to be compiled and linked with support for building shared libraries as well (this is the default for OpenMPI on Linux, but your mileage may vary).</p>
 <p>To configure and build TclMPI you need to run CMake the usual way, for example with </p><div class="fragment"><div class="line">cmake -B  build-folder -S .</div>
@@ -104,7 +104,17 @@ Compilation and Installation</h1>
 <li>CMAKE_INSTALL_PREFIX Path to installation location prefix (default: (platform specific))</li>
 </ul>
 <p>To change settings from the defaults append <code>-D&lt;SETTING&gt;=&lt;VALUE&gt;</code> to the <code>cmake</code> command line and replace <code>&lt;SETTING&gt;</code> and <code>&lt;VALUE&gt;</code> accordingly.</p>
-<p>To enable the new TclMPI package you can use the command <code>set auto_path [concat /usr/local/tcl8.6/ $auto_path]</code> in your .tclshrc (or .vmdrc or similar) file and then you can load the TclMPI wrappers on demand simply by using the command <code>package require tclmpi</code>. For the extended shell, the _tclmpi.so file is not use and instead tclmpish needs to run instead of tclsh. For that you may append the <code>bin</code> folder of the installation tree to your PATH environment variable. In case of using the custom Tcl shell, the startup script would be called .tclmpishrc instead of .tclshrc.</p>
+<h1><a class="anchor" id="gendocs"></a>
+Building the Documentation</h1>
+<p>Documentation in HTML and PDF format is extracted from the sources using doxygen, if available. The build of the HTML format documentation is requested with </p><div class="fragment"><div class="line">cmake --build build-folder --target</div>
+</div><!-- fragment --><p> docs`. The documentation will be in the build-folder/html folder. To generate the PDF documentation, PDFLaTeX and several required LaTeX style packages need to be installed. This is requested using </p><div class="fragment"><div class="line">cmake --build build-folder --target pdf</div>
+</div><!-- fragment --><p> and the resulting documentation will be in build-folder/tclmpi_docs.pdf.</p>
+<h1><a class="anchor" id="install"></a>
+Installation</h1>
+<p>To install the TclMPI package you can use </p><div class="fragment"><div class="line">cmake --build build-folder --target install</div>
+</div><!-- fragment --><p> which should by default install the compiled shared object and the associated two Tcl files into a subfolder of <code>/usr/local/tcl8.6</code>. If you used custom value for CMAKE_INSTALL_PREFIX when configuring with CMake, then the installation will be into the corresponding location.</p>
+<p>To tell Tcl where to find the package, you need to either set or expand the TCLLIBPATH environment variable to the folder into which you have installed the file or place <code>auto_path [concat /usr/local/tcl8.6/ $auto_path]</code> at the beginning of your script or in your <code>.tclshrc</code> file (or .vmdrc or similar). Then you should be able to load the TclMPI wrappers on demand by using the command <code>package require tclmpi</code>.</p>
+<p>For the extended Tcl shell <code>tclmpish</code>, the _tclmpi.so file is not use and instead tclmpish needs to run instead of tclsh. For that you may append the <code>bin</code> folder of the installation tree to your PATH environment variable. In case of using the custom Tcl shell, the startup script would be called .tclmpishrc instead of .tclshrc.</p>
 <h1><a class="anchor" id="devel"></a>
 Software Development and Bug Reports</h1>
 <p>The TclMPI code is maintained using git for source code management, and the project is hosted on github at <a href="https://github.com/akohlmey/tclmpi">https://github.com/akohlmey/tclmpi</a> From there you can download snapshots of the development and releases, clode the repository to follow development, or work on your own branch through forking it. Bug reports and feature requests should also be filed on github at through the issue tracker at: <a href="https://github.com/akohlmey/tclmpi/issues">https://github.com/akohlmey/tclmpi/issues</a>.</p>
@@ -113,8 +123,7 @@ Example Programs</h1>
 <p>The following section provides some simple examples using TclMPI to recreate some common MPI example programs in Tcl.</p>
 <h2><a class="anchor" id="hello"></a>
 Hello World</h2>
-<p>This is the TclMPI version of "hello world". </p><div class="fragment"><div class="line">#!/bin/sh \</div>
-<div class="line">exec tclsh &quot;$0&quot; &quot;$@&quot;</div>
+<p>This is the TclMPI version of "hello world". </p><div class="fragment"><div class="line">#!/usr/bin/env tclsh</div>
 <div class="line">package require tclmpi 1.1</div>
 <div class="line"> </div>
 <div class="line"># initialize MPI</div>
@@ -135,8 +144,7 @@ Computation of Pi</h2>
 <p>This script uses TclMPI to compute the value of Pi from numerical quadrature of the integral: </p><p class="formulaDsp">
 <img class="formulaDsp" alt="\[ \pi = \int^1_0 {\frac{4}{1 + x^2}} dx \]" src="form_0.png" width="96" height="33"/>
 </p>
- <div class="fragment"><div class="line">#!/bin/sh \</div>
-<div class="line">exec tclsh &quot;$0&quot; &quot;$@&quot;</div>
+ <div class="fragment"><div class="line">#!/usr/bin/env tclsh</div>
 <div class="line">package require tclmpi 1.1</div>
 <div class="line"> </div>
 <div class="line"># initialize MPI</div>
@@ -173,8 +181,7 @@ Computation of Pi</h2>
 </div><!-- fragment --><h2><a class="anchor" id="distsum"></a>
 Distributed Sum</h2>
 <p>This is a small example version that distributes a data set and computes the sum across all elements in parallel.</p>
-<div class="fragment"><div class="line">#!/bin/sh \</div>
-<div class="line">exec tclsh &quot;$0&quot; &quot;$@&quot;</div>
+<div class="fragment"><div class="line">#!/usr/bin/env tclsh</div>
 <div class="line">package require tclmpi 1.1</div>
 <div class="line"> </div>
 <div class="line"># data summation helper function</div>

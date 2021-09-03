@@ -25,13 +25,15 @@
 var NAVTREE =
 [
   [ "TclMPI", "index.html", [
+    [ "Homepage", "index.html#autotoc_md0", null ],
+    [ "Test Status", "index.html#autotoc_md1", null ],
+    [ "Citing", "index.html#autotoc_md2", null ],
+    [ "Acknowledgements", "index.html#autotoc_md3", null ],
     [ "Copyright and License for TclMPI", "copyright.html", null ],
     [ "TclMPI User's Guide", "userguide.html", [
-      [ "Homepage:", "index.html#autotoc_md0", null ],
-      [ "Test Status:", "index.html#autotoc_md1", null ],
-      [ "Citing:", "index.html#autotoc_md2", null ],
-      [ "Acknowledgements:", "index.html#autotoc_md3", null ],
-      [ "Compilation and Installation", "userguide.html#compile", null ],
+      [ "Compilation", "userguide.html#compile", null ],
+      [ "Building the Documentation", "userguide.html#gendocs", null ],
+      [ "Installation", "userguide.html#install", null ],
       [ "Software Development and Bug Reports", "userguide.html#devel", null ],
       [ "Example Programs", "userguide.html#examples", [
         [ "Hello World", "userguide.html#hello", null ],
