@@ -273,6 +273,9 @@
  }
  ::tclmpi::finalize
  * \endcode
+ *
+ * \section tclapi TclMPI Tcl command reference
+ * All TclMPI Tcl commands are placed into the \ref tclmpi namespace.
  */
 
 /*! \page devguide TclMPI Developer's Guide
@@ -400,6 +403,11 @@
  * \ref tclmpi_typecheck test if a type argument was using  a valid
  * Tcl representation and if not, generates a formatted error message
  * that is appended to the current result list.
+ *
+ * \section tcltest TclMPI Tcl Test Harness command reference
+ * TclMPI includes a simple unit test harness written in (of course) Tcl.
+ * The corresponding commands are placed into the \ref tclmpi_test namespace.
+ * Check out the files in the `tests` folders for examples.
  */
 
 /*! Define for backward compatibility with old MPI libraries.
