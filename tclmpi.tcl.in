@@ -8,7 +8,7 @@
 # licensing conditions.
 ###########################################################
 
-if {$tcl_version < 8.6} { return -code error "Tcl version 8.6 or later is required" }
+if {$tcl_version < 8.5} { return -code error "Tcl version 8.5 or later is required" }
 
 namespace eval tclmpi {
 
