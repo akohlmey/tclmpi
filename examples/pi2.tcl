@@ -1,4 +1,4 @@
-#!/usr/bin/tclsh
+#!/usr/bin/env tclsh
 # compute pi
 
 set auto_path [concat [file normalize ..] $auto_path]

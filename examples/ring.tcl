@@ -1,4 +1,4 @@
-#!/usr/bin/tclsh
+#!/usr/bin/env tclsh
 # ring example
 
 set auto_path [concat [file normalize ..] $auto_path]

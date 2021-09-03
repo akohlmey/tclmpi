@@ -119,8 +119,7 @@
  * \subsection hello Hello World
  * This is the TclMPI version of "hello world".
  * \code {.tcl}
- #!/bin/sh \
- exec tclsh "$0" "$@"
+ #!/usr/bin/env tclsh
  package require tclmpi 1.1
 
  # initialize MPI
@@ -145,8 +144,7 @@
       \pi = \int^1_0 {\frac{4}{1 + x^2}} dx
    \f]
  * \code {.tcl}
- #!/bin/sh \
- exec tclsh "$0" "$@"
+ #!/usr/bin/env tclsh
  package require tclmpi 1.1
 
  # initialize MPI
@@ -187,8 +185,7 @@
  * and computes the sum across all elements in parallel.
  *
  * \code {.tcl}
- #!/bin/sh \
- exec tclsh "$0" "$@"
+ #!/usr/bin/env tclsh
  package require tclmpi 1.1
 
  # data summation helper function

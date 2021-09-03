@@ -1,4 +1,4 @@
-#!/usr/bin/tclsh
+#!/usr/bin/env tclsh
 # hello world a la TclMPI
 
 # point Tcl to the directory with pkgIndex.tcl

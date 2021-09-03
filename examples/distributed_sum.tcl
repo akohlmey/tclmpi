@@ -1,4 +1,4 @@
-#!/usr/bin/tclsh
+#!/usr/bin/env tclsh
 # distributed_sum.tcl --
 #     Use MPI to sum a long list of numbers
 #     with explicit send/receive and data serialization
