@@ -55,7 +55,7 @@
  * convenient API to people that already know how to program parallel
  * programs with MPI in C, C++ or Fortran.
  *
- * \section compile Compilation and Installation
+ * \section compile Compilation
  *
  * The package currently consist of a single C source file which usually
  * will be compiled for dynamic linkage, but can also be compiled into a
@@ -75,7 +75,7 @@
  * mileage may vary).
  *
  * To configure and build TclMPI you need to run CMake the usual way, for example with
-\code
+\code{.sh}
   cmake -B  build-folder -S .
   cmake   --build build-folder
   cmake   --install build-folder
@@ -91,15 +91,46 @@
  * To change settings from the defaults append `-D<SETTING>=<VALUE>` to
  * the `cmake` command line and replace `<SETTING>` and `<VALUE>` accordingly.
  *
- * To enable the new TclMPI package you can use the command `set
- * auto_path [concat /usr/local/tcl8.6/ $auto_path]` in your
- * .tclshrc (or .vmdrc or similar) file and then you can load the TclMPI
- *  wrappers on demand simply by using the command `package require tclmpi`.
- *  For the extended shell, the _tclmpi.so file is not use and instead
- * tclmpish needs to run instead of tclsh.  For that you may append the `bin`
- * folder of the installation tree to your PATH environment variable.
- * In case of using the custom Tcl shell, the startup script would be called
- * .tclmpishrc instead of .tclshrc.
+ * \section gendocs Building the Documentation
+ * 
+ * Documentation in HTML and PDF format is extracted from the sources
+ * using doxygen, if available. The build of the HTML format
+ * documentation is requested with
+\code{.sh}
+  cmake --build build-folder --target
+\endcode
+ * docs`. The documentation will be in the build-folder/html folder. To
+ * generate the PDF documentation, PDFLaTeX and several required LaTeX
+ * style packages need to be installed.  This is requested using
+\code{.sh}
+  cmake --build build-folder --target pdf
+\endcode
+ * and the resulting documentation will be in build-folder/tclmpi_docs.pdf.
+ * 
+ * \section install Installation 
+ *
+ * To install the TclMPI package you can use
+\code{.sh}
+  cmake --build build-folder --target install
+\endcode
+ * which should by default install the compiled shared object and the
+ * associated two Tcl files into a subfolder of `/usr/local/tcl8.6`.
+ * If you used custom value for CMAKE_INSTALL_PREFIX when configuring
+ * with CMake, then the installation will be into the corresponding location.
+ *
+ * To tell Tcl where to find the package, you need to either set or expand
+ * the TCLLIBPATH environment variable to the folder into which you have
+ * installed the file or place 
+ * `auto_path [concat /usr/local/tcl8.6/ $auto_path]` at the beginning
+ * of your script or in your `.tclshrc` file (or .vmdrc or similar).
+ * Then you should be able to load the TclMPI wrappers on demand by using
+ * the command `package require tclmpi`.
+ *
+ * For the extended Tcl shell `tclmpish`, the _tclmpi.so file is not use
+ * and instead tclmpish needs to run instead of tclsh.  For that you may
+ * append the `bin` folder of the installation tree to your PATH
+ * environment variable.  In case of using the custom Tcl shell, the
+ * startup script would be called .tclmpishrc instead of .tclshrc.
  *
  * \section devel Software Development and Bug Reports
  *

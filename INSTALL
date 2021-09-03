@@ -21,7 +21,8 @@ The following settings are supported by the CMake build environment
 - CMAKE_INSTALL_PREFIX Path to installation location prefix (default: (platform specific))
 
 Documentation in HTML and PDF format is generated from doxygen and
-pdflatex, if available.
+pdflatex, if available, with `cmake --build build-folder --target docs`
+and `cmake --build build-folder --target pdf`, respectively.
 
 Installation:
 

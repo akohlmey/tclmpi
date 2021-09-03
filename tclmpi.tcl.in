@@ -253,7 +253,7 @@ package provide tclmpi $tclmpi::version
 #X#  *
 #X#  * The following example shows how to construct a communicator where
 #X#  * the ranks are reversed in comparison to the world communicator.
-#X#  * \code
+#X#  * \code{.tcl}
 #X#  * set comm tclmpi::comm_world
 #X#  * set size [::tclmpi::comm_size $comm]
 #X#  * set key -[::tclmpi::comm_rank $comm]
