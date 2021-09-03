@@ -11,6 +11,7 @@ var NAVTREEINDEX0 =
 "devguide.html#tcldata":[6,2,2],
 "devguide.html#tclerr":[6,2,3],
 "devguide.html#tclreq":[6,2,1],
+"devguide.html#tcltest":[6,3],
 "functions.html":[8,2,0],
 "functions_vars.html":[8,2,1],
 "index.html":[],
@@ -126,5 +127,6 @@ var NAVTREEINDEX0 =
 "userguide.html#gendocs":[5,1],
 "userguide.html#hello":[5,4,0],
 "userguide.html#install":[5,2],
-"userguide.html#mypi":[5,4,1]
+"userguide.html#mypi":[5,4,1],
+"userguide.html#tclapi":[5,5]
 };

@@ -39,7 +39,8 @@ var NAVTREE =
         [ "Hello World", "userguide.html#hello", null ],
         [ "Computation of Pi", "userguide.html#mypi", null ],
         [ "Distributed Sum", "userguide.html#distsum", null ]
-      ] ]
+      ] ],
+      [ "TclMPI Tcl command reference", "userguide.html#tclapi", null ]
     ] ],
     [ "TclMPI Developer's Guide", "devguide.html", [
       [ "Overall Design and Differences to the MPI C-bindings", "devguide.html#design", null ],
@@ -49,7 +50,8 @@ var NAVTREE =
         [ "Mapping MPI Requests", "devguide.html#tclreq", null ],
         [ "Mapping Data Types", "devguide.html#tcldata", null ],
         [ "Common Error Message Processing", "devguide.html#tclerr", null ]
-      ] ]
+      ] ],
+      [ "TclMPI Tcl Test Harness command reference", "devguide.html#tcltest", null ]
     ] ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
