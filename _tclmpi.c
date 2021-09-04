@@ -439,7 +439,7 @@ static tclmpi_comm_t *last_comm = NULL;
 /*! Communicator counter. Incremented to get unique strings */
 static int tclmpi_comm_cntr = 0;
 /*! Size of stringbuffer for tclmpi labels */
-static const int TCLMPI_LABEL_SIZE = 32;
+#define TCLMPI_LABEL_SIZE 32
 
 /*! Additional global communicator to detect unlisted communicators */
 static MPI_Comm MPI_COMM_INVALID;
@@ -581,16 +581,16 @@ struct tclmpi_intint {
 
 /* some symbolic constants. some have multiple uses. */
 
-static const int TCLMPI_TOZERO     = -4; /*!< convert problematic data items to zero */
-static const int TCLMPI_ABORT      = -3; /*!< abort on problems */
-static const int TCLMPI_ERROR      = -2; /*!< flag problems as Tcl errors */
-static const int TCLMPI_INVALID    = -1; /*!< not ready to handle data */
-static const int TCLMPI_NONE       = 0;  /*!< no data type assigned */
-static const int TCLMPI_AUTO       = 1;  /*!< the tcl native data type (string) */
-static const int TCLMPI_INT        = 2;  /*!< data type for integers */
-static const int TCLMPI_INT_INT    = 3;  /*!< data type for pairs of integers */
-static const int TCLMPI_DOUBLE     = 4;  /*!< floating point data type */
-static const int TCLMPI_DOUBLE_INT = 5;  /*!< data type for double/integer pair */
+#define TCLMPI_TOZERO -4    /*!< convert problematic data items to zero */
+#define TCLMPI_ABORT -3     /*!< abort on problems */
+#define TCLMPI_ERROR -2     /*!< flag problems as Tcl errors */
+#define TCLMPI_INVALID -1   /*!< not ready to handle data */
+#define TCLMPI_NONE 0       /*!< no data type assigned */
+#define TCLMPI_AUTO 1       /*!< the tcl native data type (string) */
+#define TCLMPI_INT 2        /*!< data type for integers */
+#define TCLMPI_INT_INT 3    /*!< data type for pairs of integers */
+#define TCLMPI_DOUBLE 4     /*!< floating point data type */
+#define TCLMPI_DOUBLE_INT 5 /*!< data type for double/integer pair */
 
 /*! Translate TclMPI strings to MPI constants for reductions
  * \param opstr string constant describing the operator
