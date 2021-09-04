@@ -1,7 +1,10 @@
 # CMake file for the TclMPI Tcl wrapper around MPI
 
 cmake_minimum_required(VERSION 3.16)
-project(TclMPI VERSION 1.1 DESCRIPTION "Tcl Bindings for MPI" LANGUAGES C)
+project(TclMPI VERSION 1.1
+        DESCRIPTION "Tcl Bindings for MPI"
+        LANGUAGES C
+        HOMEPAGE_URL https://akohlmey.github.io/tclmpi/)
 
 # compilation settings and options
 option(ENABLE_TCL_STUBS "Build TclMPI using the Tcl stub library" ON)
@@ -55,7 +58,7 @@ string(REGEX MATCH "[0-9]\.[0-9]*" TCL_VERSION ${_})
 
 # build shared object
 add_library(_tclmpi MODULE _tclmpi.c)
-set_target_properties(_tclmpi PROPERTIES PREFIX "")
+set_target_properties(_tclmpi PROPERTIES PREFIX "" C_STANDARD 99)
 target_include_directories(_tclmpi PRIVATE ${TCL_INCLUDE_PATH})
 target_compile_definitions(_tclmpi PRIVATE -DPACKAGE_NAME="_tclmpi" -DPACKAGE_VERSION="${CMAKE_PROJECT_VERSION}")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -72,6 +75,7 @@ target_link_libraries(_tclmpi PRIVATE MPI::MPI_C)
 # build Tcl shell extended with MPI
 if(BUILD_TCLMPI_SHELL)
   add_executable(tclmpish _tclmpi.c)
+  set_target_properties(tclmpish PROPERTIES C_STANDARD 99)
   target_include_directories(tclmpish PRIVATE ${TCL_INCLUDE_PATH})
   target_compile_definitions(tclmpish PRIVATE -DPACKAGE_NAME="_tclmpi" -DPACKAGE_VERSION="${CMAKE_PROJECT_VERSION}" -DBUILD_TCLMPISH)
   target_link_libraries(tclmpish PRIVATE ${TCL_LIBRARY})
