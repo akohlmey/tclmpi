@@ -92,18 +92,18 @@ $(document).ready(function(){initNavTree('userguide.html',''); initResizable(); 
 <h1><a class="anchor" id="compile"></a>
 Compilation</h1>
 <p>The package currently consist of a single C source file which usually will be compiled for dynamic linkage, but can also be compiled into a new Tcl interpreter with TclMPI included (required on some platforms that require static linkage) and a Tcl script file. In addition the package contains some examples, a simple unit test harness (implemented in Tcl) and a set of tests to be run with either one MPI rank (test01, test02) or two MPI ranks (test03, test04).</p>
-<p>The build system uses CMake (version 3.16 or later) and has been confirmed to work on Linux macOS and Windows. The MPI library has to be at least MPI-2 standard compliant and the Tcl version should be 8.6 or later (it may work with 8.5, too). When compiled for a dynamically loaded shared object (DSO) or DLL file, the MPI library has to be compiled and linked with support for building shared libraries as well (this is the default for OpenMPI on Linux, but your mileage may vary).</p>
-<p>To configure and build TclMPI you need to run CMake the usual way, for example with </p><div class="fragment"><div class="line">cmake -B  build-folder -S .</div>
+<p>The build system uses CMake (version 3.16 or later) and has been confirmed to work on Linux, macOS, and Windows using a variety of C compilers (GNU, Clang, Intel, PGI, MSVC). You need to have both, Tcl and MPI installed including their respective development support packages (sometimes called SDK). The MPI library has to be at least MPI-2 standard compliant and the Tcl version should be 8.5 or later. When compiled for a dynamically loaded shared object (DSO) or DLL file, the MPI library has to be compiled and linked with support for building shared libraries as well.</p>
+<p>To configure and build TclMPI you need to run CMake the usual way, in a console window with with: </p><div class="fragment"><div class="line">cmake -B  build-folder -S .</div>
 <div class="line">cmake   --build build-folder</div>
 <div class="line">cmake   --install build-folder</div>
 </div><!-- fragment --><p> There are a few settings that can be used to adjust what is compiled and installed and where. The following settings are supported:</p><ul>
 <li>BUILD_TCLMPI_SHELL Build a <code>tclmpish</code> executable as extended Tcl shell (default: on)</li>
 <li>ENABLE_TCL_STUBS Use the Tcl stubs mechanism (default: on, requires Tcl 8.6 or later)</li>
-<li>BUILD_TESTING Enable unit testing (default: on)</li>
-<li>DOWNLOAD_MPICH4WIN Download MPICH2-1.4.1 headers and link library (default: off, Windows only)</li>
 <li>CMAKE_INSTALL_PREFIX Path to installation location prefix (default: (platform specific))</li>
+<li>BUILD_TESTING Enable unit testing (default: on)</li>
+<li>DOWNLOAD_MPICH4WIN Download MPICH2-1.4.1 headers and link library (default: off, only supported when cross-compiling on Linux for Windows)</li>
 </ul>
-<p>To change settings from the defaults append <code>-D&lt;SETTING&gt;=&lt;VALUE&gt;</code> to the <code>cmake</code> command line and replace <code>&lt;SETTING&gt;</code> and <code>&lt;VALUE&gt;</code> accordingly.</p>
+<p>To change settings from the defaults append <code>-D&lt;SETTING&gt;=&lt;VALUE&gt;</code> to the <code>cmake</code> command line and replace <code>&lt;SETTING&gt;</code> and <code>&lt;VALUE&gt;</code> accordingly or you may use the <code>ccmake</code> text mode UI or <code>cmake-gui</code>.</p>
 <h1><a class="anchor" id="gendocs"></a>
 Building the Documentation</h1>
 <p>Documentation in HTML and PDF format is extracted from the sources using doxygen, if available. The build of the HTML format documentation is requested with </p><div class="fragment"><div class="line">cmake --build build-folder --target</div>
