@@ -101,15 +101,15 @@
  * using doxygen, if available. The build of the HTML format
  * documentation is requested with
 \code{.sh}
-  cmake --build build-folder --target
+  cmake --build build-folder --target html
 \endcode
- * docs`. The documentation will be in the build-folder/html folder. To
- * generate the PDF documentation, PDFLaTeX and several required LaTeX
+ * The documentation will be in folder `build-folder/html`. To
+ * generate the PDF documentation, PDFLaTeX and several LaTeX
  * style packages need to be installed.  This is requested using
 \code{.sh}
   cmake --build build-folder --target pdf
 \endcode
- * and the resulting documentation will be in build-folder/tclmpi_docs.pdf.
+ * and the resulting documentation will be in `build-folder/tclmpi_docs.pdf`.
  *
  * \section install Installation
  *
@@ -118,23 +118,25 @@
   cmake --build build-folder --target install
 \endcode
  * which should by default install the compiled shared object and the
- * associated two Tcl files into a subfolder of `/usr/local/tcl8.6`.
- * If you used custom value for CMAKE_INSTALL_PREFIX when configuring
+ * associated two Tcl files into a subfolder of `<CMAKE_INSTALL_PREFIX>/tcl8.6`.
+ * The default value of CMAKE_INSTALL_PREFIX is system specific, but it can
+ * changed with `-D CMAKE_INSTALL_PREFIX=/some/path` when configuring
  * with CMake, then the installation will be into the corresponding location.
  *
  * To tell Tcl where to find the package, you need to either set or expand
  * the TCLLIBPATH environment variable to the folder into which you have
- * installed the file or place
+ * installed the files or place
  * `auto_path [concat /usr/local/tcl8.6/ $auto_path]` at the beginning
- * of your script or in your `.tclshrc` file (or .vmdrc or similar).
+ * of your Tcl script or in your `.tclshrc` file (or .vmdrc or similar).
  * Then you should be able to load the TclMPI wrappers on demand by using
  * the command `package require tclmpi`.
  *
- * For the extended Tcl shell `tclmpish`, the _tclmpi.so file is not use
- * and instead tclmpish needs to run instead of tclsh.  For that you may
- * append the `bin` folder of the installation tree to your PATH
- * environment variable.  In case of using the custom Tcl shell, the
- * startup script would be called .tclmpishrc instead of .tclshrc.
+ * For the extended Tcl shell `tclmpish`, the `_tclmpi.so` file is not used
+ * and instead `tclmpish` already includes the coresponding code and needs
+ * to be run instead of `tclsh`.  For that you may append the `bin` folder
+ * of the installation tree to your PATH environment variable.  In case
+ * of using the custom Tcl shell, the startup script would be called
+ * `.tclmpishrc` instead of `.tclshrc`.
  *
  * \section devel Software Development and Bug Reports
  *
@@ -414,14 +416,8 @@
  * Check out the files in the `tests` folders for examples.
  */
 
-/*! Define for backward compatibility with old MPI libraries.
- *  We need to be able to detect the API of MPI_VERSION > 1 for
- *  clean error handling and making MPI errors catch-able. */
-#if !defined(MPI_VERSION)
-#define MPI_VERSION 1
-#endif
-
-#if MPI_VERSION < 2
+/* We require MPI-2 */
+#if !defined(MPI_VERSION) || (MPI_VERSION < 2)
 #error TclMPI needs at least MPI-2
 #endif
 
