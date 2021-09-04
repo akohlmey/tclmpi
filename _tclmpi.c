@@ -332,7 +332,7 @@
  * All functions that are new Tcl commands follow the MPI naming
  * conventions, but using TclMPI_ as prefix instead of MPI_.
  * The corresponding Tcl commands are placed in the tclmpi namespace
- * and all lower case. Example: TclMPI_Init() is the wrapper for
+ * and all lower case. Example: \ref TclMPI_Init() is the wrapper for
  * MPI_Init() and is provided as command tclmpi::init.
  * Defines and constants from the MPI header file are represented in
  * TclMPI as plain strings, all lowercase and with a tclmpi:: prefix.
@@ -1038,7 +1038,7 @@ int TclMPI_Conv_set(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *co
  * \return TCL_OK
  *
  * This function returns which error handler is currently active
- * for data conversions in TclMPI. For details see TclMPI_Conv_set().
+ * for data conversions in TclMPI. For details see \ref TclMPI_Conv_set().
  *
  * There is no equivalent MPI function for this, since there are
  * no data conversions in C or C++.
