@@ -66,15 +66,17 @@
  * one MPI rank (test01, test02) or two MPI ranks (test03, test04).
  *
  * The build system uses CMake (version 3.16 or later) and has been
- * confirmed to work on Linux macOS and Windows.  The MPI library has to
- * be at least MPI-2 standard compliant and the Tcl version should be
- * 8.6 or later (it may work with 8.5, too).  When compiled for a
- * dynamically loaded shared object (DSO) or DLL file, the MPI library
- * has to be compiled and linked with support for building shared
- * libraries as well (this is the default for OpenMPI on Linux, but your
- * mileage may vary).
+ * confirmed to work on Linux, macOS, and Windows using a variety of
+ * C compilers (GNU, Clang, Intel, PGI, MSVC).  You need to have both,
+ * Tcl and MPI installed including their respective development support
+ * packages (sometimes called SDK).  The MPI library has to be at least
+ * MPI-2 standard compliant and the Tcl version should be 8.5 or later.
+ * When compiled for a dynamically loaded shared object (DSO) or DLL
+ * file, the MPI library has to be compiled and linked with support for
+ * building shared libraries as well.
  *
- * To configure and build TclMPI you need to run CMake the usual way, for example with
+ * To configure and build TclMPI you need to run CMake the usual way,
+ * in a console window with with:
 \code{.sh}
   cmake -B  build-folder -S .
   cmake   --build build-folder
@@ -84,15 +86,17 @@
  * and installed and where. The following settings are supported:
  * - BUILD_TCLMPI_SHELL   Build a `tclmpish` executable as extended Tcl shell   (default: on)
  * - ENABLE_TCL_STUBS     Use the Tcl stubs mechanism   (default: on, requires Tcl 8.6 or later)
- * - BUILD_TESTING        Enable unit testing   (default: on)
- * - DOWNLOAD_MPICH4WIN   Download MPICH2-1.4.1 headers and link library (default: off, Windows only)
  * - CMAKE_INSTALL_PREFIX Path to installation location prefix (default: (platform specific))
+ * - BUILD_TESTING        Enable unit testing   (default: on)
+ * - DOWNLOAD_MPICH4WIN   Download MPICH2-1.4.1 headers and link library (default: off,
+ *                        only supported when cross-compiling on Linux for Windows)
  *
  * To change settings from the defaults append `-D<SETTING>=<VALUE>` to
- * the `cmake` command line and replace `<SETTING>` and `<VALUE>` accordingly.
+ * the `cmake` command line and replace `<SETTING>` and `<VALUE>` accordingly
+ * or you may use the `ccmake` text mode UI or `cmake-gui`.
  *
  * \section gendocs Building the Documentation
- * 
+ *
  * Documentation in HTML and PDF format is extracted from the sources
  * using doxygen, if available. The build of the HTML format
  * documentation is requested with
@@ -106,8 +110,8 @@
   cmake --build build-folder --target pdf
 \endcode
  * and the resulting documentation will be in build-folder/tclmpi_docs.pdf.
- * 
- * \section install Installation 
+ *
+ * \section install Installation
  *
  * To install the TclMPI package you can use
 \code{.sh}
@@ -120,7 +124,7 @@
  *
  * To tell Tcl where to find the package, you need to either set or expand
  * the TCLLIBPATH environment variable to the folder into which you have
- * installed the file or place 
+ * installed the file or place
  * `auto_path [concat /usr/local/tcl8.6/ $auto_path]` at the beginning
  * of your script or in your `.tclshrc` file (or .vmdrc or similar).
  * Then you should be able to load the TclMPI wrappers on demand by using
