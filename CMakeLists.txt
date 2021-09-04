@@ -11,7 +11,11 @@ option(ENABLE_TCL_STUBS "Build TclMPI using the Tcl stub library" ON)
 option(BUILD_TCLMPI_SHELL "Build Tcl interpreter with TclMPI embedded" ON)
 # this is used for automated compiles and cross-compilation
 option(DOWNLOAD_MPICH4WIN "Download and use MPICH-1.4.1 on Windows" OFF)
-mark_as_advanced(TTK_STUB_LIBRARY)
+mark_as_advanced(TTK_STUB_LIBRARY DOWNLOAD_MPICH4WIN)
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_C_FLAGS)
+  set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
+endif()
 
 # tweaks
 set(BUILD_SHARED_LIBS TRUE)
@@ -185,6 +189,7 @@ else()
     -checks=-*,clang-analyzer-*,-clang-analyzer-cplusplus*,mpi-*,portability-*
     -- -I${MPI_INCLUDE_PATH} -I${TCL_INCLUDE_PATH} "-DPACKAGE_NAME=\\\"_tclmpi\\\"" "-DPACKAGE_VERSION=\\\"${CMAKE_PROJECT_VERSION}\\\"" -DBUILD_TCLMPISH -std=c99)
 endif()
+mark_as_advanced(CLANG_TIDY)
 
 # configure tests
 include(CTest)
