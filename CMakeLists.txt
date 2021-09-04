@@ -122,25 +122,27 @@ if(DOXYGEN_FOUND)
   set(DOXYGEN_GENERATE_LATEX YES)
   set(DOXYGEN_FULL_PATH_NAMES NO)
   set(DOXYGEN_SHOW_FILES NO)
+  set(DOXYGEN_EXTRACT_ALL YES)
+  set(DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
   set(DOXYGEN_HTML_COLORSTYLE_HUE 224)
   set(DOXYGEN_HTML_COLORSTYLE_SAT 137)
   set(DOXYGEN_HTML_COLORSTYLE_GAMMA 103)
   set(DOXYGEN_GENERATE_TREEVIEW YES)
   set(DOXYGEN_TREEVIEW_WIDTH 200)
 
-  doxygen_add_docs(docs
+  doxygen_add_docs(html
     ${CMAKE_SOURCE_DIR}/README.md
     ${CMAKE_SOURCE_DIR}/_tclmpi.c
     ${CMAKE_BINARY_DIR}/tclmpi.dox
     ${CMAKE_BINARY_DIR}/tclmpi.tcl
     ${CMAKE_BINARY_DIR}/harness.dox
     ${CMAKE_BINARY_DIR}/harness.tcl)
-  set_property(TARGET docs APPEND PROPERTY ADDITIONAL_CLEAN_FILES latex ${CMAKE_SOURCE_DIR}/docs)
+  set_property(TARGET html APPEND PROPERTY ADDITIONAL_CLEAN_FILES latex ${CMAKE_SOURCE_DIR}/docs)
   find_package(LATEX COMPONENTS PDFLATEX)
   if(LATEX_FOUND)
     add_custom_target(pdf make WORKING_DIRECTORY latex
       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/latex/refman.pdf ${CMAKE_BINARY_DIR}/tclmpi_docs.pdf
-      DEPENDS docs)
+      DEPENDS html)
   endif()
   if(GIT_FOUND)
     add_custom_target(publish ${GIT_EXECUTABLE} branch --show-current > ${CMAKE_BINARY_DIR}/.current-branch
@@ -148,8 +150,9 @@ if(DOXYGEN_FOUND)
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/html ${CMAKE_SOURCE_DIR}/docs
       COMMAND ${GIT_EXECUTABLE} add ${CMAKE_SOURCE_DIR}/docs
       COMMAND ${GIT_EXECUTABLE} commit -m 'update docs'
+      COMMAND ${GIT_EXECUTABLE} push
       COMMAND ${GIT_EXECUTABLE} checkout `cat ${CMAKE_BINARY_DIR}/.current-branch`
-      DEPENDS docs)
+      DEPENDS html)
   endif()
 endif()
 
