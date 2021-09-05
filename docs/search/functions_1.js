@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['barrier_97',['barrier',['../namespacetclmpi.html#a5b023f8161816edf8b91196c8c1c7e5f',1,'tclmpi']]],
-  ['bcast_98',['bcast',['../namespacetclmpi.html#abd8a5649a21edb8bb9923c373cd4cb38',1,'tclmpi']]]
+  ['abort_162',['abort',['../namespacetclmpi.html#a7bda40588519630ec39f969136ad3a3e',1,'tclmpi']]],
+  ['allgather_163',['allgather',['../namespacetclmpi.html#a5f6c41e625b6409e08e244c73c082e40',1,'tclmpi']]],
+  ['allreduce_164',['allreduce',['../namespacetclmpi.html#a998d0b06c32b2c14cd116e536916b0c0',1,'tclmpi']]]
 ];

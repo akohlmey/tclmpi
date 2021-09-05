@@ -5,13 +5,22 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>TclMPI: File Members</title>
+<title>TclMPI: Globals</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+  $(document).ready(function() { init_search(); });
+/* @license-end */
+</script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -26,6 +35,21 @@
    </div>
    <div id="projectbrief">Tcl Bindings for MPI</div>
   </td>
+   <td>        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
  </tr>
  </tbody>
 </table>
@@ -37,17 +61,23 @@
 var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
 /* @license-end */
 </script>
-<script type="text/javascript" src="menudata.js"></script>
-<script type="text/javascript" src="menu.js"></script>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(function() {
-  initMenu('',true,false,'search.php','Search');
-  $(document).ready(function() { init_search(); });
-});
-/* @license-end */</script>
-<div id="main-nav"></div>
-</div><!-- top -->
+$(document).ready(function(){initNavTree('globals.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -63,7 +93,7 @@ $(function() {
 </div>
 
 <div class="contents">
-<div class="textblock">Here is a list of all documented file members with links to the documentation:</div>
+<div class="textblock">Here is a list of all documented functions, variables, defines, enums, and typedefs with links to the documentation:</div>
 
 <h3><a id="index__5F"></a>- _ -</h3><ul>
 <li>_tclmpi_Init()
@@ -72,109 +102,213 @@ $(function() {
 </ul>
 
 
+<h3><a id="index_f"></a>- f -</h3><ul>
+<li>first_comm
+: <a class="el" href="group__supportfn.html#gacd491ec3e4f639e8d3184d8226a75004">_tclmpi.c</a>
+</li>
+<li>first_req
+: <a class="el" href="group__supportfn.html#gad16e026843db8b3c90875f1036d99223">_tclmpi.c</a>
+</li>
+</ul>
+
+
+<h3><a id="index_l"></a>- l -</h3><ul>
+<li>last_comm
+: <a class="el" href="group__supportfn.html#gaee4c815932882e0d8b5b6c14ee4a6357">_tclmpi.c</a>
+</li>
+</ul>
+
+
 <h3><a id="index_m"></a>- m -</h3><ul>
-<li>MPI_VERSION
-: <a class="el" href="__tclmpi_8c.html#a5c91138b0df2f204e494c609e15e7ee1">_tclmpi.c</a>
+<li>mpi2tcl_comm()
+: <a class="el" href="group__supportfn.html#gab74e438d4cb84c83bc34d0e4a4598a93">_tclmpi.c</a>
+</li>
+<li>MPI_COMM_INVALID
+: <a class="el" href="group__supportfn.html#gabdb7e271b91eeb5554e43fcb009aa495">_tclmpi.c</a>
 </li>
 </ul>
 
 
 <h3><a id="index_t"></a>- t -</h3><ul>
+<li>tcl2mpi_comm()
+: <a class="el" href="group__supportfn.html#ga37cba7b1147e19249e7d014ba12440f5">_tclmpi.c</a>
+</li>
+<li>TCLMPI_ABORT
+: <a class="el" href="group__supportfn.html#ga28af21107816287d72747f841ef917ea">_tclmpi.c</a>
+</li>
 <li>TclMPI_Abort()
-: <a class="el" href="__tclmpi_8c.html#ae7438f828128f675a55088612321a4ba">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#gae7438f828128f675a55088612321a4ba">_tclmpi.c</a>
+</li>
+<li>tclmpi_add_comm()
+: <a class="el" href="group__supportfn.html#ga71b318d6a9100598a0cb5df5df2afba2">_tclmpi.c</a>
+</li>
+<li>tclmpi_add_req()
+: <a class="el" href="group__supportfn.html#gaedff82ffce996d8ebf8d12a61f7df48a">_tclmpi.c</a>
 </li>
 <li>TclMPI_Allgather()
-: <a class="el" href="__tclmpi_8c.html#a9b888470790e13b0e78741a328741bd7">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga9b888470790e13b0e78741a328741bd7">_tclmpi.c</a>
 </li>
 <li>TclMPI_Allreduce()
-: <a class="el" href="__tclmpi_8c.html#a6e628df64da0035823328bbc5e0ef6a4">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga6e628df64da0035823328bbc5e0ef6a4">_tclmpi.c</a>
+</li>
+<li>TCLMPI_AUTO
+: <a class="el" href="group__supportfn.html#gae61d1733e69232641961370bf5a610e2">_tclmpi.c</a>
 </li>
 <li>TclMPI_Barrier()
-: <a class="el" href="__tclmpi_8c.html#ad318014c7117bce997939cc6ed2d30e4">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#gad318014c7117bce997939cc6ed2d30e4">_tclmpi.c</a>
 </li>
 <li>TclMPI_Bcast()
-: <a class="el" href="__tclmpi_8c.html#a26285fa0f7e6b299ad45359f60e6cfb7">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga26285fa0f7e6b299ad45359f60e6cfb7">_tclmpi.c</a>
+</li>
+<li>tclmpi_comm_cntr
+: <a class="el" href="group__supportfn.html#gaade7bb32c49ebdf76aca2d3fca5796f0">_tclmpi.c</a>
 </li>
 <li>TclMPI_Comm_free()
-: <a class="el" href="__tclmpi_8c.html#ab7d6a1f6657d02bec174b70ba3f1e13d">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#gab7d6a1f6657d02bec174b70ba3f1e13d">_tclmpi.c</a>
 </li>
 <li>TclMPI_Comm_rank()
-: <a class="el" href="__tclmpi_8c.html#a796fa40d25d18e3a473db9cab380b0dc">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga796fa40d25d18e3a473db9cab380b0dc">_tclmpi.c</a>
 </li>
 <li>TclMPI_Comm_size()
-: <a class="el" href="__tclmpi_8c.html#a70e54af5e85f8f41107824a9ab2e7c59">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga70e54af5e85f8f41107824a9ab2e7c59">_tclmpi.c</a>
 </li>
 <li>TclMPI_Comm_split()
-: <a class="el" href="__tclmpi_8c.html#a3d90b89b0bcdd1f21c2c358d43d295b7">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga3d90b89b0bcdd1f21c2c358d43d295b7">_tclmpi.c</a>
 </li>
 <li>tclmpi_comm_t
-: <a class="el" href="__tclmpi_8c.html#a6ec9b7c1cfd68f4185d712c800c41df8">_tclmpi.c</a>
+: <a class="el" href="group__supportfn.html#ga6ec9b7c1cfd68f4185d712c800c41df8">_tclmpi.c</a>
+</li>
+<li>tclmpi_commcheck()
+: <a class="el" href="group__supportfn.html#gaa20826953d59c1088731ea5f8ec8640d">_tclmpi.c</a>
 </li>
 <li>TCLMPI_CONV_CHECK
-: <a class="el" href="__tclmpi_8c.html#af433ad7c272eec33a53ff24098a4f36d">_tclmpi.c</a>
+: <a class="el" href="group__supportfn.html#gaf433ad7c272eec33a53ff24098a4f36d">_tclmpi.c</a>
 </li>
 <li>TclMPI_Conv_get()
-: <a class="el" href="__tclmpi_8c.html#a85c731e1706521882659eced81473680">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga85c731e1706521882659eced81473680">_tclmpi.c</a>
+</li>
+<li>tclmpi_conv_handler
+: <a class="el" href="group__supportfn.html#ga4198626bdcff711767779e6269eea968">_tclmpi.c</a>
 </li>
 <li>TclMPI_Conv_set()
-: <a class="el" href="__tclmpi_8c.html#ad87e089160b2db00ac6ff1178600ad8b">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#gad87e089160b2db00ac6ff1178600ad8b">_tclmpi.c</a>
+</li>
+<li>tclmpi_datatype()
+: <a class="el" href="group__supportfn.html#ga4c31b0a0510f230157513a68a2656191">_tclmpi.c</a>
 </li>
 <li>tclmpi_dblint_t
-: <a class="el" href="__tclmpi_8c.html#afb5f0925dae246fe1c2f2592054dff9f">_tclmpi.c</a>
+: <a class="el" href="group__supportfn.html#gafb5f0925dae246fe1c2f2592054dff9f">_tclmpi.c</a>
+</li>
+<li>tclmpi_del_comm()
+: <a class="el" href="group__supportfn.html#ga2d20c35b877c82a495cee9221c17372e">_tclmpi.c</a>
+</li>
+<li>tclmpi_del_req()
+: <a class="el" href="group__supportfn.html#gaa0d45ec203f28b828578faebca0dbe3c">_tclmpi.c</a>
+</li>
+<li>TCLMPI_DOUBLE
+: <a class="el" href="group__supportfn.html#gab31a967f19424d908b5ca1177e1743f2">_tclmpi.c</a>
+</li>
+<li>TCLMPI_DOUBLE_INT
+: <a class="el" href="group__supportfn.html#ga7d56d0f0fcee55a559830bbd0ca9a63b">_tclmpi.c</a>
+</li>
+<li>tclmpi_errcheck()
+: <a class="el" href="group__supportfn.html#ga1833f4a6357d5de800edbee32bd02ed5">_tclmpi.c</a>
+</li>
+<li>tclmpi_errmsg
+: <a class="el" href="group__supportfn.html#ga5d181798a7286b1b581e8d529b2ef199">_tclmpi.c</a>
+</li>
+<li>TCLMPI_ERROR
+: <a class="el" href="group__supportfn.html#ga59fd3e392fc35fdd36b59daf2a0fbba1">_tclmpi.c</a>
 </li>
 <li>TclMPI_Finalize()
-: <a class="el" href="__tclmpi_8c.html#a45ed08039c57d730f66d956e87431d7c">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga45ed08039c57d730f66d956e87431d7c">_tclmpi.c</a>
 </li>
 <li>TclMPI_Finalized()
-: <a class="el" href="__tclmpi_8c.html#a3b3afff28c4aa75821e23176db660138">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga3b3afff28c4aa75821e23176db660138">_tclmpi.c</a>
+</li>
+<li>tclmpi_find_req()
+: <a class="el" href="group__supportfn.html#ga4e65190491cb075c485c810836c197b9">_tclmpi.c</a>
 </li>
 <li>TclMPI_Gather()
-: <a class="el" href="__tclmpi_8c.html#a8d64d68f8f2ddbabece91704398d1271">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga8d64d68f8f2ddbabece91704398d1271">_tclmpi.c</a>
+</li>
+<li>tclmpi_get_op()
+: <a class="el" href="group__supportfn.html#ga56682a14145f918ac9ea07e9f56cc34e">_tclmpi.c</a>
 </li>
 <li>TclMPI_Init()
-: <a class="el" href="__tclmpi_8c.html#a738cbe476e7ccfd4aced07b4dd433587">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga738cbe476e7ccfd4aced07b4dd433587">_tclmpi.c</a>
+</li>
+<li>tclmpi_init_api()
+: <a class="el" href="__tclmpi_8c.html#a49513103b84a8922d747c483c9b4368f">_tclmpi.c</a>
 </li>
 <li>TclMPI_Initialized()
-: <a class="el" href="__tclmpi_8c.html#af143e6414be1d8e76b7dc88208df68b2">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#gaf143e6414be1d8e76b7dc88208df68b2">_tclmpi.c</a>
+</li>
+<li>TCLMPI_INT
+: <a class="el" href="group__supportfn.html#gae5b7012da4771a7c24d03acb7a003aa2">_tclmpi.c</a>
+</li>
+<li>TCLMPI_INT_INT
+: <a class="el" href="group__supportfn.html#ga7593dc6a63482fe64138c6e03c61683d">_tclmpi.c</a>
 </li>
 <li>tclmpi_intint_t
-: <a class="el" href="__tclmpi_8c.html#a78c3fefe896c8e0c359e2aa022b7318a">_tclmpi.c</a>
+: <a class="el" href="group__supportfn.html#ga78c3fefe896c8e0c359e2aa022b7318a">_tclmpi.c</a>
+</li>
+<li>TCLMPI_INVALID
+: <a class="el" href="group__supportfn.html#ga15472e35a22f55e5be6b40c31a308b0b">_tclmpi.c</a>
 </li>
 <li>TclMPI_Iprobe()
-: <a class="el" href="__tclmpi_8c.html#a2f7e89c72b47081da83f0c724d853d68">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga2f7e89c72b47081da83f0c724d853d68">_tclmpi.c</a>
 </li>
 <li>TclMPI_Irecv()
-: <a class="el" href="__tclmpi_8c.html#a23b7bfee001ce295267c82286eacb977">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga23b7bfee001ce295267c82286eacb977">_tclmpi.c</a>
 </li>
 <li>TclMPI_Isend()
-: <a class="el" href="__tclmpi_8c.html#a5a80dad483292f282deb68f37b014bb8">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga5a80dad483292f282deb68f37b014bb8">_tclmpi.c</a>
+</li>
+<li>TCLMPI_LABEL_SIZE
+: <a class="el" href="group__supportfn.html#ga30e7daff65ed79712f6d50471d951994">_tclmpi.c</a>
+</li>
+<li>TCLMPI_NONE
+: <a class="el" href="group__supportfn.html#gaead34b180e0dab43093d13c3f5d086bb">_tclmpi.c</a>
 </li>
 <li>TclMPI_Probe()
-: <a class="el" href="__tclmpi_8c.html#ab7f8f9e8a2e0415c15b859b742335f6f">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#gab7f8f9e8a2e0415c15b859b742335f6f">_tclmpi.c</a>
 </li>
 <li>TclMPI_Recv()
-: <a class="el" href="__tclmpi_8c.html#adf47d8f1880c12269033d3c85aa561e9">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#gadf47d8f1880c12269033d3c85aa561e9">_tclmpi.c</a>
 </li>
 <li>TclMPI_Reduce()
-: <a class="el" href="__tclmpi_8c.html#a21fffcb1b06117177f8cb64c0d13b4cf">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga21fffcb1b06117177f8cb64c0d13b4cf">_tclmpi.c</a>
+</li>
+<li>tclmpi_req_cntr
+: <a class="el" href="group__supportfn.html#gac25737008b8ef87265fdf9ea7a1f40ea">_tclmpi.c</a>
 </li>
 <li>tclmpi_req_t
-: <a class="el" href="__tclmpi_8c.html#ac072917410cb4dc8cfcdc63c886f92cb">_tclmpi.c</a>
+: <a class="el" href="group__supportfn.html#gac072917410cb4dc8cfcdc63c886f92cb">_tclmpi.c</a>
 </li>
 <li>TclMPI_Scatter()
-: <a class="el" href="__tclmpi_8c.html#a337b5793693835724b4e705e533a5091">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga337b5793693835724b4e705e533a5091">_tclmpi.c</a>
 </li>
 <li>TclMPI_Send()
-: <a class="el" href="__tclmpi_8c.html#afcf9e8effd1a99b4aed1e17e8b9bc2e3">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#gafcf9e8effd1a99b4aed1e17e8b9bc2e3">_tclmpi.c</a>
+</li>
+<li>TCLMPI_TOZERO
+: <a class="el" href="group__supportfn.html#gaa79d87087661e7ac451d2406b6cdcec1">_tclmpi.c</a>
+</li>
+<li>tclmpi_typecheck()
+: <a class="el" href="group__supportfn.html#gab6915581c2fd9c294a1e19b21026730d">_tclmpi.c</a>
 </li>
 <li>TclMPI_Wait()
-: <a class="el" href="__tclmpi_8c.html#a69a2797d86eb85cf481686f7f13d2470">_tclmpi.c</a>
+: <a class="el" href="group__wrappers.html#ga69a2797d86eb85cf481686f7f13d2470">_tclmpi.c</a>
 </li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
 </body>
 </html>

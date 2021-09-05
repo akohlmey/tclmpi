@@ -1,0 +1,28 @@
+var group__wrappers =
+[
+    [ "TclMPI_Abort", "group__wrappers.html#gae7438f828128f675a55088612321a4ba", null ],
+    [ "TclMPI_Allgather", "group__wrappers.html#ga9b888470790e13b0e78741a328741bd7", null ],
+    [ "TclMPI_Allreduce", "group__wrappers.html#ga6e628df64da0035823328bbc5e0ef6a4", null ],
+    [ "TclMPI_Barrier", "group__wrappers.html#gad318014c7117bce997939cc6ed2d30e4", null ],
+    [ "TclMPI_Bcast", "group__wrappers.html#ga26285fa0f7e6b299ad45359f60e6cfb7", null ],
+    [ "TclMPI_Comm_free", "group__wrappers.html#gab7d6a1f6657d02bec174b70ba3f1e13d", null ],
+    [ "TclMPI_Comm_rank", "group__wrappers.html#ga796fa40d25d18e3a473db9cab380b0dc", null ],
+    [ "TclMPI_Comm_size", "group__wrappers.html#ga70e54af5e85f8f41107824a9ab2e7c59", null ],
+    [ "TclMPI_Comm_split", "group__wrappers.html#ga3d90b89b0bcdd1f21c2c358d43d295b7", null ],
+    [ "TclMPI_Conv_get", "group__wrappers.html#ga85c731e1706521882659eced81473680", null ],
+    [ "TclMPI_Conv_set", "group__wrappers.html#gad87e089160b2db00ac6ff1178600ad8b", null ],
+    [ "TclMPI_Finalize", "group__wrappers.html#ga45ed08039c57d730f66d956e87431d7c", null ],
+    [ "TclMPI_Finalized", "group__wrappers.html#ga3b3afff28c4aa75821e23176db660138", null ],
+    [ "TclMPI_Gather", "group__wrappers.html#ga8d64d68f8f2ddbabece91704398d1271", null ],
+    [ "TclMPI_Init", "group__wrappers.html#ga738cbe476e7ccfd4aced07b4dd433587", null ],
+    [ "TclMPI_Initialized", "group__wrappers.html#gaf143e6414be1d8e76b7dc88208df68b2", null ],
+    [ "TclMPI_Iprobe", "group__wrappers.html#ga2f7e89c72b47081da83f0c724d853d68", null ],
+    [ "TclMPI_Irecv", "group__wrappers.html#ga23b7bfee001ce295267c82286eacb977", null ],
+    [ "TclMPI_Isend", "group__wrappers.html#ga5a80dad483292f282deb68f37b014bb8", null ],
+    [ "TclMPI_Probe", "group__wrappers.html#gab7f8f9e8a2e0415c15b859b742335f6f", null ],
+    [ "TclMPI_Recv", "group__wrappers.html#gadf47d8f1880c12269033d3c85aa561e9", null ],
+    [ "TclMPI_Reduce", "group__wrappers.html#ga21fffcb1b06117177f8cb64c0d13b4cf", null ],
+    [ "TclMPI_Scatter", "group__wrappers.html#ga337b5793693835724b4e705e533a5091", null ],
+    [ "TclMPI_Send", "group__wrappers.html#gafcf9e8effd1a99b4aed1e17e8b9bc2e3", null ],
+    [ "TclMPI_Wait", "group__wrappers.html#ga69a2797d86eb85cf481686f7f13d2470", null ]
+];

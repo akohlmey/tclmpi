@@ -1,9 +1,9 @@
 var searchData=
 [
-  ['scatter_64',['scatter',['../namespacetclmpi.html#a870f349667d1b02bba5b69f5290f9c1a',1,'tclmpi']]],
-  ['send_65',['send',['../namespacetclmpi.html#afa26b910b215c10d29296fc9f006de9c',1,'tclmpi']]],
-  ['ser_5finit_66',['ser_init',['../namespacetclmpi__test.html#a20cd88e6bb5cce848e803dc64c33fa83',1,'tclmpi_test']]],
-  ['size_67',['size',['../namespacetclmpi__test.html#a0e3bf0b41cfd74e3b7293716d5c0db65',1,'tclmpi_test']]],
-  ['source_68',['source',['../structtclmpi__req.html#a4dc0852645227f3248c4abe4f0bb7cb8',1,'tclmpi_req']]],
-  ['sum_69',['sum',['../namespacetclmpi.html#aad9805ece4968fe938730f442cea8de8',1,'tclmpi']]]
+  ['rank_65',['rank',['../namespacetclmpi__test.html#a86c32d248f1d035aae27e5d8a09f511b',1,'tclmpi_test']]],
+  ['recv_66',['recv',['../namespacetclmpi.html#a7d7dd86f25e6c531231e4c4eabf22117',1,'tclmpi']]],
+  ['reduce_67',['reduce',['../namespacetclmpi.html#ab5ec7d759969d89d83525e3806ea041b',1,'tclmpi']]],
+  ['req_68',['req',['../structtclmpi__req.html#a0967cb5fa962318d094388161b635592',1,'tclmpi_req']]],
+  ['run_5ferror_69',['run_error',['../namespacetclmpi__test.html#ada6f101b858a9c1cd232249946239a20',1,'tclmpi_test']]],
+  ['run_5freturn_70',['run_return',['../namespacetclmpi__test.html#ad0b07854c2f2b2b9481935d55f1e537c',1,'tclmpi_test']]]
 ];

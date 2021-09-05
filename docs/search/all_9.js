@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['master_46',['master',['../namespacetclmpi__test.html#a804accb828b93231985b4533841b3104',1,'tclmpi_test']]],
-  ['max_47',['max',['../namespacetclmpi.html#a3767e0a46abd5ad5d0e96f7446a9e6c8',1,'tclmpi']]],
-  ['maxloc_48',['maxloc',['../namespacetclmpi.html#abb84ee2bfb2dd5ef82aa012a40457879',1,'tclmpi::maxloc()'],['../namespacetclmpi__test.html#a3654e7b88d55937e5bec13e33659e440',1,'tclmpi_test::maxloc()']]],
-  ['min_49',['min',['../namespacetclmpi.html#a266f52f9ea5fe9049070d59014f86533',1,'tclmpi']]],
-  ['minloc_50',['minloc',['../namespacetclmpi.html#acbeac8154a6e3e91d5c621ede793170a',1,'tclmpi::minloc()'],['../namespacetclmpi__test.html#aedc2129549637a8f43cd7651e8073f40',1,'tclmpi_test::minloc()']]]
+  ['label_45',['label',['../structtclmpi__comm.html#a3cf97a27745b3b27b63f07b13a505901',1,'tclmpi_comm::label()'],['../structtclmpi__req.html#ac42be8cc73b0fe34c685d5e82b4461c6',1,'tclmpi_req::label()']]],
+  ['land_46',['land',['../namespacetclmpi.html#a149a775c142b2fb13e7003aa3769947f',1,'tclmpi']]],
+  ['last_5fcomm_47',['last_comm',['../group__supportfn.html#gaee4c815932882e0d8b5b6c14ee4a6357',1,'_tclmpi.c']]],
+  ['len_48',['len',['../structtclmpi__req.html#abde1a54e38da840ef1b2f8249ffb99ce',1,'tclmpi_req']]],
+  ['lor_49',['lor',['../namespacetclmpi.html#a3c082874e32553632fd1bb38f694542a',1,'tclmpi']]],
+  ['lxor_50',['lxor',['../namespacetclmpi.html#a52853d1c83f6d8f0520fa7161c3d5758',1,'tclmpi']]]
 ];

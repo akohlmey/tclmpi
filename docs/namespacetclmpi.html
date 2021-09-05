@@ -16,6 +16,11 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+  $(document).ready(function() { init_search(); });
+/* @license-end */
+</script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,6 +35,21 @@
    </div>
    <div id="projectbrief">Tcl Bindings for MPI</div>
   </td>
+   <td>        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
  </tr>
  </tbody>
 </table>
@@ -41,16 +61,6 @@
 var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
 /* @license-end */
 </script>
-<script type="text/javascript" src="menudata.js"></script>
-<script type="text/javascript" src="menu.js"></script>
-<script type="text/javascript">
-/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(function() {
-  initMenu('',true,false,'search.php','Search');
-  $(document).ready(function() { init_search(); });
-});
-/* @license-end */</script>
-<div id="main-nav"></div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -291,7 +301,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
   </dd>
 </dl>
 <p>This command makes a best attempt to abort all tasks sharing the communicator and exit with the provided error code. Only one task needs to call <a class="el" href="namespacetclmpi.html#a9c1e420dc3ea882e07f110fe1d8bc6f9" title="call MPI_Abort() when a data conversion fails">tclmpi::abort</a>. This command terminates the program, so there can be no return value.</p>
-<p>For implementation details see TclMPI_Abort(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#gae7438f828128f675a55088612321a4ba">TclMPI_Abort()</a>. </p>
 
 </div>
 </div>
@@ -336,7 +346,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>data that was collected or empty</dd></dl>
 <p>This command collects data the provided list from all processes sharing the communicator. The data argument has to be present on all processes and has to be of the same length. The data resulting from the gather will be stored in the return value of the command for all processes. This function call is an implicit synchronization.</p>
-<p>For implementation details see TclMPI_Allgather(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga9b888470790e13b0e78741a328741bd7">TclMPI_Allgather()</a>. </p>
 
 </div>
 </div>
@@ -388,7 +398,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>data resulting from the reduction operation</dd></dl>
 <p>This command performs a global reduction operation op on the provided data object across all processes participating in the communicator comm. If data is a list, then the reduction will be done across each respective entry of the same list index. The result is distributed to all processes and used as return value of the command. This command only supports the data types <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a> and <a class="el" href="namespacetclmpi.html#a8e4cded65a76ead28e3083f1c046234c" title="constant for double data type">tclmpi::double</a> and <a class="el" href="namespacetclmpi.html#a85d526e92283876d984ff5024bbb282a" title="constant for integer pair data type">tclmpi::intint</a> for operations <a class="el" href="namespacetclmpi.html#abb84ee2bfb2dd5ef82aa012a40457879" title="maximum and location operation">tclmpi::maxloc</a> and <a class="el" href="namespacetclmpi.html#acbeac8154a6e3e91d5c621ede793170a" title="minimum and location operation">tclmpi::minloc</a>. The following reduction operations are supported: <a class="el" href="namespacetclmpi.html#a3767e0a46abd5ad5d0e96f7446a9e6c8" title="maximum operation">tclmpi::max</a> (maximum), <a class="el" href="namespacetclmpi.html#a266f52f9ea5fe9049070d59014f86533" title="minimum operation">tclmpi::min</a> (minimum), <a class="el" href="namespacetclmpi.html#aad9805ece4968fe938730f442cea8de8" title="summation operation">tclmpi::sum</a> (sum), <a class="el" href="namespacetclmpi.html#a26cf917f31ab9099c2ce02be9c9f3a91" title="product operation">tclmpi::prod</a> (product), <a class="el" href="namespacetclmpi.html#a149a775c142b2fb13e7003aa3769947f" title="logical and operation">tclmpi::land</a> (logical and), <a class="el" href="namespacetclmpi.html#a6bf2a6825921d52274d9fcb76e3e6d6e" title="bitwise and operation">tclmpi::band</a> (bitwise and), <a class="el" href="namespacetclmpi.html#a3c082874e32553632fd1bb38f694542a" title="logical or operation">tclmpi::lor</a> (logical or), <a class="el" href="namespacetclmpi.html#af9e3629756d9c77d955f9da5d609f25a" title="bitwise or operation">tclmpi::bor</a> (bitwise or), <a class="el" href="namespacetclmpi.html#a52853d1c83f6d8f0520fa7161c3d5758" title="logical xor operation">tclmpi::lxor</a> (logical exclusive or), <a class="el" href="namespacetclmpi.html#a404de5d576a48f3af96dba09a696d49a" title="bitwise xor operation">tclmpi::bxor</a> (bitwise exclusive or), <a class="el" href="namespacetclmpi.html#abb84ee2bfb2dd5ef82aa012a40457879" title="maximum and location operation">tclmpi::maxloc</a> (max value and location), <a class="el" href="namespacetclmpi.html#acbeac8154a6e3e91d5c621ede793170a" title="minimum and location operation">tclmpi::minloc</a> (min value and location). This function call is an implicit synchronization.</p>
-<p>For implementation details see TclMPI_Allreduce(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga6e628df64da0035823328bbc5e0ef6a4">TclMPI_Allreduce()</a>. </p>
 
 </div>
 </div>
@@ -414,7 +424,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
   </dd>
 </dl>
 <p>Blocks the caller until all processes sharing the communicator have called it; the call returns at any process only after <b>all</b> processes have entered the call and thus effectively synchronizes the processes. This function has no return value.</p>
-<p>For implementation details see TclMPI_Barrier(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#gad318014c7117bce997939cc6ed2d30e4">TclMPI_Barrier()</a>. </p>
 
 </div>
 </div>
@@ -466,7 +476,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>data that was broadcast</dd></dl>
 <p>This command broadcasts the provided data object (list or single number or string) from the process with rank root on the communicator comm to all processes sharing the communicator. The data argument has to be present on all processes but will be ignored on all but the root process. The data resulting from the broadcast will be stored in the return value of the command on <b>all</b> processes. This is important when the data type is not <a class="el" href="namespacetclmpi.html#ab65b00584fb79d516e653ea35dece54e" title="constant for automatic data type">tclmpi::auto</a>, since using other data types may incur an irreversible conversion of the data elements. This function call is an implicit synchronization.</p>
-<p>For implementation details see TclMPI_Bcast(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga26285fa0f7e6b299ad45359f60e6cfb7">TclMPI_Bcast()</a>. </p>
 
 </div>
 </div>
@@ -492,7 +502,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
   </dd>
 </dl>
 <p>This operation marks the MPI communicator associated with it Tcl representation comm for deallocation by the underlying MPI library. Any pending communications using this communicator will still complete normally.</p>
-<p>For implementation details see TclMPI_Comm_free(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#gab7d6a1f6657d02bec174b70ba3f1e13d">TclMPI_Comm_free()</a>. </p>
 
 </div>
 </div>
@@ -519,7 +529,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>rank on the communicator (integer between 0 and size-1)</dd></dl>
 <p>This function gives the rank of the process in the particular communicator. Many programs will be written with a manager-worker model, where one process (such as the rank-zero process) will play a supervisory role, and the other processes will serve as compute nodes. In this framework, <a class="el" href="namespacetclmpi.html#a938a5a0cfd7d2e860a05cf16436772be">tclmpi::comm_size</a> and <a class="el" href="namespacetclmpi.html#ad793d6430092bffd0040bb723da9ae99">tclmpi::comm_rank</a> are useful for determining the roles of the various processes of a communicator.</p>
-<p>For implementation details see TclMPI_Comm_rank(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga796fa40d25d18e3a473db9cab380b0dc">TclMPI_Comm_rank()</a>. </p>
 
 </div>
 </div>
@@ -546,7 +556,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>number of MPI processes on communicator</dd></dl>
 <p>This function indicates the number of processes involved in a communicator. For <a class="el" href="namespacetclmpi.html#a59fb2c1ff4f847ecb1e4fe4fa5b89b9e" title="constant for world communicator">tclmpi::comm_world</a>, it indicates the total number of processes available. This call is often used in combination with <a class="el" href="namespacetclmpi.html#ad793d6430092bffd0040bb723da9ae99">tclmpi::comm_rank</a> to determine the amount of concurrency available for a specific library or program. <a class="el" href="namespacetclmpi.html#ad793d6430092bffd0040bb723da9ae99">tclmpi::comm_rank</a> indicates the rank of the process that calls it in the range from 0...size-1, where size is the return value of <a class="el" href="namespacetclmpi.html#a938a5a0cfd7d2e860a05cf16436772be">tclmpi::comm_size</a>.</p>
-<p>For implementation details see TclMPI_Comm_size(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga70e54af5e85f8f41107824a9ab2e7c59">TclMPI_Comm_size()</a>. </p>
 
 </div>
 </div>
@@ -595,7 +605,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 <div class="line">set size [::tclmpi::comm_size $comm]</div>
 <div class="line">set key -[::tclmpi::comm_rank $comm]</div>
 <div class="line">set revcomm [::tclmpi::comm_split $comm 1 $key]</div>
-</div><!-- fragment --><p>For implementation details see TclMPI_Comm_split(). </p>
+</div><!-- fragment --><p>For implementation details see <a class="el" href="group__wrappers.html#ga3d90b89b0bcdd1f21c2c358d43d295b7">TclMPI_Comm_split()</a>. </p>
 
 </div>
 </div>
@@ -616,7 +626,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </div><div class="memdoc">
 <p>Return a string constant naming the error handler for TclMPI data conversions </p><dl class="section return"><dt>Returns</dt><dd>string constant for error handler</dd></dl>
 <p>This function allows to query which error handler is currently active for Tcl data conversions inside TclMPI. For details on the error handlers, see <a class="el" href="namespacetclmpi.html#ade8e2d574f1859ff31f560c824f11ddc">tclmpi::conv_set</a>.</p>
-<p>For implementation details see TclMPI_Conv_get(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga85c731e1706521882659eced81473680">TclMPI_Conv_get()</a>. </p>
 
 </div>
 </div>
@@ -642,7 +652,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
   </dd>
 </dl>
 <p>This function sets what action TclMPI should take if a data conversion to <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a> or <a class="el" href="namespacetclmpi.html#a8e4cded65a76ead28e3083f1c046234c" title="constant for double data type">tclmpi::double</a> fails. When using data types other than <a class="el" href="namespacetclmpi.html#ab65b00584fb79d516e653ea35dece54e" title="constant for automatic data type">tclmpi::auto</a>, the corresponding data needs to be converted from the internal Tcl representatin to the selected native format. However, this does not always succeed for a variety of reasons. With this function TclMPI allows the programmer to define how this is handled. There are currently three handlers available: <a class="el" href="namespacetclmpi.html#a0dd5aa4c192dc1abac42c976abeb9fd7" title="throw a Tcl error when a data conversion fails">tclmpi::error</a> (the default setting), <a class="el" href="namespacetclmpi.html#a9c1e420dc3ea882e07f110fe1d8bc6f9" title="call MPI_Abort() when a data conversion fails">tclmpi::abort</a>, and <a class="el" href="namespacetclmpi.html#a0339477a80f9289c9eb75541e95987a6" title="silently assign zero for failed data conversions">tclmpi::tozero</a>. For <a class="el" href="namespacetclmpi.html#a0dd5aa4c192dc1abac42c976abeb9fd7" title="throw a Tcl error when a data conversion fails">tclmpi::error</a> a Tcl error is raised that can be intercepted with catch and TclMPI immediately returns to the calling function. For <a class="el" href="namespacetclmpi.html#a9c1e420dc3ea882e07f110fe1d8bc6f9" title="call MPI_Abort() when a data conversion fails">tclmpi::abort</a> an error message is written directly to the screen and parallel execution on the current communicator is terminated via MPI_Abort(). For <a class="el" href="namespacetclmpi.html#a0339477a80f9289c9eb75541e95987a6" title="silently assign zero for failed data conversions">tclmpi::tozero</a> the error is silently ignored and the data element set to zero. This command has no return value.</p>
-<p>For implementation details see TclMPI_Conv_set(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#gad87e089160b2db00ac6ff1178600ad8b">TclMPI_Conv_set()</a>. </p>
 
 </div>
 </div>
@@ -662,7 +672,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </div><div class="memdoc">
 <p>Shut down the MPI environment from Tcl</p>
 <p>This command closes the MPI environment and cleans up all MPI states. All processes much call this routine before exiting. Calling this function before calling <a class="el" href="namespacetclmpi.html#a2afa6bd54eb108e1e6155259132edf44">tclmpi::init</a> is an error. After calling this function, no more TclMPI commands including <a class="el" href="namespacetclmpi.html#a1884bbfe279e65b586e5558b338ef7b2">tclmpi::finalize</a> and <a class="el" href="namespacetclmpi.html#a2afa6bd54eb108e1e6155259132edf44">tclmpi::init</a> may be used. This command takes no arguments and has no return value.</p>
-<p>For implementation details see TclMPI_Finalize(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga45ed08039c57d730f66d956e87431d7c">TclMPI_Finalize()</a>. </p>
 
 </div>
 </div>
@@ -682,7 +692,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </div><div class="memdoc">
 <p>Check if MPI environment was finalized from Tcl </p><dl class="section return"><dt>Returns</dt><dd>boolean value of whether MPI has been shut down</dd></dl>
 <p>This command checks if <a class="el" href="namespacetclmpi.html#a1884bbfe279e65b586e5558b338ef7b2">tclmpi::finalize</a> has already been called or whether the MPI environment has been shut down otherwise. Since initializing MPI multiple times is an error, you can call this function to determine whether you need to call <a class="el" href="namespacetclmpi.html#a1884bbfe279e65b586e5558b338ef7b2">tclmpi::finalize</a> and whether it is (still) allowed to call <a class="el" href="namespacetclmpi.html#a2afa6bd54eb108e1e6155259132edf44">tclmpi::init</a> in your Tcl script. This command takes no arguments.</p>
-<p>For implementation details see TclMPI_Finalized(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga3b3afff28c4aa75821e23176db660138">TclMPI_Finalized()</a>. </p>
 
 </div>
 </div>
@@ -734,7 +744,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>data that was collected or empty</dd></dl>
 <p>This command collects data the provided list from the process with rank root on the communicator comm to all processes sharing the communicator. The data argument has to be present on all processes and has to be of the same length. The data resulting from the gather will be stored in the return value of the command on the root process. This function call is an implicit synchronization. This procedure is the reverse operation of <a class="el" href="namespacetclmpi.html#a870f349667d1b02bba5b69f5290f9c1a">tclmpi::scatter</a>.</p>
-<p>For implementation details see TclMPI_Gather(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga8d64d68f8f2ddbabece91704398d1271">TclMPI_Gather()</a>. </p>
 
 </div>
 </div>
@@ -754,7 +764,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </div><div class="memdoc">
 <p>Initialize the MPI environment from Tcl</p>
 <p>This command initializes the MPI environment. Needs to be called before any other TclMPI commands. MPI can be initialized at most once, so calling <a class="el" href="namespacetclmpi.html#a2afa6bd54eb108e1e6155259132edf44">tclmpi::init</a> multiple times is an error. Like in the C bindings for MPI, <a class="el" href="namespacetclmpi.html#a2afa6bd54eb108e1e6155259132edf44">tclmpi::init</a> will scan the argument vector, the global variable $argv, for any MPI implementation specific flags and will remove them. The global variable $argc will be adjusted accordingly. This command takes no arguments and has no return value.</p>
-<p>For implementation details see TclMPI_Init(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga738cbe476e7ccfd4aced07b4dd433587">TclMPI_Init()</a>. </p>
 
 </div>
 </div>
@@ -826,7 +836,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Tcl representation of generated MPI request</dd></dl>
 <p>This procedure provides a non-blocking receive operation, i.e. it returns <b>immediately</b>. The call does not return any data but a request handle of the form tclmpi::req#, with # being a unique integer number. This request handle is best stored in a variable and needs to be passed to a <a class="el" href="namespacetclmpi.html#a3b6ece078454ce26880f0b57ac827d21">tclmpi::wait</a> call to wait for completion of the receive and pass the data to the calling code as return value of the wait call. The type argument has to match that of the corresponding send command. Instead of a specific source rank, the constant <a class="el" href="namespacetclmpi.html#a8d0e8f8a25eb30932be9e710c66656a1" title="constant to accept messages from any source rank">tclmpi::any_source</a> can be used and similarly <a class="el" href="namespacetclmpi.html#a488279f50d255d389bf3d665e0aadb96" title="constant to accept messages with any tag">tclmpi::any_tag</a> as tag, to not select on source rank or tag, respectively.</p>
-<p>For implementation details see TclMPI_Irecv(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga23b7bfee001ce295267c82286eacb977">TclMPI_Irecv()</a>. </p>
 
 </div>
 </div>
@@ -885,7 +895,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Tcl representation of generated MPI request</dd></dl>
 <p>This function performs a regular <b>non-blocking</b> send to process rank dest on communicator comm. The choice of data type determines how data is being sent and thus unlike in the C-bindings the corresponding receive has to use the same data data type. As a non-blocking call, the function will return immediately. The return value is a string representing the generated MPI request and it can be passed to a call to <a class="el" href="namespacetclmpi.html#a3b6ece078454ce26880f0b57ac827d21">tclmpi::wait</a> in order to wait for its completion and release all reserved storage associated with the request.</p>
-<p>For implementation details see TclMPI_Isend(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga5a80dad483292f282deb68f37b014bb8">TclMPI_Isend()</a>. </p>
 
 </div>
 </div>
@@ -937,7 +947,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>empty</dd></dl>
 <p>This function allows to check for an incoming message on the communicator comm without actually receiving it. Nevertheless, this call is blocking, i.e. it will not return unless there is actually a message pending that matches the requirements of source rank and message tag. Instead of a specific source rank, the constant <a class="el" href="namespacetclmpi.html#a8d0e8f8a25eb30932be9e710c66656a1" title="constant to accept messages from any source rank">tclmpi::any_source</a> can be used and similarly <a class="el" href="namespacetclmpi.html#a488279f50d255d389bf3d665e0aadb96" title="constant to accept messages with any tag">tclmpi::any_tag</a> as tag, to accept send requests from any rank or tag, respectively. The (optional) status argument would be the name of a variable in which status information about the message will be stored in the form of an array. This associative array has the entries MPI_SOURCE (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size of message in bytes), COUNT_INT (size of message in <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a> units), COUNT_DOUBLE (size of message in <a class="el" href="namespacetclmpi.html#a8e4cded65a76ead28e3083f1c046234c" title="constant for double data type">tclmpi::double</a> units).</p>
-<p>For implementation details see TclMPI_Probe(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#gab7f8f9e8a2e0415c15b859b742335f6f">TclMPI_Probe()</a>. </p>
 
 </div>
 </div>
@@ -996,7 +1006,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the received data</dd></dl>
 <p>This procedure provides a blocking receive operation, i.e. it only returns <b>after</b> the message is received in full. The received data will be passed as return value. The type argument has to match that of the corresponding send command. Instead of using a specific source rank, the constant <a class="el" href="namespacetclmpi.html#a8d0e8f8a25eb30932be9e710c66656a1" title="constant to accept messages from any source rank">tclmpi::any_source</a> can be used and similarly <a class="el" href="namespacetclmpi.html#a488279f50d255d389bf3d665e0aadb96" title="constant to accept messages with any tag">tclmpi::any_tag</a> as tag. This way the receive operation will not select a message based on source rank or tag, respectively. The (optional) status argument would be the name of a variable in which status information about the receive will be stored in the form of an array. The associative array has the entries MPI_SOURCE (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size of message in bytes), COUNT_INT (size of message in <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a> units), COUNT_DOUBLE (size of message in <a class="el" href="namespacetclmpi.html#a8e4cded65a76ead28e3083f1c046234c" title="constant for double data type">tclmpi::double</a> units).</p>
-<p>For implementation details see TclMPI_Recv(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#gadf47d8f1880c12269033d3c85aa561e9">TclMPI_Recv()</a>. </p>
 
 </div>
 </div>
@@ -1055,7 +1065,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>data resulting from the reduction operation</dd></dl>
 <p>This command performs a global reduction operation op on the provided data object across all processes participating in the communicator comm. If data is a list, then the reduction will be done across each respective entry of the same list index. The result is collect on the process with rank root and used as return value of the command. For all other processes the return value is empty. This command only supports the data types <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a> and <a class="el" href="namespacetclmpi.html#a8e4cded65a76ead28e3083f1c046234c" title="constant for double data type">tclmpi::double</a> and <a class="el" href="namespacetclmpi.html#a85d526e92283876d984ff5024bbb282a" title="constant for integer pair data type">tclmpi::intint</a> for operations <a class="el" href="namespacetclmpi.html#abb84ee2bfb2dd5ef82aa012a40457879" title="maximum and location operation">tclmpi::maxloc</a> and <a class="el" href="namespacetclmpi.html#acbeac8154a6e3e91d5c621ede793170a" title="minimum and location operation">tclmpi::minloc</a>. The following reduction operations are supported: <a class="el" href="namespacetclmpi.html#a3767e0a46abd5ad5d0e96f7446a9e6c8" title="maximum operation">tclmpi::max</a> (maximum), <a class="el" href="namespacetclmpi.html#a266f52f9ea5fe9049070d59014f86533" title="minimum operation">tclmpi::min</a> (minimum), <a class="el" href="namespacetclmpi.html#aad9805ece4968fe938730f442cea8de8" title="summation operation">tclmpi::sum</a> (sum), <a class="el" href="namespacetclmpi.html#a26cf917f31ab9099c2ce02be9c9f3a91" title="product operation">tclmpi::prod</a> (product), <a class="el" href="namespacetclmpi.html#a149a775c142b2fb13e7003aa3769947f" title="logical and operation">tclmpi::land</a> (logical and), <a class="el" href="namespacetclmpi.html#a6bf2a6825921d52274d9fcb76e3e6d6e" title="bitwise and operation">tclmpi::band</a> (bitwise and), <a class="el" href="namespacetclmpi.html#a3c082874e32553632fd1bb38f694542a" title="logical or operation">tclmpi::lor</a> (logical or), <a class="el" href="namespacetclmpi.html#af9e3629756d9c77d955f9da5d609f25a" title="bitwise or operation">tclmpi::bor</a> (bitwise or), <a class="el" href="namespacetclmpi.html#a52853d1c83f6d8f0520fa7161c3d5758" title="logical xor operation">tclmpi::lxor</a> (logical exclusive or), <a class="el" href="namespacetclmpi.html#a404de5d576a48f3af96dba09a696d49a" title="bitwise xor operation">tclmpi::bxor</a> (bitwise exclusive or), <a class="el" href="namespacetclmpi.html#abb84ee2bfb2dd5ef82aa012a40457879" title="maximum and location operation">tclmpi::maxloc</a> (max value and location), <a class="el" href="namespacetclmpi.html#acbeac8154a6e3e91d5c621ede793170a" title="minimum and location operation">tclmpi::minloc</a> (min value and location). This function call is an implicit synchronization.</p>
-<p>For implementation details see TclMPI_Reduce(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga21fffcb1b06117177f8cb64c0d13b4cf">TclMPI_Reduce()</a>. </p>
 
 </div>
 </div>
@@ -1107,7 +1117,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>data that was distributed</dd></dl>
 <p>This command distributes the provided list of data from the process with rank root on the communicator comm to all processes sharing the communicator. The data argument has to be present on all processes but will be ignored on all but the root process. The data resulting from the scatter will be stored in the return value of the command. The data will be distributed evenly, so the length of the list has to be divisible by the number of processes on the communicator. This procedure is the reverse operation of <a class="el" href="namespacetclmpi.html#a5362e926cb7a43f1ffa3d56707a1c0a6">tclmpi::gather</a>. This function call is an implicit synchronization.</p>
-<p>For implementation details see TclMPI_Scatter(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga337b5793693835724b4e705e533a5091">TclMPI_Scatter()</a>. </p>
 
 </div>
 </div>
@@ -1165,7 +1175,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
   </dd>
 </dl>
 <p>This function performs a regular <b>blocking</b> send to process rank dest on communicator comm. The choice of data type determines how data is being sent and thus unlike in the C-bindings the corresponding receive has to use the same data data type. As a blocking call, the function will only return when all data is sent. This function has no return value.</p>
-<p>For implementation details see TclMPI_Send(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#gafcf9e8effd1a99b4aed1e17e8b9bc2e3">TclMPI_Send()</a>. </p>
 
 </div>
 </div>
@@ -1205,7 +1215,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>1 or 0 depending on whether a pending request was detected</dd></dl>
 <p>This function allows to check for an incoming message on the communicator comm without actually receiving it. Unlike <a class="el" href="namespacetclmpi.html#a2c941d256a08906815e9f117a18f26c6">tclmpi::probe</a>, this call is non-blocking, i.e. it will return immediately and report whether there is a message pending or not in its return value (1 or 0, respectively). Instead of a specific source rank, the constant <a class="el" href="namespacetclmpi.html#a8d0e8f8a25eb30932be9e710c66656a1" title="constant to accept messages from any source rank">tclmpi::any_source</a> can be used and similarly <a class="el" href="namespacetclmpi.html#a488279f50d255d389bf3d665e0aadb96" title="constant to accept messages with any tag">tclmpi::any_tag</a> as tag, to test for send requests from any rank or tag, respectively. The (optional) status argument would be the name of a variable in which status information about the message will be stored in the form of an array. This associative array has the entries MPI_SOURCE (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size of message in bytes), COUNT_INT (size of message in <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a> units), COUNT_DOUBLE (size of message in <a class="el" href="namespacetclmpi.html#a8e4cded65a76ead28e3083f1c046234c" title="constant for double data type">tclmpi::double</a> units).</p>
-<p>For implementation details see TclMPI_Iprobe(). Wait for MPI request completion </p><dl class="params"><dt>Parameters</dt><dd>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga2f7e89c72b47081da83f0c724d853d68">TclMPI_Iprobe()</a>. Wait for MPI request completion </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">request</td><td>Tcl representation of an MPI request </td></tr>
     <tr><td class="paramname">status</td><td>variable name for status array (string) </td></tr>
@@ -1214,7 +1224,7 @@ variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>empty or received data that was associated with the request</dd></dl>
 <p>This function takes a communication request created by a non-blocking send or receive call (<a class="el" href="namespacetclmpi.html#a90a9381b0b1b7d8aeb4e28ae46c4a5f1">tclmpi::isend</a> or <a class="el" href="namespacetclmpi.html#a97dd11ebb2b94b372f7ebf06c7f48b96">tclmpi::irecv</a>) and waits for its completion. In case of a send, it will merely wait until the matching communication is completed and any resources associated with the request will be releaseed. If the request was generated by a non-blocking receive call, <a class="el" href="namespacetclmpi.html#a3b6ece078454ce26880f0b57ac827d21">tclmpi::wait</a> will hand the received data to the calling routine in its return value. The (optional) status argument would be the name of a variable in which the resulting status information will be stored in the form of an associative array. The associative array will have the entries MPI_SOURCE (rank of sender), MPI_TAG (tag of message), COUNT_CHAR (size of message in bytes), COUNT_INT (size of message in <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a> units), COUNT_DOUBLE (size of message in <a class="el" href="namespacetclmpi.html#a8e4cded65a76ead28e3083f1c046234c" title="constant for double data type">tclmpi::double</a> units).</p>
-<p>For implementation details see TclMPI_Wait(). </p>
+<p>For implementation details see <a class="el" href="group__wrappers.html#ga69a2797d86eb85cf481686f7f13d2470">TclMPI_Wait()</a>. </p>
 
 </div>
 </div>

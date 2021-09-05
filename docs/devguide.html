@@ -16,6 +16,11 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+  $(document).ready(function() { init_search(); });
+/* @license-end */
+</script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,6 +35,21 @@
    </div>
    <div id="projectbrief">Tcl Bindings for MPI</div>
   </td>
+   <td>        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
  </tr>
  </tbody>
 </table>
@@ -41,16 +61,6 @@
 var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
 /* @license-end */
 </script>
-<script type="text/javascript" src="menudata.js"></script>
-<script type="text/javascript" src="menu.js"></script>
-<script type="text/javascript">
-/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(function() {
-  initMenu('',true,false,'search.php','Search');
-  $(document).ready(function() { init_search(); });
-});
-/* @license-end */</script>
-<div id="main-nav"></div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -94,7 +104,7 @@ Overall Design and Differences to the MPI C-bindings</h1>
 <p>Things get even more complicated with with non-blocking receives. Since we need to know the size of the message to receive, a non-blocking receive can only be posted, if the corresponding send is already pending. This is being determined by calling MPI_Iprobe() and when this shows no (matching) pending message, the parameters for the receive will be cached and the then MPI_Probe() followed by MPI_Recv() will be called as part of <a class="el" href="namespacetclmpi.html#a3b6ece078454ce26880f0b57ac827d21">tclmpi::wait</a>. The blocking/non-blocking behavior of the Tcl script should be very close to the corresponding C bindings, but probably not as efficient.</p>
 <h1><a class="anchor" id="naming"></a>
 Naming Conventions</h1>
-<p>All functions that are new Tcl commands follow the MPI naming conventions, but using TclMPI_ as prefix instead of MPI_. The corresponding Tcl commands are placed in the tclmpi namespace and all lower case. Example: TclMPI_Init() is the wrapper for MPI_Init() and is provided as command <a class="el" href="namespacetclmpi.html#a2afa6bd54eb108e1e6155259132edf44">tclmpi::init</a>. Defines and constants from the MPI header file are represented in TclMPI as plain strings, all lowercase and with a tclmpi:: prefix. Thus MPI_COMM_WORLD becomes <a class="el" href="namespacetclmpi.html#a59fb2c1ff4f847ecb1e4fe4fa5b89b9e" title="constant for world communicator">tclmpi::comm_world</a> and MPI_INT becomes <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a>.</p>
+<p>All functions that are new Tcl commands follow the MPI naming conventions, but using TclMPI_ as prefix instead of MPI_. The corresponding Tcl commands are placed in the tclmpi namespace and all lower case. Example: <a class="el" href="group__wrappers.html#ga738cbe476e7ccfd4aced07b4dd433587">TclMPI_Init()</a> is the wrapper for MPI_Init() and is provided as command <a class="el" href="namespacetclmpi.html#a2afa6bd54eb108e1e6155259132edf44">tclmpi::init</a>. Defines and constants from the MPI header file are represented in TclMPI as plain strings, all lowercase and with a tclmpi:: prefix. Thus MPI_COMM_WORLD becomes <a class="el" href="namespacetclmpi.html#a59fb2c1ff4f847ecb1e4fe4fa5b89b9e" title="constant for world communicator">tclmpi::comm_world</a> and MPI_INT becomes <a class="el" href="namespacetclmpi.html#a1cabae47e0cff6dfb26f3013347158ac" title="constant for integer data type">tclmpi::int</a>.</p>
 <p>Functions that are internal to the plugin as well as static variables are prefixed with all lower case, i.e. tclmpi_. Those functions have to be declared static.</p>
 <p>All string constants are also declared as namespace variables, e.g. $tclmpi::comm_world, so that shortcut notations are possible as shown in the following example: </p><div class="fragment"><div class="line">namespace upvar tclmpi comm_world comm</div>
 <div class="line">namespace upvar tclmpi int        mpi_int</div>
@@ -104,19 +114,19 @@ TclMPI Support Functions</h1>
 <h2><a class="anchor" id="tclcomm"></a>
 Mapping MPI Communicators</h2>
 <p>MPI communicators are represented in TclMPI by strings of the form "tclmpi::comm%d", with "%d" being replaced by a unique integer. In addition, a few string constants are mapped to the default communicators that are defined in MPI. These are <a class="el" href="namespacetclmpi.html#a59fb2c1ff4f847ecb1e4fe4fa5b89b9e" title="constant for world communicator">tclmpi::comm_world</a>, <a class="el" href="namespacetclmpi.html#a4f7336cfd7f45ba2f38ec72adebc5b88" title="constant for self communicator">tclmpi::comm_self</a>, and <a class="el" href="namespacetclmpi.html#a3e90906d53f8730ad48783c9aaad706e" title="constant empty communicator">tclmpi::comm_null</a>, which represent MPI_COMM_WORLD, MPI_COMM_SELF, and MPI_COMM_NULL, respectively.</p>
-<p>Internally the map is maintained in a simple linked list which is initialized with the three default communicators when the plugin is loaded and where new communicators are added at the end as needed. The functions mpi2tcl_comm and tcl2mpi_comm are then used to translate from one representation to the other while tclmpi_add_comm will append a new structure containing the communicator to the list. Correspondingly tclmpi_del_comm will remove a communicator entry from the lest, based on its Tcl string representation.</p>
+<p>Internally the map is maintained in a simple linked list which is initialized with the three default communicators when the plugin is loaded and where new communicators are added at the end as needed. The functions <a class="el" href="group__supportfn.html#gab74e438d4cb84c83bc34d0e4a4598a93">mpi2tcl_comm</a> and <a class="el" href="group__supportfn.html#ga37cba7b1147e19249e7d014ba12440f5">tcl2mpi_comm</a> are then used to translate from one representation to the other while <a class="el" href="group__supportfn.html#ga71b318d6a9100598a0cb5df5df2afba2">tclmpi_add_comm</a> will append a new structure containing the communicator to the list. Correspondingly <a class="el" href="group__supportfn.html#ga2d20c35b877c82a495cee9221c17372e">tclmpi_del_comm</a> will remove a communicator entry from the lest, based on its Tcl string representation.</p>
 <h2><a class="anchor" id="tclreq"></a>
 Mapping MPI Requests</h2>
-<p>MPI requests are represented in TclMPI by strings of the form "tclmpi::req%d", with "%d" being replaced by a unique integer. Internally this map is maintained in a simple linked list to which new requests are appended and from which completed requests are removed as needed. The function tclmpi_find_req is used to locate a specific request and its associated data from its string label. In addition, tclmpi_add_req will append a new request to the list, and tclmpi_del_req will remove (completed) requests.</p>
+<p>MPI requests are represented in TclMPI by strings of the form "tclmpi::req%d", with "%d" being replaced by a unique integer. Internally this map is maintained in a simple linked list to which new requests are appended and from which completed requests are removed as needed. The function <a class="el" href="group__supportfn.html#ga4e65190491cb075c485c810836c197b9">tclmpi_find_req</a> is used to locate a specific request and its associated data from its string label. In addition, <a class="el" href="group__supportfn.html#gaedff82ffce996d8ebf8d12a61f7df48a">tclmpi_add_req</a> will append a new request to the list, and <a class="el" href="group__supportfn.html#gaa0d45ec203f28b828578faebca0dbe3c">tclmpi_del_req</a> will remove (completed) requests.</p>
 <h2><a class="anchor" id="tcldata"></a>
 Mapping Data Types</h2>
-<p>The helper function tclmpi_datatype is used to convert string constants representing specific data types into integer constants for convenient branching. Data types in TclMPI are somewhat different from MPI data types to match better the spirit of Tcl scripting.</p>
+<p>The helper function <a class="el" href="group__supportfn.html#ga4c31b0a0510f230157513a68a2656191">tclmpi_datatype</a> is used to convert string constants representing specific data types into integer constants for convenient branching. Data types in TclMPI are somewhat different from MPI data types to match better the spirit of Tcl scripting.</p>
 <h2><a class="anchor" id="tclerr"></a>
 Common Error Message Processing</h2>
 <p>There is a significant redundancy in checking for and reporting error conditions. For this purpose, several support functions exist.</p>
-<p>tclmpi_errcheck verifies if calls to the MPI library were successful and if not, generates a formatted error message that is appended to the current result list.</p>
-<p>tclmpi_commcheck verifies if a communicator argument was using a valid Tcl representation and if not, generates a formatted error message that is appended to the current result list.</p>
-<p>tclmpi_typecheck test if a type argument was using a valid Tcl representation and if not, generates a formatted error message that is appended to the current result list.</p>
+<p><a class="el" href="group__supportfn.html#ga1833f4a6357d5de800edbee32bd02ed5">tclmpi_errcheck</a> verifies if calls to the MPI library were successful and if not, generates a formatted error message that is appended to the current result list.</p>
+<p><a class="el" href="group__supportfn.html#gaa20826953d59c1088731ea5f8ec8640d">tclmpi_commcheck</a> verifies if a communicator argument was using a valid Tcl representation and if not, generates a formatted error message that is appended to the current result list.</p>
+<p><a class="el" href="group__supportfn.html#gab6915581c2fd9c294a1e19b21026730d">tclmpi_typecheck</a> test if a type argument was using a valid Tcl representation and if not, generates a formatted error message that is appended to the current result list.</p>
 <h1><a class="anchor" id="tcltest"></a>
 TclMPI Tcl Test Harness command reference</h1>
 <p>TclMPI includes a simple unit test harness written in (of course) Tcl. The corresponding commands are placed into the <a class="el" href="namespacetclmpi__test.html">tclmpi_test</a> namespace. Check out the files in the <code>tests</code> folders for examples. </p>

@@ -16,6 +16,11 @@
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+  $(document).ready(function() { init_search(); });
+/* @license-end */
+</script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -30,6 +35,21 @@
    </div>
    <div id="projectbrief">Tcl Bindings for MPI</div>
   </td>
+   <td>        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
  </tr>
  </tbody>
 </table>
@@ -41,16 +61,6 @@
 var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
 /* @license-end */
 </script>
-<script type="text/javascript" src="menudata.js"></script>
-<script type="text/javascript" src="menu.js"></script>
-<script type="text/javascript">
-/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(function() {
-  initMenu('',true,false,'search.php','Search');
-  $(document).ready(function() { init_search(); });
-});
-/* @license-end */</script>
-<div id="main-nav"></div>
 </div><!-- top -->
 <div id="side-nav" class="ui-resizable side-nav-resizable">
   <div id="nav-tree">
@@ -106,15 +116,15 @@ Compilation</h1>
 <p>To change settings from the defaults append <code>-D&lt;SETTING&gt;=&lt;VALUE&gt;</code> to the <code>cmake</code> command line and replace <code>&lt;SETTING&gt;</code> and <code>&lt;VALUE&gt;</code> accordingly or you may use the <code>ccmake</code> text mode UI or <code>cmake-gui</code>.</p>
 <h1><a class="anchor" id="gendocs"></a>
 Building the Documentation</h1>
-<p>Documentation in HTML and PDF format is extracted from the sources using doxygen, if available. The build of the HTML format documentation is requested with </p><div class="fragment"><div class="line">cmake --build build-folder --target</div>
-</div><!-- fragment --><p> docs`. The documentation will be in the build-folder/html folder. To generate the PDF documentation, PDFLaTeX and several required LaTeX style packages need to be installed. This is requested using </p><div class="fragment"><div class="line">cmake --build build-folder --target pdf</div>
-</div><!-- fragment --><p> and the resulting documentation will be in build-folder/tclmpi_docs.pdf.</p>
+<p>Documentation in HTML and PDF format is extracted from the sources using doxygen, if available. The build of the HTML format documentation is requested with </p><div class="fragment"><div class="line">cmake --build build-folder --target html</div>
+</div><!-- fragment --><p> The documentation will be in folder <code>build-folder/html</code>. To generate the PDF documentation, PDFLaTeX and several LaTeX style packages need to be installed. This is requested using </p><div class="fragment"><div class="line">cmake --build build-folder --target pdf</div>
+</div><!-- fragment --><p> and the resulting documentation will be in <code>build-folder/tclmpi_docs.pdf</code>.</p>
 <h1><a class="anchor" id="install"></a>
 Installation</h1>
 <p>To install the TclMPI package you can use </p><div class="fragment"><div class="line">cmake --build build-folder --target install</div>
-</div><!-- fragment --><p> which should by default install the compiled shared object and the associated two Tcl files into a subfolder of <code>/usr/local/tcl8.6</code>. If you used custom value for CMAKE_INSTALL_PREFIX when configuring with CMake, then the installation will be into the corresponding location.</p>
-<p>To tell Tcl where to find the package, you need to either set or expand the TCLLIBPATH environment variable to the folder into which you have installed the file or place <code>auto_path [concat /usr/local/tcl8.6/ $auto_path]</code> at the beginning of your script or in your <code>.tclshrc</code> file (or .vmdrc or similar). Then you should be able to load the TclMPI wrappers on demand by using the command <code>package require tclmpi</code>.</p>
-<p>For the extended Tcl shell <code>tclmpish</code>, the _tclmpi.so file is not use and instead tclmpish needs to run instead of tclsh. For that you may append the <code>bin</code> folder of the installation tree to your PATH environment variable. In case of using the custom Tcl shell, the startup script would be called .tclmpishrc instead of .tclshrc.</p>
+</div><!-- fragment --><p> which should by default install the compiled shared object and the associated two Tcl files into a subfolder of <code>&lt;CMAKE_INSTALL_PREFIX&gt;/tcl8.6</code>. The default value of CMAKE_INSTALL_PREFIX is system specific, but it can changed with <code>-D CMAKE_INSTALL_PREFIX=/some/path</code> when configuring with CMake, then the installation will be into the corresponding location.</p>
+<p>To tell Tcl where to find the package, you need to either set or expand the TCLLIBPATH environment variable to the folder into which you have installed the files or place <code>auto_path [concat /usr/local/tcl8.6/ $auto_path]</code> at the beginning of your Tcl script or in your <code>.tclshrc</code> file (or .vmdrc or similar). Then you should be able to load the TclMPI wrappers on demand by using the command <code>package require tclmpi</code>.</p>
+<p>For the extended Tcl shell <code>tclmpish</code>, the <code>_tclmpi.so</code> file is not used and instead <code>tclmpish</code> already includes the coresponding code and needs to be run instead of <code>tclsh</code>. For that you may append the <code>bin</code> folder of the installation tree to your PATH environment variable. In case of using the custom Tcl shell, the startup script would be called <code>.tclmpishrc</code> instead of <code>.tclshrc</code>.</p>
 <h1><a class="anchor" id="devel"></a>
 Software Development and Bug Reports</h1>
 <p>The TclMPI code is maintained using git for source code management, and the project is hosted on github at <a href="https://github.com/akohlmey/tclmpi">https://github.com/akohlmey/tclmpi</a> From there you can download snapshots of the development and releases, clode the repository to follow development, or work on your own branch through forking it. Bug reports and feature requests should also be filed on github at through the issue tracker at: <a href="https://github.com/akohlmey/tclmpi/issues">https://github.com/akohlmey/tclmpi/issues</a>.</p>
