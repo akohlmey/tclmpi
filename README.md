@@ -31,7 +31,7 @@ Information about the implementation and design of the package are in the
 
 You can cite TclMPI as:
 
-Axel Kohlmeyer. (2021). TclMPI: Release 1.1 [Data set]. Zenodo. [![DOI](https://www.zenodo.org/badge/4368856.svg)](https://www.zenodo.org/badge/latestdoi/4368856)
+Axel Kohlmeyer. (2021). TclMPI: Release 1.1 [Data set]. Zenodo. [![DOI](https://www.zenodo.org/badge/5453505.svg)](https://www.zenodo.org/badge/latestdoi/5453505)
 
 # Acknowledgements
 
