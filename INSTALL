@@ -11,17 +11,18 @@ The TclMPI package  uses CMake for building,  installation, testing, and
 packaging.  This requires  a somewhat modern CMake  version (3.16).  You
 need  to run  CMake the  usual way  `cmake -B  build-folder .`  and then
 `cmake   --build    build-folder`,   followed   by    `cmake   --install
-build-folder`. Tcl version 8.6 with support for development is required.
+build-folder`. Tcl version 8.5 or later and MPI-2 or later with  support
+for development are required.
 
 The following settings are supported by the CMake build environment
 - BUILD_TCLMPI_SHELL   Build a `tclmpish` executable as extended Tcl shell   (default: on)
 - ENABLE_TCL_STUBS     Use the Tcl stubs mechanism   (default: on, requires Tcl 8.6 or later)
-- BUILD_TESTING        Enable unit testing   (default: on)
-- DOWNLOAD_MPICH4WIN   Download MPICH2-1.4.1 headers and link library (default: off, Windows only)
 - CMAKE_INSTALL_PREFIX Path to installation location prefix (default: (platform specific))
+- BUILD_TESTING        Enable unit testing   (default: on)
+- DOWNLOAD_MPICH4WIN   Download MPICH2-1.4.1 headers and link library (default: off, for cross-compiling to Windows only)
 
 Documentation in HTML and PDF format is generated from doxygen and
-pdflatex, if available, with `cmake --build build-folder --target docs`
+pdflatex, if available, with `cmake --build build-folder --target html`
 and `cmake --build build-folder --target pdf`, respectively.
 
 Installation:

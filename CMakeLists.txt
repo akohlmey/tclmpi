@@ -148,11 +148,12 @@ if(DOXYGEN_FOUND)
     add_custom_target(publish ${GIT_EXECUTABLE} branch --show-current > ${CMAKE_BINARY_DIR}/.current-branch
       COMMAND ${GIT_EXECUTABLE} checkout github-docs
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/html ${CMAKE_SOURCE_DIR}/docs
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/tclmpi_docs.pdf ${CMAKE_SOURCE_DIR}/docs
       COMMAND ${GIT_EXECUTABLE} add ${CMAKE_SOURCE_DIR}/docs
       COMMAND ${GIT_EXECUTABLE} commit -m 'update docs'
       COMMAND ${GIT_EXECUTABLE} push
       COMMAND ${GIT_EXECUTABLE} checkout `cat ${CMAKE_BINARY_DIR}/.current-branch`
-      DEPENDS html)
+      DEPENDS html pdf)
   endif()
 endif()
 

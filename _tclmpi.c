@@ -2909,7 +2909,6 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
  * @}
  */
 
-
 /*! initialize TclMPI extensions and do one time init
  * \param interp pointer to current Tcl interpreter
  *
