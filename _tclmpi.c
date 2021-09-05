@@ -421,6 +421,10 @@
 #error TclMPI needs at least MPI-2
 #endif
 
+/*! \defgroup supportfn Support functions and data structures
+ * @{
+ */
+
 /*! Linked list entry type for managing MPI communicators */
 typedef struct tclmpi_comm tclmpi_comm_t;
 
@@ -872,6 +876,15 @@ static int tclmpi_typecheck(Tcl_Interp *interp, int type, Tcl_Obj *obj0, Tcl_Obj
     } else
         return TCL_OK;
 }
+
+/*!
+ * @}
+ */
+
+/*!
+ * \defgroup wrappers TclMPI wrapper functions
+ * @{
+ */
 
 /*! wrapper for MPI_Initialized()
  * \return TCL_OK or TCL_ERROR
@@ -2892,6 +2905,10 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
         return TCL_OK;
     }
 }
+/*!
+ * @}
+ */
+
 
 /*! initialize TclMPI extensions and do one time init
  * \param interp pointer to current Tcl interpreter
