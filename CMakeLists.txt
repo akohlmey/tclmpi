@@ -198,6 +198,7 @@ mark_as_advanced(CLANG_TIDY)
 # configure tests
 include(CTest)
 enable_testing()
+find_program(MPIRUN_EXE NAMES mpirun mpiexec)
 add_test(NAME RunShell01
   COMMAND $<TARGET_FILE:tclmpish> ${CMAKE_SOURCE_DIR}/tests/test_01.tcl
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -209,12 +210,12 @@ add_test(NAME RunShell02
 set_tests_properties(RunShell02 PROPERTIES
   PASS_REGULAR_EXPRESSION ".*test section 02.*total fail: 000.*")
 add_test(NAME RunShell03
-  COMMAND mpirun -np 2 $<TARGET_FILE:tclmpish> ${CMAKE_SOURCE_DIR}/tests/test_03.tcl
+  COMMAND ${MPIRUN_EXE} -np 2 $<TARGET_FILE:tclmpish> ${CMAKE_SOURCE_DIR}/tests/test_03.tcl
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 set_tests_properties(RunShell03 PROPERTIES
   PASS_REGULAR_EXPRESSION ".*test section 03.*total fail: 000.*")
 add_test(NAME RunShell04
-  COMMAND mpirun -np 2 $<TARGET_FILE:tclmpish> ${CMAKE_SOURCE_DIR}/tests/test_04.tcl
+  COMMAND ${MPIRUN_EXE} -np 2 $<TARGET_FILE:tclmpish> ${CMAKE_SOURCE_DIR}/tests/test_04.tcl
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 set_tests_properties(RunShell04 PROPERTIES
   PASS_REGULAR_EXPRESSION ".*test section 04.*total fail: 000.*")
@@ -230,12 +231,12 @@ if(NOT ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"))
   set_tests_properties(RunPackage02 PROPERTIES
     PASS_REGULAR_EXPRESSION ".*test section 02.*total fail: 000.*")
   add_test(NAME RunPackage03
-    COMMAND mpirun -np 2 ${CMAKE_SOURCE_DIR}/tests/test_03.tcl
+    COMMAND ${MPIRUN_EXE} -np 2 ${CMAKE_SOURCE_DIR}/tests/test_03.tcl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   set_tests_properties(RunPackage03 PROPERTIES
     PASS_REGULAR_EXPRESSION ".*test section 03.*total fail: 000.*")
   add_test(NAME RunPackage04
-    COMMAND mpirun -np 2 ${CMAKE_SOURCE_DIR}/tests/test_04.tcl
+    COMMAND ${MPIRUN_EXE} -np 2 ${CMAKE_SOURCE_DIR}/tests/test_04.tcl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   set_tests_properties(RunPackage04 PROPERTIES
     PASS_REGULAR_EXPRESSION ".*test section 04.*total fail: 000.*")
