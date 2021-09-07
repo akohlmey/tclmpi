@@ -62,7 +62,7 @@ string(REGEX MATCH "[0-9]\.[0-9]*" TCL_VERSION ${_})
 
 # build shared object
 add_library(_tclmpi MODULE _tclmpi.c)
-set_target_properties(_tclmpi PROPERTIES PREFIX "" C_STANDARD 99 VERSION ${CMAKE_PROJECT_VERSION})
+set_target_properties(_tclmpi PROPERTIES PREFIX "" C_STANDARD 99)
 target_include_directories(_tclmpi PRIVATE ${TCL_INCLUDE_PATH})
 target_compile_definitions(_tclmpi PRIVATE -DPACKAGE_NAME="_tclmpi" -DPACKAGE_VERSION="${CMAKE_PROJECT_VERSION}")
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
