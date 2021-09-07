@@ -85,8 +85,7 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"__tclmpi_8c.html",
-"structtclmpi__req.html#a9c23fe2c323e2f401ac45c4b1f2a79d6"
+"__tclmpi_8c.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
