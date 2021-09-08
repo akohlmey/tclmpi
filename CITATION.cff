@@ -1,0 +1,19 @@
+# YAML 1.2
+---
+cff-version: 1.2.0
+title: TclMPI
+authors:
+  - family-names: Kohlmeyer
+    given-names: Axel
+    orcid: https://orcid.org/0000-0001-6204-6475
+message: "If you use this software, please cite it as below."
+version: 1.1
+date-released: 2021-09-05
+license: BSD-3-Clause
+doi: 10.5281/zenodo.598343
+url: https://akohlmey.github.io/tclmpi/
+repository-code: https://github.com/akohlmey/tclmpi/
+keywords:
+  - Tcl
+  - MPI
+  - "Parallel Programming"
