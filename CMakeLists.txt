@@ -75,6 +75,7 @@ else()
   target_link_libraries(_tclmpi PRIVATE ${TCL_LIBRARY})
 endif()
 target_link_libraries(_tclmpi PRIVATE MPI::MPI_C)
+set_target_properties(_tclmpi PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 
 # build Tcl shell extended with MPI
 if(BUILD_TCLMPI_SHELL)
@@ -221,22 +222,22 @@ set_tests_properties(RunShell04 PROPERTIES
   PASS_REGULAR_EXPRESSION ".*test section 04.*total fail: 000.*")
 if(NOT ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"))
   add_test(NAME RunPackage01
-    COMMAND ${CMAKE_SOURCE_DIR}/tests/test_01.tcl
+    COMMAND ${TCL_TCLSH} ${CMAKE_SOURCE_DIR}/tests/test_01.tcl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   set_tests_properties(RunPackage01 PROPERTIES
     PASS_REGULAR_EXPRESSION ".*test section 01.*total fail: 000.*")
   add_test(NAME RunPackage02
-    COMMAND ${CMAKE_SOURCE_DIR}/tests/test_02.tcl
+    COMMAND ${TCL_TCLSH} ${CMAKE_SOURCE_DIR}/tests/test_02.tcl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   set_tests_properties(RunPackage02 PROPERTIES
     PASS_REGULAR_EXPRESSION ".*test section 02.*total fail: 000.*")
   add_test(NAME RunPackage03
-    COMMAND ${MPIRUN_EXE} -np 2 ${CMAKE_SOURCE_DIR}/tests/test_03.tcl
+    COMMAND ${MPIRUN_EXE} -np 2 ${TCL_TCLSH} ${CMAKE_SOURCE_DIR}/tests/test_03.tcl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   set_tests_properties(RunPackage03 PROPERTIES
     PASS_REGULAR_EXPRESSION ".*test section 03.*total fail: 000.*")
   add_test(NAME RunPackage04
-    COMMAND ${MPIRUN_EXE} -np 2 ${CMAKE_SOURCE_DIR}/tests/test_04.tcl
+    COMMAND ${MPIRUN_EXE} -np 2 ${TCL_TCLSH} ${CMAKE_SOURCE_DIR}/tests/test_04.tcl
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   set_tests_properties(RunPackage04 PROPERTIES
     PASS_REGULAR_EXPRESSION ".*test section 04.*total fail: 000.*")

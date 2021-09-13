@@ -14,3 +14,4 @@ tclmpi-*.tar.gz
 tclmpi-*docs.pdf
 latex
 build*
+/Testing/Temporary
