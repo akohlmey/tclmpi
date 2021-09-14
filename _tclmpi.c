@@ -1350,7 +1350,7 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const
 {
     Tcl_Obj *result = NULL;
     MPI_Comm comm;
-    int i, rank, root, type, len, ierr = MPI_SUCCESS;
+    int i, rank, root, type, len = 0, ierr = MPI_SUCCESS;
 
     if (objc != 5) {
         Tcl_WrongNumArgs(interp, 1, objv, "<data> <type> <root> <comm>");
