@@ -1365,7 +1365,8 @@ int TclMPI_Bcast(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const
     comm = tcl2mpi_comm(Tcl_GetString(objv[4]));
     if (tclmpi_commcheck(interp, comm, objv[0], objv[4]) != TCL_OK) return TCL_ERROR;
 
-    MPI_Comm_rank(comm, &rank);
+    ierr = MPI_Comm_rank(comm, &rank);
+    if (tclmpi_errcheck(interp, ierr, objv[0]) != TCL_OK) return TCL_ERROR;
 
     if (type == TCLMPI_AUTO) {
         char *idata;
@@ -1984,7 +1985,8 @@ int TclMPI_Reduce(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *cons
         return TCL_ERROR;
     }
 
-    MPI_Comm_rank(comm, &rank);
+    ierr = MPI_Comm_rank(comm, &rank);
+    if (tclmpi_errcheck(interp, ierr, objv[0]) != TCL_OK) return TCL_ERROR;
     Tcl_IncrRefCount(objv[1]);
 
     if (type == TCLMPI_INT) {
