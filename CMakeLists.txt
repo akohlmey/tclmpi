@@ -169,12 +169,14 @@ install(FILES ${CMAKE_BINARY_DIR}/tclmpi.tcl ${CMAKE_BINARY_DIR}/pkgIndex.tcl
 install(TARGETS _tclmpi
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/tcl${TCL_VERSION}/tclmpi${CMAKE_PROJECT_VERSION})
 if(DOXYGEN_FOUND)
-  install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${CMAKE_BINARY_DIR}\" --target docs)")
+  install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${CMAKE_BINARY_DIR}\" --target html)")
 endif()
 install(DIRECTORY ${CMAKE_BINARY_DIR}/html examples
   DESTINATION ${CMAKE_INSTALL_DOCDIR})
-install(FILES ${CMAKE_BINARY_DIR}/latex/refman.pdf
+if(LATEX_FOUND)
+  install(FILES ${CMAKE_BINARY_DIR}/latex/refman.pdf
   DESTINATION ${CMAKE_INSTALL_DOCDIR})
+endif()
 
 # packaging
 include(InstallRequiredSystemLibraries)
