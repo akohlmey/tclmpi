@@ -187,12 +187,7 @@ set(CPACK_PACKAGE_NAME "TclMPI")
 set(CPACK_PACKAGE_VENDOR "Axel Kohlmeyer")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MPI library wrapper for Tcl")
-set(CPACK_PACKAGE_DESCRIPTION "The TclMPI package contains an extension for Tcl providing commands\n"
-  "that allow MPI calls to be used from Tcl scripts.  It provides a shared\n"
-  "object that can be loaded into the default or an embedded Tcl interpreter\n"
-  "at runtime and a standalone 'tclmpish' interpreter.  In combination with\n"
-  "the included Tcl script code, it is possible to write Tcl scripts that are\n"
-  "run in parallel via 'mpiexec', similar to parallel C, C++ or Fortran programs.")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTION.txt")
 set(CPACK_PACKAGE_CHECKSUM MD5)
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   set(CPACK_GENERATOR "NSIS")
@@ -202,6 +197,8 @@ endif()
 set(CPACK_SOURCE_GENERATOR "TGZ")
 set(CPACK_SOURCE_IGNORE_FILES \\.git/ "build.*/" ".*~$" ".*/.*~$")
 set(CPACK_VERBATIM_VARIABLES YES)
+set(CPACK_RPM_PACKAGE_LICENSE "BSD-3-Clause")
+
 include(CPack)
 
 # code checking with clang-tidy if available

@@ -1,0 +1,7 @@
+The TclMPI package contains an extension for Tcl providing commands that
+allow  MPI calls  to be  used from  Tcl scripts.   It provides  a shared
+object  that  can  be  loaded  into  the  default  or  an  embedded  Tcl
+interpreter  at runtime  and  a standalone  'tclmpish' interpreter.   In
+combination with the  included Tcl script code, it is  possible to write
+Tcl scripts that are run in  parallel via 'mpiexec', similar to parallel
+C, C++ or Fortran programs.
