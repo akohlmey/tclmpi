@@ -3,12 +3,12 @@
 %{!?tcl_sitelib: %global tcl_sitelib %{_datadir}/tcl%{tcl_version}}
 %global with_mpich 1
 Name:          tclmpi
-Version:       1.1
-Release:       0%{?dist}
+Version:       1.1.1
+Release:       1%{?dist}
 Summary:       Tcl bindings of the Message Passing Interface (MPI)
 
 License:       BSD
-URL:           https://github.com/akohlmey/tclmpi
+URL:           git@github.com:akohlmey/tclmpi
 Source0:       %{name}-%{version}.tar.gz
 
 BuildRequires: tcl-devel >= 8.6 gcc cmake make binutils
@@ -133,3 +133,6 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
+* Sun Oct 10 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.1.1-1
+- Initial build of TclMPI with tito for copr
+
