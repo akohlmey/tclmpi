@@ -7,8 +7,17 @@
 # commands.  When this script is sourced, the variable $dir
 # must contain the full path name of this file's directory.
 
-package ifneeded tclmpi  @PROJECT_VERSION@ [list source [file join $dir tclmpi.tcl]]
-package ifneeded _tclmpi @PROJECT_VERSION@ [list load -global [file join $dir @TCLMPI_BINARY_MODULE@]]
+package ifneeded tclmpi @PROJECT_VERSION@ [list source [file join $dir tclmpi.tcl]]
+if {[info exists ::env(CTEST_SHARED_OBJECT)] } {
+    package ifneeded _tclmpi @PROJECT_VERSION@ [list load -global $::env(CTEST_SHARED_OBJECT)]
+} elseif {[info exists ::env(MPI_LIB)]} {
+    package ifneeded _tclmpi @PROJECT_VERSION@ \
+        [list load -global [file join $::env(MPI_LIB) tcl[info tclversion] \
+            tclmpi@PROJECT_VERSION@ @TCLMPI_BINARY_MODULE@]]
+} else {
+    package ifneeded _tclmpi @PROJECT_VERSION@ \
+        [list load -global [file join $dir @TCLMPI_BINARY_MODULE@]]
+}
 
 # Local Variables:
 # mode: tcl

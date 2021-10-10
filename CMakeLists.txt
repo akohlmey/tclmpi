@@ -98,6 +98,7 @@ set(TCLMPI_BINARY_MODULE _tclmpi${CMAKE_SHARED_LIBRARY_SUFFIX})
 configure_file(tclmpi.tcl.in tclmpi.tcl @ONLY)
 configure_file(pkgIndex.tcl.in pkgIndex.tcl @ONLY)
 configure_file(tests/harness.tcl.in harness.tcl @ONLY)
+configure_file(tclmpi.spec.in tclmpi.spec @ONLY)
 
 # extract documentation from Tcl files
 function(TclFileToDox infile outfile)
@@ -173,33 +174,8 @@ install(TARGETS _tclmpi
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/tcl${TCL_VERSION}/tclmpi${CMAKE_PROJECT_VERSION})
 if(DOXYGEN_FOUND)
   install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${CMAKE_BINARY_DIR}\" --target html)")
+  install(DIRECTORY ${CMAKE_BINARY_DIR}/html examples DESTINATION ${CMAKE_INSTALL_DOCDIR})
 endif()
-install(DIRECTORY ${CMAKE_BINARY_DIR}/html examples
-  DESTINATION ${CMAKE_INSTALL_DOCDIR})
-if(LATEX_FOUND)
-  install(FILES ${CMAKE_BINARY_DIR}/latex/refman.pdf
-  DESTINATION ${CMAKE_INSTALL_DOCDIR})
-endif()
-
-# packaging
-include(InstallRequiredSystemLibraries)
-set(CPACK_PACKAGE_NAME "TclMPI")
-set(CPACK_PACKAGE_VENDOR "Axel Kohlmeyer")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MPI library wrapper for Tcl")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/DESCRIPTION.txt")
-set(CPACK_PACKAGE_CHECKSUM MD5)
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  set(CPACK_GENERATOR "NSIS")
-else()
-  set(CPACK_GENERATOR "TGZ;RPM")
-endif()
-set(CPACK_SOURCE_GENERATOR "TGZ")
-set(CPACK_SOURCE_IGNORE_FILES \\.git/ "build.*/" ".*~$" ".*/.*~$")
-set(CPACK_VERBATIM_VARIABLES YES)
-set(CPACK_RPM_PACKAGE_LICENSE "BSD-3-Clause")
-
-include(CPack)
 
 # code checking with clang-tidy if available
 find_program(CLANG_TIDY clang-tidy DOC "clang-tidy executable")
@@ -259,4 +235,14 @@ if(NOT ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"))
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   set_tests_properties(RunPackage04 PROPERTIES
     PASS_REGULAR_EXPRESSION ".*test section 04.*total fail: 000.*")
+  set_tests_properties(RunPackage01 RunPackage02 RunPackage03 RunPackage04 PROPERTIES
+    ENVIRONMENT CTEST_SHARED_OBJECT=$<TARGET_FILE:_tclmpi>)
+endif()
+
+if(GIT_FOUND)
+  add_custom_target(tar ${GIT_EXECUTABLE} archive -v --format tar.gz
+       --prefix tclmpi-${CMAKE_PROJECT_VERSION}/
+       --add-file ${CMAKE_BINARY_DIR}/tclmpi.spec
+       -o tclmpi-${CMAKE_PROJECT_VERSION}.tar.gz HEAD
+       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
