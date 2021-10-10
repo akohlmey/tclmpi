@@ -4,7 +4,7 @@
 %global with_mpich 1
 Name:          tclmpi
 Version:       1.2
-Release:       2
+Release:       3
 Summary:       Tcl bindings of the Message Passing Interface (MPI)
 
 License:       BSD
@@ -133,6 +133,9 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
+* Sun Oct 10 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-3
+- must not delete variable with name of shared object
+
 * Sun Oct 10 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-2
 - exclude files and folders required for tito from exported source tar packages
 - add support for a copr hosted Fedora Linux repository
