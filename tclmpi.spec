@@ -3,7 +3,7 @@
 %{!?tcl_sitelib: %global tcl_sitelib %{_datadir}/tcl%{tcl_version}}
 %global with_mpich 1
 Name:          tclmpi
-Version:       1.1.1
+Version:       1.2
 Release:       1%{?dist}
 Summary:       Tcl bindings of the Message Passing Interface (MPI)
 

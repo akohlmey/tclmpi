@@ -1,7 +1,7 @@
 # CMake file for the TclMPI Tcl wrapper around MPI
 
 cmake_minimum_required(VERSION 3.16)
-project(TclMPI VERSION 1.1
+project(TclMPI VERSION 1.2
         DESCRIPTION "Tcl Bindings for MPI"
         LANGUAGES C
         HOMEPAGE_URL https://akohlmey.github.io/tclmpi/)
