@@ -133,6 +133,9 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
+* Sun Oct 10 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-1
+- step version to 1.2
+
 * Sun Oct 10 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.1.1-1
 - Initial build of TclMPI with tito for copr
 
