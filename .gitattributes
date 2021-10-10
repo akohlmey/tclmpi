@@ -2,4 +2,5 @@
 .gitignore export-ignore
 .github export-ignore
 .lgtm.yml export-ignore
+.tito export-ignore
 docs export-ignore
