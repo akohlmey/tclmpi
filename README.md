@@ -21,6 +21,17 @@ INSTALL. More detailed documentation is available online from the
 Information about the implementation and design of the package are in the
 [Developer's Guide](https://akohlmey.github.io/tclmpi/devguide.html).
 
+# Precompiled Binaries
+
+Precompiled binary packages of TclMPI are available for the following
+operating systems and distributions.
+
+## Fedora Linux
+
+Repositories with TclMPI for Fedora Linux are hosted at https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/
+
+[![Copr build status](https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/package/tclmpi/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/package/tclmpi/)
+
 # Test Status
 
 [![Linux](https://github.com/akohlmey/tclmpi/actions/workflows/unittest-linux.yml/badge.svg?branch=master)](https://github.com/akohlmey/tclmpi/actions/workflows/unittest-linux.yml)

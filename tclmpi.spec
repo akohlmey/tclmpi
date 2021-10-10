@@ -25,7 +25,7 @@ BuildRequires: rpm-mpi-hooks
 
 %description
 TclMPI provides MPI support for Tcl scripts. It supports a commonly
-use subset of the the MPI-1/MPI-2 specification with an interface
+used subset of the the MPI-1/MPI-2 specification with an interface
 following the MPI C language bindings but with some adjustments for
 Tcl dynamic typing. It supports point-to-point (sends, receives)
 and collective (broadcasts, scatters, gathers) communications.

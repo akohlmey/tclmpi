@@ -94,11 +94,9 @@ endif()
 endif()
 
 # embed version numbers and file names
-set(TCLMPI_BINARY_MODULE _tclmpi${CMAKE_SHARED_LIBRARY_SUFFIX})
 configure_file(tclmpi.tcl.in tclmpi.tcl @ONLY)
 configure_file(pkgIndex.tcl.in pkgIndex.tcl @ONLY)
 configure_file(tests/harness.tcl.in harness.tcl @ONLY)
-configure_file(tclmpi.spec.in tclmpi.spec @ONLY)
 
 # extract documentation from Tcl files
 function(TclFileToDox infile outfile)
@@ -242,7 +240,6 @@ endif()
 if(GIT_FOUND)
   add_custom_target(tar ${GIT_EXECUTABLE} archive -v --format tar.gz
        --prefix tclmpi-${CMAKE_PROJECT_VERSION}/
-       --add-file ${CMAKE_BINARY_DIR}/tclmpi.spec
        -o tclmpi-${CMAKE_PROJECT_VERSION}.tar.gz HEAD
        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
