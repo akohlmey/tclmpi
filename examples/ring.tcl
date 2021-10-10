@@ -1,7 +1,6 @@
-#!/usr/bin/env tclsh
+#!/usr/bin/tclsh
 # ring example
 
-set auto_path [concat [file normalize ..] $auto_path]
 package require tclmpi
 
 # error helper

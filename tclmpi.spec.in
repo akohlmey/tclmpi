@@ -8,7 +8,7 @@ Release:       1%{?dist}
 Summary:       Tcl bindings of the Message Passing Interface (MPI)
 
 License:       BSD
-URL:           https://akohlmey.github.io/tclmpi
+URL:           https://github.com/akohlmey/tclmpi
 Source0:       https://github.com/akohlmey/tclmpi/releases/download/tclmpi-@PROJECT_VERSION@/tclmpi-@PROJECT_VERSION@.tar.gz
 
 BuildRequires: tcl-devel >= 8.6 gcc cmake make binutils
@@ -47,7 +47,7 @@ Summary:       Tcl bindings for MPI, Open MPI version
 Provides:      tclmpi-runtime = %{version}-%{release}
 Provides:      tclmpi-openmpi = %{version}-%{release}
 %description openmpi
-This package contains %{name} compiled against Open MPI.
+This package contains %{name} binary files compiled against Open MPI.
 
 %if %{with_mpich}
 %global mpi_family mpich
@@ -58,7 +58,7 @@ Summary:       Tcl bindings for MPI, MPICH version
 Provides:      tclmpi-runtime = %{version}-%{release}
 Provides:      tclmpi-mpich = %{version}-%{release}
 %description mpich
-This package contains %{name} compiled against MPICH.
+This package contains %{name} binary files compiled against MPICH.
 %endif
 
 %prep
@@ -133,5 +133,5 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
-* Sun Oct 10 2021 Axel Kohlmeyer <akohlmey@gmail.com>
+* Sun Oct 10 2021 Axel Kohlmeyer <akohlmey@gmail.com> - 1.1-1
 - Initial version of the TclMPI Fedora/RHEL SPEC file

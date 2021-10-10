@@ -1,7 +1,6 @@
-#!/usr/bin/env tclsh
+#!/usr/bin/tclsh
 # compute pi
 
-set auto_path [concat [file normalize ..] $auto_path]
 package require tclmpi
 
 # simplify code through namespace

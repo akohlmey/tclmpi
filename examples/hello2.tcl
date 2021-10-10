@@ -1,9 +1,6 @@
-#!/usr/bin/env tclsh
+#!/usr/bin/tclsh
 # hello world a la TclMPI
 
-# point Tcl to the directory with pkgIndex.tcl
-# and load the TclMPI package.
-set auto_path [concat [file normalize ..] $auto_path]
 package require tclmpi
 
 # import the namespace and a shortcut to the world communicator

@@ -1,10 +1,9 @@
-#!/usr/bin/env tclsh
+#!/usr/bin/tclsh
 # distributed_sum2.tcl --
 #     Use MPI to sum a long list of numbers
 #     using scatter and avoiding serialization
 #
 
-set auto_path [concat [file normalize ..] $auto_path]
 package require tclmpi
 
 # simplify code through namespace
