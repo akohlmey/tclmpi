@@ -4,6 +4,8 @@ name: "Unittest for Linux"
 on:
   push:
 
+  workflow_dispatch:
+
 jobs:
   build:
     name: Linux Unit Test

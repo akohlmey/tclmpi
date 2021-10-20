@@ -4,6 +4,8 @@ name: "Unittest for macOS"
 on:
   push:
 
+  workflow_dispatch:
+
 jobs:
   build:
     name: macOS Unit Test
