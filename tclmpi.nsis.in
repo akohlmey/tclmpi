@@ -1,0 +1,33 @@
+#!Nsis Installer Command Script
+#
+!include "MUI2.nsh"
+!include "FileFunc.nsh"
+!include "x64.nsh"
+
+Unicode true
+XPStyle on
+RequestExecutionLevel user
+
+# name of installer file
+OutFile "TclMPI-v@PROJECT_VERSION@-@CMAKE_SYSTEM_NAME@-@CMAKE_SYSTEM_PROCESSOR@.exe"
+
+# Create a default section
+Section Prerequisites
+ClearErrors
+ReadRegStr $0 HKLM "Software\Microsoft\MPI" Version
+${If} ${Errors}
+  MessageBox MB_OK "Please install MS-MPI (msmpisetup.exe) from https://www.microsoft.com/en-us/download/details.aspx?id=57467"
+  Quit
+${Else}
+  DetailPrint "MS-MPI is installed installed as version $0"
+${EndIf}
+
+ClearErrors
+ReadRegStr $0 HKLM "Software\WOW6432Node\ActiveState\ActiveTcl" CurrentVersion
+${If} ${Errors}
+  MessageBox MB_OK "Please install ActiveState ActiveTcl from https://www.activestate.com/products/tcl/"
+  Quit
+${Else}
+  DetailPrint "ActiveTCL is installed installed as version $0"
+${EndIf}
+SectionEnd

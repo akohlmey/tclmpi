@@ -98,6 +98,7 @@ set(TCLMPI_BINARY_MODULE _tclmpi${CMAKE_SHARED_LIBRARY_SUFFIX})
 configure_file(tclmpi.tcl.in tclmpi.tcl @ONLY)
 configure_file(pkgIndex.tcl.in pkgIndex.tcl @ONLY)
 configure_file(tests/harness.tcl.in harness.tcl @ONLY)
+configure_file(tclmpi.nsis.in tclmpi.nsi @ONLY)
 
 # extract documentation from Tcl files
 function(TclFileToDox infile outfile)
