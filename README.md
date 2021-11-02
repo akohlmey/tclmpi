@@ -26,6 +26,19 @@ Information about the implementation and design of the package are in the
 Precompiled binary packages of TclMPI are available for the following
 operating systems and distributions.
 
+## Microsoft Windows
+
+A precompiled installer package for 64-bit Windows 10 is available from the
+[TclMPI GitHub Releases Page](https://github.com/akohlmey/tclmpi/releases).
+
+To use this package, the MS-MPI package version 10.x and ActiveTcl version 8.6
+from ActiveState must be downloaded and installed first.  The installer will
+check for them and refuse to install TclMPI without.
+
+MS-MPI is [available here](https://github.com/microsoft/Microsoft-MPI/releases).
+You only need the "msmpisetup.exe" file and ActiveTcl is
+[available here](https://www.activestate.com/products/tcl/)
+
 ## Fedora Linux
 
 Repositories with TclMPI for Fedora Linux are hosted at https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/
@@ -42,7 +55,7 @@ Repositories with TclMPI for Fedora Linux are hosted at https://copr.fedorainfra
 
 You can cite TclMPI as:
 
-Axel Kohlmeyer. (2021). TclMPI: Release 1.1 [Data set]. Zenodo. [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.598343.svg)](https://doi.org/10.5281/zenodo.598343)
+Axel Kohlmeyer. (2021). TclMPI: Release 1.2 [Data set]. Zenodo. [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.598343.svg)](https://doi.org/10.5281/zenodo.598343)
 
 # Acknowledgements
 
