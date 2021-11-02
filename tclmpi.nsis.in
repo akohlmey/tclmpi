@@ -2,16 +2,48 @@
 #
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
+!include "LogicLib.nsh"
+!addplugindir "envvar/Plugins/x86-unicode"
 !include "x64.nsh"
+
+!macro CreateInternetShortcut FILENAME URL ICONFILE ICONINDEX
+WriteINIStr "${FILENAME}.url" "InternetShortcut" "URL" "${URL}"
+WriteINIStr "${FILENAME}.url" "InternetShortcut" "IconFile" "${ICONFILE}"
+WriteINIStr "${FILENAME}.url" "InternetShortcut" "IconIndex" "${ICONINDEX}"
+!macroend
 
 Unicode true
 XPStyle on
 RequestExecutionLevel user
 
-# name of installer file
-OutFile "TclMPI-v@PROJECT_VERSION@-@CMAKE_SYSTEM_NAME@-@CMAKE_SYSTEM_PROCESSOR@.exe"
+ShowInstDetails show
+ShowUninstDetails show
 
-# Create a default section
+!define MUI_ICON "@CMAKE_SOURCE_DIR@\TclMPI.ico"
+!define MUI_UNICON "@CMAKE_SOURCE_DIR@\TclMPI.ico"
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_BITMAP "@CMAKE_SOURCE_DIR@\TclMPI-logo.bmp"
+!define MUI_HEADERIMAGE_RIGHT
+!define MUI_ABORTWARNING
+
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "LICENSE.txt"
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+
+!insertmacro MUI_UNPAGE_WELCOME
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+
+!insertmacro MUI_LANGUAGE "English"
+
+# name of installer file and software
+OutFile "TclMPI-@PROJECT_VERSION@-@CMAKE_SYSTEM_NAME@-@CMAKE_SYSTEM_PROCESSOR@.exe"
+!define TCLMPI "TclMPI @PROJECT_VERSION@"
+Name "${TCLMPI}"
+InstallDir "$LOCALAPPDATA\${TCLMPI}"
+
+# Check for prerequisite software installations
 Section Prerequisites
 ClearErrors
 ReadRegStr $0 HKLM "Software\Microsoft\MPI" Version
@@ -28,6 +60,125 @@ ${If} ${Errors}
   MessageBox MB_OK "Please install ActiveState ActiveTcl from https://www.activestate.com/products/tcl/"
   Quit
 ${Else}
-  DetailPrint "ActiveTCL is installed installed as version $0"
+  DetailPrint "ActiveTcl is installed installed as version $0"
 ${EndIf}
+ReadRegStr $1 HKLM "Software\WOW6432Node\ActiveState\ActiveTcl\$0" ""
+DetailPrint "ActiveTcl in installed in folder $1"
+!define TCLDIR $1
+SectionEnd
+
+function .onInit
+  # Determine if TclMPI was already installed and if yes, offer to uninstall or quit
+  SetRegView 64
+  ClearErrors
+  ReadRegStr $0 HKCU "Software\TclMPI" "Version"
+  !define OLDVERSION $0
+  ReadRegStr $R0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI" "UninstallString"
+  ${If} ${Errors}
+    DetailPrint "TclMPI not (yet) installed"
+  ${Else}
+    MessageBox MB_YESNO "TclMPI ${OLDVERSION} is already installed. Uninstall existing version?" /SD IDYES IDNO Quit
+      Pop $R1
+      StrCmp $R1 2 Quit +1
+      Exec $R0
+    Quit:
+      Quit
+  ${EndIf}
+  setShellVarContext all
+functionEnd
+
+# Installation of TclMPI
+Section "TclMPI @CMAKE_PROJECT_VERSION@" SecTclMPI
+  SectionIn RO
+  # write marker to registry
+  SetRegView 64
+  WriteRegStr HKCU "Software\TclMPI" "Version" "@CMAKE_PROJECT_VERSION@"
+  SetShellVarContext current
+
+  CreateDirectory "$SMPROGRAMS\${TCLMPI}"
+  CreateShortCut "$SMPROGRAMS\${TCLMPI}\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" ""
+  CreateShortCut "$SMPROGRAMS\${TCLMPI}\Examples.lnk"  "$INSTDIR\Examples"      "" ""
+!insertmacro CreateInternetShortCut "$SMPROGRAMS\${TCLMPI}\TclMPI Homepage"     "https://akohlmey.github.io/tclmpi" "" "0"
+
+  SetOutPath "$INSTDIR"
+  CreateDirectory "$INSTDIR\bin"
+  CreateDirectory "$INSTDIR\Examples"
+  
+  File LICENSE.txt
+  File @CMAKE_SOURCE_DIR@\TclMPI.ico
+
+  SetOutPath "$INSTDIR\bin"
+  File ${BUILD_CONFIG}\tclmpish.exe
+
+  SetOutPath "$INSTDIR\Examples"
+  File @CMAKE_SOURCE_DIR@\examples\*
+
+  CreateDirectory "${TCLDIR}\lib\tcl8.6\tclmpi@CMAKE_PROJECT_VERSION@"
+  SetOutPath "${TCLDIR}\lib\tcl8.6\tclmpi@CMAKE_PROJECT_VERSION@"
+  File ${BUILD_CONFIG}\_tclmpi.dll
+  File tclmpi.tcl
+  File pkgIndex.tcl
+
+  SetOutPath "$INSTDIR"
+  
+  # Register Application and its uninstaller
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI" \
+                 "DisplayName" "TclMPI -- Tcl Bindings for MPI"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI" \
+                 "Publisher" "Axel Kohlmeyer"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI" \
+                 "URLInfoAbout" "akohlmey.github.io/tclmpi"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI" \
+                 "DisplayIcon" "$INSTDIR\TclMPI.ico"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI" \
+                 "DisplayVersion" "@CMAKE_PROJECT_VERSION@"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI" \
+                 "InstallLocation" "$INSTDIR"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI" \
+                 "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI" \
+                 "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
+
+  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+  IntFmt $0 "0x%08X" $0
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI" \
+                 "EstimatedSize" "$0"
+
+  # update path variables
+  EnVar::SetHKCU
+  # add tclmpish to executable path
+  EnVar::AddValue "PATH" "$INSTDIR\bin"
+
+  WriteUninstaller "$INSTDIR\Uninstall.exe"
+SectionEnd
+
+function un.onInit
+  SetShellVarContext current
+functionEnd
+
+Section "Uninstall"
+  # remove TclMPI 
+  SetRegView 64
+  DeleteRegKey HKCU "Software\TclMPI"
+
+  SetShellVarContext current
+  # unregister installation
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\TclMPI"
+
+  # update path variables
+  EnVar::SetHKCU
+  # remove tclmpish executable
+  EnVar::DeleteValue "PATH" "$INSTDIR\bin"
+
+  RMDir /r "$SMPROGRAMS\${TCLMPI}"
+
+  RMDir /r /REBOOTOK "${TCLDIR}\lib\tcl8.6\tclmpi@CMAKE_PROJECT_VERSION@"
+
+  Delete /REBOOTOK   "$INSTDIR\*.txt"
+  Delete /REBOOTOK   "$INSTDIR\*.ico"
+  Delete /REBOOTOK   "$INSTDIR\Uninstall.exe"
+  RMDir /r /REBOOTOK "$INSTDIR\bin"
+  RMDir /r /REBOOTOK "$INSTDIR\Examples"
+  RMDir /REBOOTOK "$INSTDIR"
+
 SectionEnd

@@ -99,6 +99,7 @@ configure_file(tclmpi.tcl.in tclmpi.tcl @ONLY)
 configure_file(pkgIndex.tcl.in pkgIndex.tcl @ONLY)
 configure_file(tests/harness.tcl.in harness.tcl @ONLY)
 configure_file(tclmpi.nsis.in tclmpi.nsi @ONLY)
+configure_file(LICENSE LICENSE.txt @ONLY)
 
 # extract documentation from Tcl files
 function(TclFileToDox infile outfile)
@@ -172,7 +173,7 @@ install(FILES ${CMAKE_BINARY_DIR}/tclmpi.tcl ${CMAKE_BINARY_DIR}/pkgIndex.tcl
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/tcl${TCL_VERSION}/tclmpi${CMAKE_PROJECT_VERSION})
 install(TARGETS _tclmpi
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/tcl${TCL_VERSION}/tclmpi${CMAKE_PROJECT_VERSION})
-if(DOXYGEN_FOUND)
+if(DOXYGEN_FOUND AND LATEX_FOUND)
   install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${CMAKE_BINARY_DIR}\" --target html)")
   install(DIRECTORY ${CMAKE_BINARY_DIR}/html examples DESTINATION ${CMAKE_INSTALL_DOCDIR})
 endif()
@@ -244,4 +245,15 @@ if(GIT_FOUND)
        --prefix tclmpi-${CMAKE_PROJECT_VERSION}/
        -o tclmpi-${CMAKE_PROJECT_VERSION}.tar.gz HEAD
        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  get_filename_component(MAKENSIS_DIR "[HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432node\\NSIS]" ABSOLUTE)
+  if(NOT (MAKENSIS_DIR STREQUAL "/registry"))
+    add_custom_target(installer ${MAKENSIS_DIR}/bin/makensis.exe /DBUILD_CONFIG=$<CONFIG> ${CMAKE_BINARY_DIR}/tclmpi.nsi
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      BYPRODUCTS TclMPI-${CMAKE_PROJECT_VERSION}-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}.exe
+      DEPENDS $<CONFIG>/_tclmpi.dll $<CONFIG>/tclmpish.exe)
+    add_dependencies(installer _tclmpi tclmpish)
+  endif()
 endif()

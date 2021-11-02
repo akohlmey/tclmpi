@@ -157,7 +157,7 @@
  * This is the TclMPI version of "hello world".
  * \code {.tcl}
  #!/usr/bin/env tclsh
- package require tclmpi 1.1
+ package require tclmpi 1.2
 
  # initialize MPI
  ::tclmpi::init
@@ -182,7 +182,7 @@
    \f]
  * \code {.tcl}
  #!/usr/bin/env tclsh
- package require tclmpi 1.1
+ package require tclmpi 1.2
 
  # initialize MPI
  ::tclmpi::init
@@ -223,7 +223,7 @@
  *
  * \code {.tcl}
  #!/usr/bin/env tclsh
- package require tclmpi 1.1
+ package require tclmpi 1.2
 
  # data summation helper function
  proc sum {data} {
