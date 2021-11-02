@@ -4,7 +4,7 @@
 %global with_mpich 1
 Name:          tclmpi
 Version:       1.2
-Release:       4
+Release:       5
 Summary:       Tcl bindings of the Message Passing Interface (MPI)
 
 License:       BSD
@@ -133,6 +133,9 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
+* Tue Nov 02 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-5
+- recover building rpm packages on copr
+
 * Tue Nov 02 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-4
 - add support for creating an NSIS installer on Windows
 - add icon and logo image for installer
