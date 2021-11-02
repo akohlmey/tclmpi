@@ -4,7 +4,7 @@
 %global with_mpich 1
 Name:          tclmpi
 Version:       1.2
-Release:       3
+Release:       4
 Summary:       Tcl bindings of the Message Passing Interface (MPI)
 
 License:       BSD
@@ -133,6 +133,14 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
+* Tue Nov 02 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-4
+- add support for creating an NSIS installer on Windows
+- add icon and logo image for installer
+- mention download of windows binaries on homepage
+- change license text to read better in Windows installer
+- remove obsolte backward compatibility in unit tests
+- enable manual workflow dispatch feature
+
 * Sun Oct 10 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-3
 - must not delete variable with name of shared object
 
