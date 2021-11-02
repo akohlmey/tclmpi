@@ -26,9 +26,13 @@ var NAVTREE =
 [
   [ "TclMPI", "index.html", [
     [ "Homepage", "index.html#autotoc_md0", null ],
-    [ "Test Status", "index.html#autotoc_md1", null ],
-    [ "Citing", "index.html#autotoc_md2", null ],
-    [ "Acknowledgements", "index.html#autotoc_md3", null ],
+    [ "Precompiled Binaries", "index.html#autotoc_md1", [
+      [ "Microsoft Windows", "index.html#autotoc_md2", null ],
+      [ "Fedora Linux", "index.html#autotoc_md3", null ]
+    ] ],
+    [ "Test Status", "index.html#autotoc_md4", null ],
+    [ "Citing", "index.html#autotoc_md5", null ],
+    [ "Acknowledgements", "index.html#autotoc_md6", null ],
     [ "Copyright and License for TclMPI", "copyright.html", null ],
     [ "TclMPI User's Guide", "userguide.html", [
       [ "Compilation", "userguide.html#compile", null ],
@@ -85,7 +89,8 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"__tclmpi_8c.html"
+"__tclmpi_8c.html",
+"structtclmpi__req.html#a31b38965098b6b8d568575fe97925269"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
