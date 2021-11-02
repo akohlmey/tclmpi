@@ -140,10 +140,6 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 - exclude files and folders required for tito from exported source tar packages
 - add support for a copr hosted Fedora Linux repository
 
-* Sun Oct 10 2021 Axel Kohlmeyer <akohlmey@gmail.com>
-- exclude files and folders required for tito from exported source tar packages
-- add support for a copr hosted Fedora Linux repository
-
 * Sun Oct 10 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-1
 - step version to 1.2
 
