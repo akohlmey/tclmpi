@@ -35,6 +35,7 @@ var NAVTREE =
     [ "Acknowledgements", "index.html#autotoc_md6", null ],
     [ "Copyright and License for TclMPI", "copyright.html", null ],
     [ "TclMPI User's Guide", "userguide.html", [
+      [ "Pre-compiled Binary Packages", "userguide.html#binaries", null ],
       [ "Compilation", "userguide.html#compile", null ],
       [ "Building the Documentation", "userguide.html#gendocs", null ],
       [ "Installation", "userguide.html#install", null ],
