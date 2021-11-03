@@ -1,3 +1,5 @@
+![TclMPI Logo](TclMPI-logo.bmp)
+
 The TclMPI package  contains software that wraps  an MPI library for Tcl
 and allows MPI  calls to  be  used from  Tcl scripts.  This code can  be
 compiled as   a  shared object   to   be loaded   into  an existing  Tcl
@@ -28,7 +30,8 @@ operating systems and distributions.
 
 ## Microsoft Windows
 
-A precompiled installer package for 64-bit Windows 10 is available from the
+A precompiled installer package for 64-bit Windows 10 (Version 21H1) is
+available from the
 [TclMPI GitHub Releases Page](https://github.com/akohlmey/tclmpi/releases).
 
 To use this package, the MS-MPI package version 10.x and ActiveTcl version 8.6

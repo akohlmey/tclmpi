@@ -127,8 +127,14 @@ TclFileToDox(${CMAKE_BINARY_DIR}/harness.tcl ${CMAKE_BINARY_DIR}/harness.dox)
 
 # build documentation
 if(DOXYGEN_FOUND)
+  find_package(LATEX COMPONENTS PDFLATEX)
   set(DOXYGEN_USE_MDFILE_AS_MAINPAGE "${CMAKE_SOURCE_DIR}/README.md")
-  set(DOXYGEN_GENERATE_LATEX YES)
+  if(LATEX_FOUND)
+    set(DOXYGEN_GENERATE_LATEX YES)
+  else()
+    set(DOXYGEN_GENERATE_LATEX NO)
+  endif()
+  set(DOXYGEN_USE_MATHJAX YES)
   set(DOXYGEN_FULL_PATH_NAMES NO)
   set(DOXYGEN_SHOW_FILES YES)
   set(DOXYGEN_EXTRACT_STATIC YES)
@@ -147,7 +153,6 @@ if(DOXYGEN_FOUND)
     ${CMAKE_BINARY_DIR}/tclmpi.dox
     ${CMAKE_BINARY_DIR}/harness.dox)
   set_property(TARGET html APPEND PROPERTY ADDITIONAL_CLEAN_FILES latex ${CMAKE_SOURCE_DIR}/docs)
-  find_package(LATEX COMPONENTS PDFLATEX)
   if(LATEX_FOUND)
     add_custom_target(pdf make WORKING_DIRECTORY latex
       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/latex/refman.pdf ${CMAKE_BINARY_DIR}/tclmpi_docs.pdf
