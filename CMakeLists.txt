@@ -153,6 +153,9 @@ if(DOXYGEN_FOUND)
     ${CMAKE_BINARY_DIR}/tclmpi.dox
     ${CMAKE_BINARY_DIR}/harness.dox)
   set_property(TARGET html APPEND PROPERTY ADDITIONAL_CLEAN_FILES latex ${CMAKE_SOURCE_DIR}/docs)
+  add_custom_target(logo
+      ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/TclMPI-logo.bmp ${CMAKE_BINARY_DIR}/html/
+      DEPENDS html)
   if(LATEX_FOUND)
     add_custom_target(pdf make WORKING_DIRECTORY latex
       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/latex/refman.pdf ${CMAKE_BINARY_DIR}/tclmpi_docs.pdf
@@ -163,11 +166,12 @@ if(DOXYGEN_FOUND)
       COMMAND ${GIT_EXECUTABLE} checkout github-docs
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/html ${CMAKE_SOURCE_DIR}/docs
       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/tclmpi_docs.pdf ${CMAKE_SOURCE_DIR}/docs
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_BINARY_DIR}/html/TclMPI-logo.bmp ${CMAKE_SOURCE_DIR}/docs
       COMMAND ${GIT_EXECUTABLE} add ${CMAKE_SOURCE_DIR}/docs
       COMMAND ${GIT_EXECUTABLE} commit -m 'update docs'
       COMMAND ${GIT_EXECUTABLE} push
       COMMAND ${GIT_EXECUTABLE} checkout `cat ${CMAKE_BINARY_DIR}/.current-branch`
-      DEPENDS html pdf)
+      DEPENDS html logo pdf)
   endif()
 endif()
 
