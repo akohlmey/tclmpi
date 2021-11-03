@@ -21,6 +21,13 @@
   $(document).ready(function() { init_search(); });
 /* @license-end */
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+});
+</script>
+<script type="text/javascript" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -152,7 +159,7 @@ Hello World</h2>
 </div><!-- fragment --><h2><a class="anchor" id="mypi"></a>
 Computation of Pi</h2>
 <p>This script uses TclMPI to compute the value of Pi from numerical quadrature of the integral: </p><p class="formulaDsp">
-<img class="formulaDsp" alt="\[ \pi = \int^1_0 {\frac{4}{1 + x^2}} dx \]" src="form_0.png" width="96" height="33"/>
+\[ \pi = \int^1_0 {\frac{4}{1 + x^2}} dx \]
 </p>
  <div class="fragment"><div class="line">#!/usr/bin/env tclsh</div>
 <div class="line">package require tclmpi 1.2</div>

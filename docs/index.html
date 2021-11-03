@@ -21,6 +21,13 @@
   $(document).ready(function() { init_search(); });
 /* @license-end */
 </script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX","output/HTML-CSS"],
+});
+</script>
+<script type="text/javascript" async="async" src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js"></script>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
@@ -97,7 +104,8 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 <div class="title">TclMPI Documentation</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md_README"></a> The TclMPI package contains software that wraps an MPI library for Tcl and allows MPI calls to be used from Tcl scripts. This code can be compiled as a shared object to be loaded into an existing Tcl interpreter or as a standalone TclMPI interpreter. In combination with some additional bundled Tcl script code, additional commands are provided that allow to run Tcl scripts in parallel via "mpirun" or "mpiexec" similar to C, C++ or Fortran programs.</p>
+<div class="textblock"><p><a class="anchor" id="md_README"></a> <img src="TclMPI-logo.bmp" alt="TclMPI Logo" class="inline"/></p>
+<p>The TclMPI package contains software that wraps an MPI library for Tcl and allows MPI calls to be used from Tcl scripts. This code can be compiled as a shared object to be loaded into an existing Tcl interpreter or as a standalone TclMPI interpreter. In combination with some additional bundled Tcl script code, additional commands are provided that allow to run Tcl scripts in parallel via "mpirun" or "mpiexec" similar to C, C++ or Fortran programs.</p>
 <h1><a class="anchor" id="autotoc_md0"></a>
 Homepage</h1>
 <p>The main author of this package is Axel Kohlmeyer and you can reach him at <a href="#" onclick="location.href='mai'+'lto:'+'ako'+'hl'+'mey'+'@g'+'mai'+'l.'+'com'; return false;">akohl<span style="display: none;">.nosp@m.</span>mey@<span style="display: none;">.nosp@m.</span>gmail<span style="display: none;">.nosp@m.</span>.com</a>. The online documentation for this project is at <a href="https://akohlmey.github.io/tclmpi/">https://akohlmey.github.io/tclmpi/</a>, a <a href="https://akohlmey.github.io/tclmpi/tclmpi_docs.pdf">PDF version of the documentation</a> is also available, and development is <a href="https://github.com/akohlmey/tclmpi/">hosted on GitHub</a>.</p>
@@ -108,7 +116,7 @@ Precompiled Binaries</h1>
 <p>Precompiled binary packages of TclMPI are available for the following operating systems and distributions.</p>
 <h2><a class="anchor" id="autotoc_md2"></a>
 Microsoft Windows</h2>
-<p>A precompiled installer package for 64-bit Windows 10 is available from the <a href="https://github.com/akohlmey/tclmpi/releases">TclMPI GitHub Releases Page</a>.</p>
+<p>A precompiled installer package for 64-bit Windows 10 (Version 21H1) is available from the <a href="https://github.com/akohlmey/tclmpi/releases">TclMPI GitHub Releases Page</a>.</p>
 <p>To use this package, the MS-MPI package version 10.x and ActiveTcl version 8.6 from ActiveState must be downloaded and installed first. The installer will check for them and refuse to install TclMPI without.</p>
 <p>MS-MPI is <a href="https://github.com/microsoft/Microsoft-MPI/releases">available here</a>. You only need the "msmpisetup.exe" file and ActiveTcl is <a href="https://www.activestate.com/products/tcl/">available here</a></p>
 <h2><a class="anchor" id="autotoc_md3"></a>
