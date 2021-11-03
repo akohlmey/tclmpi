@@ -51,9 +51,22 @@
  * The original motivation for writing this package was to complement a
  * Tcl wrapper for the LAMMPS molecular dynamics simulation software,
  * but also allow using the VMD molecular visualization and analysis
- * package in parallel without having to recompile VMD and using a
- * convenient API to people that already know how to program parallel
- * programs with MPI in C, C++ or Fortran.
+ * package in parallel without having to recompile VMD and using an
+ * API that is convenient to people that already know how to program
+ * parallel programs with MPI in C, C++ or Fortran.
+ * It has since been adopted to provide an MPI wrapper for
+ * the OpenSees software: https://github.com/ambaker1/OpenSeesMPI
+ *
+ * \section binaries Pre-compiled Binary Packages
+ *
+ * While it is usually expected that MPI based parallel applications
+ * are compiled from source code using the target machine's local
+ * MPI implementation, that is not always convenient or necessary.
+ * This applies for example to the Windows platform or Linux
+ * distributions where mechanisms are in place to check that are
+ * pre-requisites are installed and binaries are compatible.
+ * The TclMPI homepage has links to available binaries and information
+ * about how to install them as they become available.
  *
  * \section compile Compilation
  *
@@ -70,7 +83,7 @@
  * C compilers (GNU, Clang, Intel, PGI, MSVC).  You need to have both,
  * Tcl and MPI installed including their respective development support
  * packages (sometimes called SDK).  The MPI library has to be at least
- * MPI-2 standard compliant and the Tcl version should be 8.5 or later.
+ * MPI-2 standard compliant and the Tcl version should be 8.6 or later.
  * When compiled for a dynamically loaded shared object (DSO) or DLL
  * file, the MPI library has to be compiled and linked with support for
  * building shared libraries as well.
@@ -143,8 +156,8 @@
  * The TclMPI code is maintained using git for source code management,
  * and the project is hosted on github at
  * https://github.com/akohlmey/tclmpi From there you can download
- * snapshots of the development and releases, clode the repository to
- * follow development, or work on your own branch through forking
+ * snapshots of the development and releases, clone the repository to
+ * follow development, or work on your own branches after forking
  * it. Bug reports and feature requests should also be filed on github
  * at through the issue tracker at:
  * https://github.com/akohlmey/tclmpi/issues.
@@ -288,30 +301,30 @@
  *
  * This document explains the implementation of the Tcl bindings
  * for MPI implemented in TclMPI. The following sections will
- * document how and which MPI is mapped to Tcl and what design
- * choices were made.
+ * document how and which MPI functions are mapped to Tcl and
+ * what design choices were made in the process.
  *
  * \section design Overall Design and Differences to the MPI C-bindings
  *
- * To be consistent with typical Tcl conventions all commands and constants
- * in lower case and prefixed with tclmpi, so that clashes with existing
+ * To be consistent with typical Tcl conventions, all commands and constants
+ * are in lower case and prefixed with tclmpi, so that clashes with existing
  * programs are reduced.
- * This is not yet set up to be a proper namespace, but that may happen at
- * a later point, if the need arises. The overall philosophy of the bindings
+ *
+ * The overall philosophy of the bindings
  * is to make the API similar to the MPI one (e.g. maintain the order of
  * arguments), but don't stick to it slavishly and do things the Tcl way
  * wherever justified. Convenience and simplicity take precedence over
  * performance. If performance matters that much, one would write the entire
- * code C/C++ or Fortran and not Tcl. The biggest visible change is that
+ * code in C/C++ or Fortran and not in Tcl. The biggest visible change is that
  * for sending data around, receive buffers will be automatically set up
  * to handle the entire message. Thus the typical "count" arguments of the
  * C/C++ or Fortran bindings for MPI is not required, and the received data
- * will be the return value of the corresponding command. This is consistent
+ * will be the return value of the corresponding command.  This is consistent
  * with the automatic memory management in Tcl, but this convenience and
- * consistency will affect performance and the semantics. For example calls
+ * consistency will affect performance and semantics. For example calls
  * to tclmpi::bcast will be converted into *two* calls to MPI_Bcast();
  * the first will broadcast the size of the data set being sent (so that
- * a sufficiently sized buffers can be allocated) and then the second call
+ * sufficiently sized buffers can be allocated) and then the second call
  * will finally send the data for real. Similarly, tclmpi::recv will be
  * converted into calling MPI_Probe() and then MPI_Recv() for the purpose
  * of determining the amount of temporary storage required. The second call
