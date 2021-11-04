@@ -4,7 +4,7 @@
 %global with_mpich 1
 Name:          tclmpi
 Version:       1.2
-Release:       5
+Release:       6
 Summary:       Tcl bindings of the Message Passing Interface (MPI)
 
 License:       BSD
@@ -133,6 +133,11 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
+* Wed Nov 03 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-6
+- Improve building html docs on systems without latex. include logo image
+- Documentation updates and corrections
+
+
 * Tue Nov 02 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-5
 - recover building rpm packages on copr
 
