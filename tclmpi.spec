@@ -91,6 +91,8 @@ mkdir -p %{buildroot}%{_libdir}/openmpi/bin
 mv %{buildroot}%{_bindir}/tclmpish %{buildroot}%{_libdir}/openmpi/bin/tclmpish
 mkdir -p %{buildroot}%{_libdir}/openmpi/lib/tcl%{tcl_version}/%{name}%{version}
 mv %{buildroot}%{tcl_sitearch}/%{name}%{version}/_tclmpi.so %{buildroot}%{_libdir}/openmpi/lib/tcl%{tcl_version}/%{name}%{version}
+mkdir -p %{buildroot}%{_libdir}/openmpi/share/man/man1
+mv %{buildroot}%{_mandir}/man1/tclmpi.1 %{buildroot}%{_libdir}/openmpi/share/man/man1
 mv %_vpath_builddir openmpi
 %{_openmpi_unload}
 
@@ -103,6 +105,8 @@ mkdir -p %{buildroot}%{_libdir}/mpich/bin
 mv %{buildroot}%{_bindir}/tclmpish %{buildroot}%{_libdir}/mpich/bin/tclmpish
 mkdir -p %{buildroot}%{_libdir}/mpich/lib/tcl%{tcl_version}/%{name}%{version}
 mv %{buildroot}%{tcl_sitearch}/%{name}%{version}/_tclmpi.so %{buildroot}%{_libdir}/mpich/lib/tcl%{tcl_version}/%{name}%{version}
+mkdir -p %{buildroot}%{_libdir}/openmpi/share/man/man1
+mv %{buildroot}%{_mandir}/man1/tclmpi.1 %{buildroot}%{_libdir}/openmpi/share/man/man1
 mv %_vpath_builddir mpich
 %{_mpich_unload}
 %endif

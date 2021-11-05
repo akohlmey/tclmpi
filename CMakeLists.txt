@@ -186,6 +186,7 @@ if(DOXYGEN_FOUND)
   install(CODE "execute_process(COMMAND \"${CMAKE_COMMAND}\" --build \"${CMAKE_BINARY_DIR}\" --target html)")
   install(DIRECTORY ${CMAKE_BINARY_DIR}/html examples DESTINATION ${CMAKE_INSTALL_DOCDIR})
 endif()
+install(FILES tclmpish.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 
 # code checking with clang-tidy if available
 find_program(CLANG_TIDY clang-tidy DOC "clang-tidy executable")
