@@ -1,0 +1,41 @@
+Source: tclmpi
+Section: libs
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+XSBC-Original-Maintainer: Axel Kohlmeyer <akohlmey@gmail.com>
+Build-Depends: debhelper-compat (= 12), tcl-dev, doxygen, cmake, mpi-default-dev
+Standards-Version: 4.4.1
+Homepage: https://akohlmey.github.io/tclmpi
+Vcs-Browser: https://github.com/akohlmey/tclmpi
+Vcs-Git: https://github.com/akohlmey/tclmpi.git
+
+Package: tcl-tclmpi
+Section: libs
+Priority: optional
+Architecture: any
+Depends: libtcl, mpi-default-bin, ${shlibs:Depends}, ${misc:Depends}
+Suggests: tcl-tclmpi-doc
+Multi-arch: foreign
+Description: MPI bindings for Tcl - run-time files
+ The TclMPI package allows one to make MPI library calls from Tcl scripts.
+ This is implemented as a Tcl package and shared object that can be loaded
+ into an existing Tcl interpreter at runtime and a standalone extended
+ Tcl interpreter "tclmpish".
+ .
+ This package contains everything you need to write parallel tcl scripts
+ that can be run with "mpirun" and communicate  with each other through
+ MPI library calls that are interfaced to Tcl commands.
+
+Package: tcl-tclmpi-doc
+Section: doc
+Priority: optional
+Architecture: all
+Depends: libjs-mathjax, ${misc:Depends}
+Description: MPI bindings for Tcl - Documentation and examples
+ The TclMPI package allows one to make MPI library calls from Tcl scripts.
+ This is implemented as a Tcl package and shared object that can be loaded
+ into an existing Tcl interpreter at runtime and a standalone extended
+ Tcl interpreter "tclmpish".
+ .
+ This package contains a copy of the online documentation in html format
+ and several example files using TclMPI.

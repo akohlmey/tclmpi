@@ -1,0 +1,5 @@
+.github/workflows/*
+.tito/tito.props
+.tito/packages/*
+.tito/packages/.readme
+.lgtm.yml

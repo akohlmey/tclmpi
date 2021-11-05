@@ -1,0 +1,4 @@
+# The name is chosen because the package is primary a Tcl extension,
+# so the Tcl/Tk policy applies
+tcl-tclmpi: package-name-doesnt-match-sonames
+tcl-tclmpi: shlib-without-versioned-soname

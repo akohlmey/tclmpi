@@ -1,0 +1,35 @@
+#!/usr/bin/make -f
+
+vmajor=$(shell dpkg-parsechangelog | grep ^Version: | sed 's/[^0-9]*\([0-9]*\).*/\1/')
+vminor=$(shell dpkg-parsechangelog | grep ^Version: | sed 's/[^0-9]*[0-9]*\.\([0-9]*\).*/\1/')
+v=$(vmajor).$(vminor)
+dtmp=$(shell pwd)/debian/tmp
+
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+include /usr/share/dpkg/architecture.mk
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- -DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH) -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-soname,tclmpi.so.$(v)"
+
+override_dh_auto_install:
+	dh_auto_install
+	# fix up the tclmpi tcl library location
+	mkdir -p $(dtmp)/usr/lib/$(DEB_HOST_MULTIARCH)
+	mkdir -p $(dtmp)/usr/lib/tcltk/$(DEB_HOST_MULTIARCH)
+	mv $(dtmp)/usr/lib/$(DEB_HOST_MULTIARCH)/tcl*/tclmpi$(v) $(dtmp)/usr/lib/tcltk/$(DEB_HOST_MULTIARCH)/
+	# move docs
+	mkdir -p $(dtmp)/usr/share/doc/tcl-tclmpi
+	mv $(dtmp)/usr/share/doc/TclMPI/html $(dtmp)/usr/share/doc/TclMPI/examples $(dtmp)/usr/share/doc/tcl-tclmpi/
+	# use local mathjax
+	sed -i -e 's,https://cdnjs.cloudflare.com/ajax/libs/mathjax/.*/MathJax.js,/usr/share/javascript/mathjax/MathJax.js,' $(dtmp)/usr/share/doc/tcl-tclmpi/html/*.html
+
+get-orig-source:
+	wget -O tclmpi-$(v).orig.tar.gz \
+             https://github.com/akohlmey/tclmpi/releases/tclmpi-$(v)/tclmpi-$(v).tar.gz
+
+.PHONY: override_dh_auto_configure override_dh_clean \
+	override_dh_auto_install override_dh_link get-orig-source

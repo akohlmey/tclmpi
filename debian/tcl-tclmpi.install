@@ -1,0 +1,4 @@
+usr/bin/tclmpish
+usr/lib/tcltk/*/*/*.tcl
+usr/lib/tcltk/*/*/*.so
+usr/share/man/man1/tclmpish.1
