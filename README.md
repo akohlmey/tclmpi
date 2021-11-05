@@ -42,9 +42,17 @@ MS-MPI is [available here](https://github.com/microsoft/Microsoft-MPI/releases).
 You only need the "msmpisetup.exe" file and ActiveTcl is
 [available here](https://www.activestate.com/products/tcl/)
 
+## Ubuntu Linux
+
+PPA repositories for Ubuntu Linux are hosted on Launchpad at:
+https://launchpad.net/~akohlmey/+archive/ubuntu/tclmpi
+
+[![Uses Launchpad](http://media.launchpad.net/lp-badge-kit/launchpad-badge-w120px.png)](https://launchpad.net/~akohlmey/+archive/ubuntu/tclmpi)
+
 ## Fedora Linux
 
-Repositories with TclMPI for Fedora Linux are hosted at https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/
+Repositories with TclMPI packages for Fedora Linux are hosted on Copr at
+https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/
 
 [![Copr build status](https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/package/tclmpi/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/package/tclmpi/)
 
