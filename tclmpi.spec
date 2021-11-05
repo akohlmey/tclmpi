@@ -4,7 +4,7 @@
 %global with_mpich 1
 Name:          tclmpi
 Version:       1.2
-Release:       6
+Release:       7
 Summary:       Tcl bindings of the Message Passing Interface (MPI)
 
 License:       BSD
@@ -137,6 +137,14 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
+* Fri Nov 05 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-7
+- add files for packaging for a launchpad ppa
+- Add manpage for tclmpish
+
+* Fri Nov 05 2021 Axel Kohlmeyer <akohlmey@gmail.com>
+- add files for packaging for a launchpad ppa
+- Add manpage for tclmpish
+
 * Wed Nov 03 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-6
 - Improve building html docs on systems without latex. include logo image
 - Documentation updates and corrections
