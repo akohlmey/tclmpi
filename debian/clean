@@ -2,4 +2,5 @@
 .tito/tito.props
 .tito/packages/*
 .tito/packages/.readme
+.tito/packages/tclmpi
 .lgtm.yml

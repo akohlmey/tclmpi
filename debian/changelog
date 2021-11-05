@@ -1,3 +1,9 @@
+tclmpi (1.2-1ppa2) focal; urgency=medium
+
+  * include changes from upstream
+
+ -- Axel Kohlmeyer <akohlmey@gmail.com>  Fri, 05 Nov 2021 07:09:57 -0400
+
 tclmpi (1.2-1ppa1) focal; urgency=medium
 
   * add debian packaging support

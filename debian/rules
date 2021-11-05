@@ -28,7 +28,7 @@ override_dh_auto_install:
 	sed -i -e 's,https://cdnjs.cloudflare.com/ajax/libs/mathjax/.*/MathJax.js,/usr/share/javascript/mathjax/MathJax.js,' $(dtmp)/usr/share/doc/tcl-tclmpi/html/*.html
 
 get-orig-source:
-	wget -O tclmpi-$(v).orig.tar.gz \
+	wget -O tclmpi_$(v).orig.tar.gz \
              https://github.com/akohlmey/tclmpi/releases/tclmpi-$(v)/tclmpi-$(v).tar.gz
 
 .PHONY: override_dh_auto_configure override_dh_clean \
