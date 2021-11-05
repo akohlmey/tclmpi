@@ -92,7 +92,7 @@ mv %{buildroot}%{_bindir}/tclmpish %{buildroot}%{_libdir}/openmpi/bin/tclmpish
 mkdir -p %{buildroot}%{_libdir}/openmpi/lib/tcl%{tcl_version}/%{name}%{version}
 mv %{buildroot}%{tcl_sitearch}/%{name}%{version}/_tclmpi.so %{buildroot}%{_libdir}/openmpi/lib/tcl%{tcl_version}/%{name}%{version}
 mkdir -p %{buildroot}%{_libdir}/openmpi/share/man/man1
-mv %{buildroot}%{_mandir}/man1/tclmpi.1 %{buildroot}%{_libdir}/openmpi/share/man/man1
+mv %{buildroot}%{_mandir}/man1/tclmpish.1 %{buildroot}%{_libdir}/openmpi/share/man/man1
 mv %_vpath_builddir openmpi
 %{_openmpi_unload}
 
@@ -105,8 +105,8 @@ mkdir -p %{buildroot}%{_libdir}/mpich/bin
 mv %{buildroot}%{_bindir}/tclmpish %{buildroot}%{_libdir}/mpich/bin/tclmpish
 mkdir -p %{buildroot}%{_libdir}/mpich/lib/tcl%{tcl_version}/%{name}%{version}
 mv %{buildroot}%{tcl_sitearch}/%{name}%{version}/_tclmpi.so %{buildroot}%{_libdir}/mpich/lib/tcl%{tcl_version}/%{name}%{version}
-mkdir -p %{buildroot}%{_libdir}/openmpi/share/man/man1
-mv %{buildroot}%{_mandir}/man1/tclmpi.1 %{buildroot}%{_libdir}/openmpi/share/man/man1
+mkdir -p %{buildroot}%{_libdir}/mpich/share/man/man1
+mv %{buildroot}%{_mandir}/man1/tclmpish.1 %{buildroot}%{_libdir}/mpich/share/man/man1
 mv %_vpath_builddir mpich
 %{_mpich_unload}
 %endif
@@ -128,12 +128,14 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %global mpi_family openmpi
 %{_libdir}/openmpi/bin
 %{_libdir}/openmpi/lib/tcl%{tcl_version}/%{name}%{version}
+%{_libdir}/openmpi/share/man/man1/tclmpish.1
 
 %if %{with_mpich}
 %global mpi_family mpich
 %files mpich
 %{_libdir}/mpich/bin
 %{_libdir}/mpich/lib/tcl%{tcl_version}/%{name}%{version}
+%{_libdir}/mpich/share/man/man1/tclmpish.1
 %endif
 
 %changelog
