@@ -4,7 +4,7 @@
 %global with_mpich 1
 Name:          tclmpi
 Version:       1.2
-Release:       8
+Release:       9
 Summary:       Tcl bindings of the Message Passing Interface (MPI)
 
 License:       BSD
@@ -139,7 +139,10 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
-* Fri Nov 05 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-8
+- Mention launchpad PPA for Ubuntu (akohlmey@gmail.com)
+- update debian packaging files (akohlmey@gmail.com)
+
+* Fri Nov 05 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-9
 - fix multiple manpage installation issues
 
 * Fri Nov 05 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-7
