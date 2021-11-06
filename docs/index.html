@@ -123,11 +123,24 @@ Microsoft Windows</h2>
 Ubuntu Linux</h2>
 <p>PPA repositories for Ubuntu Linux are hosted on Launchpad at: <a href="https://launchpad.net/~akohlmey/+archive/ubuntu/tclmpi">https://launchpad.net/~akohlmey/+archive/ubuntu/tclmpi</a></p>
 <p><a href="https://launchpad.net/~akohlmey/+archive/ubuntu/tclmpi"><img src="http://media.launchpad.net/lp-badge-kit/launchpad-badge-w120px.png" alt="Uses Launchpad" class="inline"/></a></p>
+<p>To access the PPA and install the package, use the commands:</p>
+<div class="fragment"><div class="line">sudo add-apt-repository ppa:akohlmey/tclmpi</div>
+<div class="line">sudo apt-get update</div>
+<div class="line">sudo apt-get install tcl-tclmpi</div>
+</div><!-- fragment --><p>Currently binaries are created for Ubuntu 20.04LTS and later.</p>
 <h2><a class="anchor" id="autotoc_md4"></a>
 Fedora Linux</h2>
 <p>Repositories with TclMPI packages for Fedora Linux are hosted on Copr at <a href="https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/">https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/</a></p>
 <p><a href="https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/package/tclmpi/"><img src="https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/package/tclmpi/status_image/last_build.png" alt="Copr build status" class="inline"/></a></p>
-<h1><a class="anchor" id="autotoc_md5"></a>
+<p>To access the Copr repository use the command:</p>
+<div class="fragment"><div class="line">sudo dnf copr enable akohlmey/TclMPI</div>
+</div><!-- fragment --><p>To install TclMPI with support for the OpenMPI MPI library, use the command:</p>
+<div class="fragment"><div class="line">sudo dnf install tclmpi-openmpi</div>
+</div><!-- fragment --><p>To install TclMPI with support for MPICH MPI library, use the command:</p>
+<div class="fragment"><div class="line">sudo dnf install tclmpi-mpich</div>
+</div><!-- fragment --><p>Please note that to use any of the MPI libraries the corresponding environment module must be loaded first, e.g. with:</p>
+<div class="fragment"><div class="line">module load mpi</div>
+</div><!-- fragment --><h1><a class="anchor" id="autotoc_md5"></a>
 Test Status</h1>
 <p><a href="https://github.com/akohlmey/tclmpi/actions/workflows/unittest-linux.yml"><img src="https://github.com/akohlmey/tclmpi/actions/workflows/unittest-linux.yml/badge.svg?branch=master" alt="Linux" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/akohlmey/tclmpi/actions/workflows/unittest-macos.yml"><img src="https://github.com/akohlmey/tclmpi/actions/workflows/unittest-macos.yml/badge.svg?branch=master" alt="macOS" style="pointer-events: none;" class="inline"/></a> <a href="https://github.com/akohlmey/tclmpi/actions/workflows/codeql-analysis.yml"><img src="https://github.com/akohlmey/tclmpi/actions/workflows/codeql-analysis.yml/badge.svg?branch=master" alt="CodeQL" style="pointer-events: none;" class="inline"/></a></p>
 <h1><a class="anchor" id="autotoc_md6"></a>
