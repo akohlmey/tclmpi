@@ -47,7 +47,7 @@ You only need the "msmpisetup.exe" file and ActiveTcl is
 PPA repositories for Ubuntu Linux are hosted on Launchpad at:
 https://launchpad.net/~akohlmey/+archive/ubuntu/tclmpi
 
-[![Uses Launchpad](http://media.launchpad.net/lp-badge-kit/launchpad-badge-w120px.png)](https://launchpad.net/~akohlmey/+archive/ubuntu/tclmpi)
+[![Uses Launchpad](launchpad-badge-w120px.png)](https://launchpad.net/~akohlmey/+archive/ubuntu/tclmpi)
 
 To access the PPA and install the package, use the commands:
 
