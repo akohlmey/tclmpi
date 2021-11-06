@@ -139,11 +139,10 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
-- Mention launchpad PPA for Ubuntu (akohlmey@gmail.com)
-- update debian packaging files (akohlmey@gmail.com)
-
 * Fri Nov 05 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-9
 - fix multiple manpage installation issues
+- Mention launchpad PPA for Ubuntu
+- update debian packaging files
 
 * Fri Nov 05 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-7
 - add files for packaging for a launchpad ppa

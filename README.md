@@ -49,12 +49,47 @@ https://launchpad.net/~akohlmey/+archive/ubuntu/tclmpi
 
 [![Uses Launchpad](http://media.launchpad.net/lp-badge-kit/launchpad-badge-w120px.png)](https://launchpad.net/~akohlmey/+archive/ubuntu/tclmpi)
 
+To access the PPA and install the package, use the commands:
+
+``` bash
+sudo add-apt-repository ppa:akohlmey/tclmpi
+sudo apt-get update
+sudo apt-get install tcl-tclmpi
+```
+
+Currently binaries are created for Ubuntu 20.04LTS and later.
+
 ## Fedora Linux
 
 Repositories with TclMPI packages for Fedora Linux are hosted on Copr at
 https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/
 
 [![Copr build status](https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/package/tclmpi/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/akohlmey/TclMPI/package/tclmpi/)
+
+To access the Copr repository use the command:
+
+``` bash
+sudo dnf copr enable akohlmey/TclMPI
+```
+
+To install TclMPI with support for the OpenMPI MPI library, use the command:
+
+``` bash
+sudo dnf install tclmpi-openmpi
+```
+
+To install TclMPI with support for MPICH MPI library, use the command:
+
+``` bash
+sudo dnf install tclmpi-mpich
+```
+
+Please note that to use any of the MPI libraries the corresponding environment
+module must be loaded first, e.g. with:
+
+``` bash
+module load mpi
+```
 
 # Test Status
 
