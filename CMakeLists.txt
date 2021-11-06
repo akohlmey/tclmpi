@@ -155,6 +155,7 @@ if(DOXYGEN_FOUND)
   set_property(TARGET html APPEND PROPERTY ADDITIONAL_CLEAN_FILES latex ${CMAKE_SOURCE_DIR}/docs)
   add_custom_target(logo
       ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/TclMPI-logo.bmp ${CMAKE_BINARY_DIR}/html/
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/launchpad-badge-w120px.png ${CMAKE_BINARY_DIR}/html/
       DEPENDS html)
   if(LATEX_FOUND)
     add_custom_target(pdf make WORKING_DIRECTORY latex
