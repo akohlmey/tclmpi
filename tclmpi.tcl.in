@@ -46,10 +46,29 @@ namespace eval tclmpi {
 
     variable undefined  tclmpi::undefined  ;# constant to indicate an undefined number
 
-    proc waitall {requests {status {}}} {
+    proc waitall {requests {statvar {}}} {
         set retval {}
-        foreach req {$requests} {
-            lappend retval [wait $req]
+        if {$statvar eq ""} {
+            foreach req $requests {
+                lappend retval [wait $req]
+            }
+        } else {
+            upvar $statvar status
+            set status(MPI_SOURCE) {}
+            set status(MPI_TAG) {}
+            set status(MPI_ERROR) {}
+            set status(COUNT_CHAR) {}
+            set status(COUNT_INT) {}
+            set status(COUNT_DOUBLE) {}
+            foreach req $requests {
+                lappend retval [wait $req temp]
+                lappend status(MPI_SOURCE) $temp(MPI_SOURCE)
+                lappend status(MPI_TAG) $temp(MPI_TAG)       
+                lappend status(MPI_ERROR) $temp(MPI_ERROR)   
+                lappend status(COUNT_CHAR) $temp(COUNT_CHAR)  
+                lappend status(COUNT_INT) $temp(COUNT_INT)   
+                lappend status(COUNT_DOUBLE) $temp(COUNT_DOUBLE)
+            }
         }
         return $retval
     }
