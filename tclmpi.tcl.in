@@ -54,6 +54,7 @@ namespace eval tclmpi {
             }
         } else {
             upvar $statvar status
+            set status {}
             foreach req $requests {
                 lappend retval [wait $req tclmpi_wait_temp]
                 lappend status [array get tclmpi_wait_temp]
