@@ -264,7 +264,7 @@ package provide tclmpi $tclmpi::version
 #X#  * \code{.tcl}
 #X#  * set comm tclmpi::comm_world
 #X#  * set size [::tclmpi::comm_size $comm]
-#X#  * set key -[::tclmpi::comm_rank $comm]
+#X#  * set key  [::tclmpi::comm_rank $comm]
 #X#  * set revcomm [::tclmpi::comm_split $comm 1 $key]
 #X#  * \endcode
 #X#  *
@@ -600,9 +600,9 @@ package provide tclmpi $tclmpi::version
 #X#  * associative arrays - like they are created by tclmpi::wait -  can
 #X#  * reconstituted using the ``array set`` command.
 #X#  * \code{.tcl}
-#X#  * ::tclmpi::waitall [list $req1 $req2] status]
-#X#  * [array set status1 [lindex $status 0]
-#X#  * [array set status2 [lindex $status 1]
+#X#  * ::tclmpi::waitall [list $req1 $req2] status
+#X#  * array set status1 [lindex $status 0]
+#X#  * array set status2 [lindex $status 1]
 #X#  * \endcode
 #X#  *
 #X#  * This call is implemented in Tcl as a wrapper around tclmpi::wait */
