@@ -2767,6 +2767,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
         if (statvar != NULL) {
             Tcl_Obj *var;
             int len_char, len_int, len_double;
+
+            memset(&status, 0, sizeof(status));
             ierr = MPI_Wait(req->req, &status);
 
             MPI_Get_count(&status, MPI_CHAR, &len_char);
@@ -2778,8 +2780,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
             Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("MPI_TAG", -1), Tcl_NewIntObj(status.MPI_TAG), 0);
             Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("MPI_ERROR", -1), Tcl_NewIntObj(status.MPI_ERROR), 0);
             Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_CHAR", -1), Tcl_NewIntObj(len_char), 0);
-            Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_INT", -1), Tcl_NewIntObj(len_char), 0);
-            Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_DOUBLE", -1), Tcl_NewIntObj(len_char), 0);
+            Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_INT", -1), Tcl_NewIntObj(len_int), 0);
+            Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_DOUBLE", -1), Tcl_NewIntObj(len_double), 0);
         } else
             ierr = MPI_Wait(req->req, MPI_STATUS_IGNORE);
 
@@ -2802,6 +2804,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
                 Tcl_Obj *var;
                 int len_char, len_int, len_double;
 
+                memset(&status, 0, sizeof(status));
+                ierr = MPI_Wait(req->req, &status);
                 MPI_Get_count(&status, MPI_CHAR, &len_char);
                 MPI_Get_count(&status, MPI_INT, &len_int);
                 MPI_Get_count(&status, MPI_DOUBLE, &len_double);
@@ -2811,8 +2815,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
                 Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("MPI_TAG", -1), Tcl_NewIntObj(status.MPI_TAG), 0);
                 Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("MPI_ERROR", -1), Tcl_NewIntObj(status.MPI_ERROR), 0);
                 Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_CHAR", -1), Tcl_NewIntObj(len_char), 0);
-                Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_INT", -1), Tcl_NewIntObj(len_char), 0);
-                Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_DOUBLE", -1), Tcl_NewIntObj(len_char), 0);
+                Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_INT", -1), Tcl_NewIntObj(len_int), 0);
+                Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_DOUBLE", -1), Tcl_NewIntObj(len_double), 0);
             } else
                 ierr = MPI_Wait(req->req, MPI_STATUS_IGNORE);
 
@@ -2820,7 +2824,6 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
 
             if (req->type == TCLMPI_AUTO) {
                 result = Tcl_NewStringObj((const char *)req->data, req->len);
-
             } else if (req->type == TCLMPI_INT) {
                 int *idata = (int *)req->data;
                 result     = Tcl_NewListObj(0, NULL);
@@ -2839,6 +2842,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
             /* receive not posted so far, we can do a blocking receive now */
             if (req->type == TCLMPI_AUTO) {
                 char *idata;
+
+                memset(&status, 0, sizeof(status));
                 MPI_Probe(req->source, req->tag, req->comm, &status);
                 MPI_Get_count(&status, MPI_CHAR, &len);
                 idata  = Tcl_Alloc(len);
@@ -2855,6 +2860,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
 
             } else if (req->type == TCLMPI_INT) {
                 int *idata;
+
+                memset(&status, 0, sizeof(status));
                 MPI_Probe(req->source, req->tag, req->comm, &status);
                 MPI_Get_count(&status, MPI_INT, &len);
                 idata  = (int *)Tcl_Alloc(len * sizeof(int));
@@ -2872,6 +2879,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
 
             } else if (req->type == TCLMPI_DOUBLE) {
                 double *idata;
+
+                memset(&status, 0, sizeof(status));
                 MPI_Probe(req->source, req->tag, req->comm, &status);
                 MPI_Get_count(&status, MPI_DOUBLE, &len);
                 idata  = (double *)Tcl_Alloc(len * sizeof(double));
@@ -2908,8 +2917,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
                 Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("MPI_TAG", -1), Tcl_NewIntObj(status.MPI_TAG), 0);
                 Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("MPI_ERROR", -1), Tcl_NewIntObj(status.MPI_ERROR), 0);
                 Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_CHAR", -1), Tcl_NewIntObj(len_char), 0);
-                Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_INT", -1), Tcl_NewIntObj(len_char), 0);
-                Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_DOUBLE", -1), Tcl_NewIntObj(len_char), 0);
+                Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_INT", -1), Tcl_NewIntObj(len_int), 0);
+                Tcl_ObjSetVar2(interp, var, Tcl_NewStringObj("COUNT_DOUBLE", -1), Tcl_NewIntObj(len_double), 0);
             }
             Tcl_SetObjResult(interp, result);
         }
