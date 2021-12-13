@@ -2757,8 +2757,8 @@ int TclMPI_Wait(ClientData nodata, Tcl_Interp *interp, int objc, Tcl_Obj *const 
     /* waiting on an illegal request returns immediately */
     if (req == NULL) return TCL_OK;
 
-    if (objc > 4)
-        statvar = Tcl_GetString(objv[4]);
+    if (objc > 2)
+        statvar = Tcl_GetString(objv[2]);
     else
         statvar = NULL;
 
