@@ -4,7 +4,7 @@
 %global with_mpich 1
 Name:          tclmpi
 Version:       1.2
-Release:       13
+Release:       14
 Summary:       Tcl bindings of the Message Passing Interface (MPI)
 
 License:       BSD
@@ -139,6 +139,10 @@ mv %{buildroot}%{_docdir}/TclMPI %{buildroot}%{_docdir}/tclmpi
 %endif
 
 %changelog
+* Mon Dec 13 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-14
+- initialize returned status list to empty in tclmpi::waitall (ambaker1@mtu.edu)
+- correct typos in Tcl docs (akohlmey@gmail.com)
+
 * Mon Dec 13 2021 Axel Kohlmeyer <akohlmey@gmail.com> 1.2-13
 
 - fix bugs in wait and waitall and change/document the behavior
