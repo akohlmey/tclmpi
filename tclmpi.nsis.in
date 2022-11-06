@@ -48,7 +48,7 @@ Section Prerequisites
 ClearErrors
 ReadRegStr $0 HKLM "Software\Microsoft\MPI" Version
 ${If} ${Errors}
-  MessageBox MB_OK "Please install MS-MPI (msmpisetup.exe) from https://www.microsoft.com/en-us/download/details.aspx?id=57467"
+  MessageBox MB_OK "Please install MS-MPI (msmpisetup.exe) from https://www.microsoft.com/en-us/download/details.aspx?id=100593"
   Quit
 ${Else}
   DetailPrint "MS-MPI is installed installed as version $0"
