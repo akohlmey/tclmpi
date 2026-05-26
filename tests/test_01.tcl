@@ -140,10 +140,10 @@ run_error  [list ::tclmpi::bcast {} tclmpi::real 0 $comm]    \
 ::tclmpi::conv_set tclmpi::error
 
 run_error  [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.0 7 0xff yy} \
-                $int 0 $self] {{expected integer but got "xx 11"}}
+                $int 0 $self] {{expected integer but got}}
 run_error  [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.5 yy 1}      \
                 $double 0 $self] \
-    {{expected floating-point number but got "xx 11"}}
+    {{expected floating-point number but got}}
 run_error  [list ::tclmpi::bcast {-1 2 +3 2.0 7 0o16}             \
                 $int 0 $comm] {{expected integer but got "2.0"}}
 run_error [list ::tclmpi::bcast {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \

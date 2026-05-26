@@ -57,8 +57,8 @@ find_package(Git)
 
 # extract Tcl version number from tcl.h
 file(READ ${TCL_INCLUDE_PATH}/tcl.h _tcl_header)
-string(REGEX MATCH "TCL_VERSION[ \t]*\"[0-9]\.[0-9]*\"" _ ${_tcl_header})
-string(REGEX MATCH "[0-9]\.[0-9]*" TCL_VERSION ${_})
+string(REGEX MATCH "TCL_VERSION[ \t]*\"[0-9]+\\.[0-9]+\"" _ ${_tcl_header})
+string(REGEX MATCH "[0-9]+\\.[0-9]+" TCL_VERSION ${_})
 
 # build shared object
 add_library(_tclmpi MODULE _tclmpi.c)

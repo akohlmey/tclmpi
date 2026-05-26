@@ -39,6 +39,20 @@ CTest layout: `test_01`/`test_02` are serial, `test_03`/`test_04` need 2 MPI ran
 
 Useful CMake options (see `INSTALL`): `BUILD_TCLMPI_SHELL`, `ENABLE_TCL_STUBS`, `BUILD_TESTING`, `DOWNLOAD_MPICH4WIN` (cross-compile to Windows).
 
+## Testing against Tcl 9
+
+The repo ships `fedora44.def` / `fedora44.sif` — an apptainer container with Fedora 44, Tcl 9.0, openmpi, and mpich. Use it to verify Tcl 9 compatibility:
+
+```sh
+apptainer exec fedora44.sif sh -c '
+  cmake -B build-tcl9 . &&
+  cmake --build build-tcl9 &&
+  ctest --test-dir build-tcl9 --output-on-failure
+'
+```
+
+The regular `build/` tree uses whatever Tcl the host distro provides. When changing the C side, build and test in both to catch Tcl 8.6 / Tcl 9 regressions. The C code compiles against both via a small `#if TCL_MAJOR_VERSION < 9` compatibility shim near the top of `_tclmpi.c`.
+
 ## Architecture notes
 
 - **One C file**: `_tclmpi.c` (~3100 lines) is the entire C side. The list of every Tcl command this package exposes lives in `tclmpi_init_api()` (around lines 2944–3005). Add new commands there.
@@ -47,14 +61,6 @@ Useful CMake options (see `INSTALL`): `BUILD_TCLMPI_SHELL`, `ENABLE_TCL_STUBS`, 
 - **Template files**: `tclmpi.tcl.in`, `pkgIndex.tcl.in`, `tests/harness.tcl.in`, `tclmpi.nsis.in` are configured by CMake (`@PROJECT_VERSION@` etc.). Always run tests/examples from a build directory — the source-tree `.tcl.in` files are not loadable as-is.
 - **Doxygen for Tcl**: Doxygen no longer parses Tcl, so docstrings in `.tcl.in` files are hidden behind a `#X#` prefix. `TclFileToDox()` in `CMakeLists.txt` strips the prefix into a generated `.dox` file. When documenting Tcl code, edit the `#X#` lines — don't invent a different comment style.
 - **Convenience wrappers** like `tclmpi::waitall` are implemented in Tcl in `tclmpi.tcl.in`, not in C.
-
-## Branch / environment notes
-
-Branch `port-to-tcl9` is in progress. Two pre-configured build trees exist locally:
-- `build/` — against system Tcl 8.6.
-- `build-tcl9/` — against `/home/akohlmey/tcl9/include`.
-
-When changing the C side, build and run `ctest` in both to verify Tcl 8.6 and Tcl 9 compatibility.
 
 ## Style
 
