@@ -105,7 +105,7 @@ par_return [list [list ::tclmpi::bcast {} $auto 0 $comm]     \
                 [list ::tclmpi::bcast $idata $auto 0 $comm]] \
     [list {} {}]
 
-set idata {016 {1 2 3} 2.0 7 0xff yy}
+set idata {0o16 {1 2 3} 2.0 7 0xff yy}
 set odata {14 0 0 7 255 0}
 par_return [list [list ::tclmpi::bcast {} $int 1 $comm]     \
                 [list ::tclmpi::bcast $idata $int 1 $comm]] \
@@ -126,7 +126,7 @@ par_error  [list [list ::tclmpi::bcast $idata $double 0 $comm] \
     [list [list $odata] {::tclmpi::bcast: message truncated}]
 
 # scatter
-set idata {016 {1 2 3} 2.0 7 0xff yy}
+set idata {0o16 {1 2 3} 2.0 7 0xff yy}
 par_return [list [list ::tclmpi::scatter {} $int 1 $comm] \
                 [list ::tclmpi::scatter $idata $int 1 $comm]] \
     [list {{14 0 0}} {{7 255 0}}]
@@ -141,7 +141,7 @@ if {$tcl_version < 8.5} {
         [list {{14.0 0.0 2.0}} {{7.0 255.0 0.0}}]
 }
 
-set idata {016 {1 2 3} 2.0 7 0xff}
+set idata {0o16 {1 2 3} 2.0 7 0xff}
 set odata {::tclmpi::scatter: number of data items must be divisible by the number of processes}
 par_error [list [list ::tclmpi::scatter {} $int 1 $comm] \
                 [list ::tclmpi::scatter $idata $int 1 $comm]] \
@@ -152,7 +152,7 @@ par_error [list [list ::tclmpi::scatter $idata $double 0 $comm] \
 
 # allgather
 set odata {14 0 0 7 255 0}
-par_return [list [list ::tclmpi::allgather {016 {1 2 3} 2.0} $int $comm] \
+par_return [list [list ::tclmpi::allgather {0o16 {1 2 3} 2.0} $int $comm] \
                 [list ::tclmpi::allgather {7 0xff yy} $int $comm]] \
     [list [list $odata] [list $odata]]
 
@@ -161,21 +161,21 @@ if {$tcl_version < 8.5} {
 } else {
     set odata {14.0 0.0 2.0 7.0 255.0 0.0}
 }
-par_return [list [list ::tclmpi::allgather {016 {1 2 3} 2.0} $double $comm] \
+par_return [list [list ::tclmpi::allgather {0o16 {1 2 3} 2.0} $double $comm] \
                 [list ::tclmpi::allgather {7 0xff yy} $double $comm]] \
     [list [list $odata] [list $odata]]
 
 set odata {::tclmpi::allgather: number of data items must be the same on all processes}
-par_error [list [list ::tclmpi::allgather {016 {1 2 3}} $int $comm] \
+par_error [list [list ::tclmpi::allgather {0o16 {1 2 3}} $int $comm] \
                 [list ::tclmpi::allgather {7 0xff yy} $int $comm]] \
     [list [list $odata] [list $odata]]
-par_error [list [list ::tclmpi::allgather {016 {1 2 3} 2.0} $double $comm] \
+par_error [list [list ::tclmpi::allgather {0o16 {1 2 3} 2.0} $double $comm] \
                 [list ::tclmpi::allgather {2.0 7 0xff yy} $double $comm]] \
     [list [list $odata] [list $odata]]
 
 # gather
 set odata {14 0 0 7 255 0}
-par_return [list [list ::tclmpi::gather {016 {1 2 3} 2.0} $int 1 $comm] \
+par_return [list [list ::tclmpi::gather {0o16 {1 2 3} 2.0} $int 1 $comm] \
                 [list ::tclmpi::gather {7 0xff yy} $int 1 $comm]] \
     [list {} [list $odata]]
 
@@ -184,15 +184,15 @@ if {$tcl_version < 8.5} {
 } else {
     set odata {14.0 0.0 2.0 7.0 255.0 0.0}
 }
-par_return [list [list ::tclmpi::gather {016 {1 2 3} 2.0} $double 0 $comm] \
+par_return [list [list ::tclmpi::gather {0o16 {1 2 3} 2.0} $double 0 $comm] \
                 [list ::tclmpi::gather {7 0xff yy} $double 0 $comm]] \
     [list [list $odata] {}]
 
 set odata {::tclmpi::gather: number of data items must be the same on all processes}
-par_error [list [list ::tclmpi::gather {016 {1 2 3}} $int 1 $comm] \
+par_error [list [list ::tclmpi::gather {0o16 {1 2 3}} $int 1 $comm] \
                 [list ::tclmpi::gather {7 0xff yy} $int 1 $comm]] \
     [list [list $odata] [list $odata]]
-par_error [list [list ::tclmpi::gather {016 {1 2 3} 2.0} $double 0 $comm] \
+par_error [list [list ::tclmpi::gather {0o16 {1 2 3} 2.0} $double 0 $comm] \
                 [list ::tclmpi::gather {2.0 7 0xff yy} $double 0 $comm]] \
     [list [list $odata] [list $odata]]
 
@@ -264,7 +264,7 @@ par_return [list [list ::tclmpi::allreduce $idata $double tclmpi::prod $comm] \
     [list [list $rdata] [list $rdata]]
 
 # pairs
-set idata {{-016 0} {2 0} {1.5 0} {2 -1} {two 0} {0x22 0}}
+set idata {{-0o16 0} {2 0} {1.5 0} {2 -1} {two 0} {0x22 0}}
 set odata {{1 1} {-1 1} {-10 1} {0 1} {1 1} {18 1}}
 set rdata {{1 1} {2 0} {0 0} {2 -1} {1 1} {34 0}}
 par_return [list [list ::tclmpi::allreduce $idata tclmpi::intint \
@@ -356,7 +356,7 @@ par_return [list [list ::tclmpi::reduce $idata $double tclmpi::prod 1 $comm] \
     [list {} [list $rdata]]
 
 # pairs
-set idata {{-016 0} {2 0} {1.5 0} {2 -1} {two 0} {0x22 0}}
+set idata {{-0o16 0} {2 0} {1.5 0} {2 -1} {two 0} {0x22 0}}
 set odata {{1 1} {-1 1} {-10 1} {0 1} {1 1} {18 1}}
 set rdata {{1 1} {2 0} {0 0} {2 -1} {1 1} {34 0}}
 par_return [list [list ::tclmpi::reduce $idata tclmpi::intint \

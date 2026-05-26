@@ -144,7 +144,7 @@ run_error  [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.0 7 0xff yy} \
 run_error  [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.5 yy 1}      \
                 $double 0 $self] \
     {{expected floating-point number but got "xx 11"}}
-run_error  [list ::tclmpi::bcast {-1 2 +3 2.0 7 016}             \
+run_error  [list ::tclmpi::bcast {-1 2 +3 2.0 7 0o16}             \
                 $int 0 $comm] {{expected integer but got "2.0"}}
 run_error [list ::tclmpi::bcast {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
                $double 0 $self] \
@@ -159,7 +159,7 @@ run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.0 7 0xff yy} \
                 $int 0 $self] {{0 0 0 7 255 0}}
 run_return [list ::tclmpi::bcast {{xx 11} {1 2 3} 2.5 yy 1}      \
                 $double 0 $self] {{0.0 0.0 2.5 0.0 1.0}}
-run_return [list ::tclmpi::bcast {-1 2 +3 2.0 7 016}             \
+run_return [list ::tclmpi::bcast {-1 2 +3 2.0 7 0o16}             \
                 $int 0 $comm] {{-1 2 3 0 7 14}}
 run_return [list ::tclmpi::bcast {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
                 $double 0 $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
@@ -186,7 +186,7 @@ run_return [list ::tclmpi::scatter {{xx 11} {1 2 3} 2.0 7 0xff yy} \
                 $int 0 $self] {{0 0 0 7 255 0}}
 run_return [list ::tclmpi::scatter {{xx 11} {1 2 3} 2.5 yy 1}      \
                 $double 0 $comm] {{0.0 0.0 2.5 0.0 1.0}}
-run_return [list ::tclmpi::scatter {-1 2 +3 2.0 7 016}             \
+run_return [list ::tclmpi::scatter {-1 2 +3 2.0 7 0o16}             \
                 $int 0 $comm] {{-1 2 3 0 7 14}}
 run_return [list ::tclmpi::scatter {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
                 $double 0 $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
@@ -210,7 +210,7 @@ run_return [list ::tclmpi::allgather {{xx 11} {1 2 3} 2.0 7 0xff yy} \
                 $int $self] {{0 0 0 7 255 0}}
 run_return [list ::tclmpi::allgather {{xx 11} {1 2 3} 2.5 yy 1}      \
                 $double $comm] {{0.0 0.0 2.5 0.0 1.0}}
-run_return [list ::tclmpi::allgather {-1 2 +3 2.0 7 016}             \
+run_return [list ::tclmpi::allgather {-1 2 +3 2.0 7 0o16}             \
                 $int $comm] {{-1 2 3 0 7 14}}
 run_return [list ::tclmpi::allgather {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
                 $double $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
@@ -237,7 +237,7 @@ run_return [list ::tclmpi::gather {{xx 11} {1 2 3} 2.0 7 0xff yy} \
                 $int 0 $self] {{0 0 0 7 255 0}}
 run_return [list ::tclmpi::gather {{xx 11} {1 2 3} 2.5 yy 1}      \
                 $double 0 $comm] {{0.0 0.0 2.5 0.0 1.0}}
-run_return [list ::tclmpi::gather {-1 2 +3 2.0 7 016}             \
+run_return [list ::tclmpi::gather {-1 2 +3 2.0 7 0o16}             \
                 $int 0 $comm] {{-1 2 3 0 7 14}}
 run_return [list ::tclmpi::gather {-1e5 1.1 1.2d0 0.2e-1 0.06E+28 0x22} \
                 $double 0 $self] {{-100000.0 1.1 0.0 0.02 6e+26 34.0}}
@@ -294,7 +294,7 @@ run_return [list ::tclmpi::allreduce {{xx 11} {1 2 3} 2.0 7 0xff yy} \
                 $int tclmpi::max $self] {{0 0 0 7 255 0}}
 run_return [list ::tclmpi::allreduce {{xx 11} {1 2 3} 2.5 yy 1}      \
                 $double tclmpi::sum $comm] {{0.0 0.0 2.5 0.0 1.0}}
-run_return [list ::tclmpi::allreduce {-1 2 +3 2.0 7 016}             \
+run_return [list ::tclmpi::allreduce {-1 2 +3 2.0 7 0o16}             \
                 $int tclmpi::prod $comm] {{-1 2 3 0 7 14}}
 
 # reduce

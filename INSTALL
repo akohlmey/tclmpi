@@ -11,7 +11,7 @@ The TclMPI package  uses CMake for building,  installation, testing, and
 packaging.  This requires  a somewhat modern CMake  version (3.16).  You
 need  to run  CMake the  usual way  `cmake -B  build-folder .`  and then
 `cmake   --build    build-folder`,   followed   by    `cmake   --install
-build-folder`. Tcl version 8.5 or later and MPI-2 or later with  support
+build-folder`. Tcl version 8.6 or later and MPI-2 or later with  support
 for development are required.
 
 The following settings are supported by the CMake build environment
@@ -31,7 +31,7 @@ To    install   you    choose    a   suitable    prefix   folder    with
 `-DCMAKE_INSTALL_PREFIX` when  configuring with  CMake and then  can use
 `cmake  --install <builddir>`  e.g.  /usr/local.  The files  _tclmpi.so,
 tclmpi.tcl   and    pkgIndex.tcl   would   then   be    installed   into
-/usr/local/lib64/tcl8.6/tclmpi1.1.  To enable  loading  the plugin  'set
+/usr/local/lib64/tcl8.6/tclmpi1.3.  To enable  loading  the plugin  'set
 auto_path [concat /usr/local/lib64/tcl8.6  $auto_path]' in your .tclshrc
 or set the environment variable  TCLLIBPATH to include that folder.  One
 can  load the  tclmpi wrappers  on demand  simply by  using the  command

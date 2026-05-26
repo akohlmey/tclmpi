@@ -136,7 +136,7 @@ par_return [list [list bcast {} $auto 0 $comm]     \
                 [list bcast $idata $auto 0 $comm]] \
     [list {} {}]
 
-set idata {016 {1 2 3} 2.0 7 0xff yy}
+set idata {0o16 {1 2 3} 2.0 7 0xff yy}
 set odata {14 0 0 7 255 0}
 par_return [list [list bcast {} $int 1 $comm]     \
                 [list bcast $idata $int 1 $comm]] \
@@ -157,7 +157,7 @@ par_error  [list [list bcast $idata $double 0 $comm] \
     [list [list $odata] {bcast: message truncated}]
 
 # scatter
-set idata {016 {1 2 3} 2.0 7 0xff yy}
+set idata {0o16 {1 2 3} 2.0 7 0xff yy}
 par_return [list [list scatter {} $int 1 $comm] \
                 [list scatter $idata $int 1 $comm]] \
     [list {{14 0 0}} {{7 255 0}}]
@@ -172,7 +172,7 @@ if {$tcl_version < 8.5} {
         [list {{14.0 0.0 2.0}} {{7.0 255.0 0.0}}]
 }
 
-set idata {016 {1 2 3} 2.0 7 0xff}
+set idata {0o16 {1 2 3} 2.0 7 0xff}
 set odata {scatter: number of data items must be divisible by the number of processes}
 par_error [list [list scatter {} $int 1 $comm] \
                 [list scatter $idata $int 1 $comm]] \
@@ -183,7 +183,7 @@ par_error [list [list scatter $idata $double 0 $comm] \
 
 # allgather
 set odata {14 0 0 7 255 0}
-par_return [list [list allgather {016 {1 2 3} 2.0} $int $comm] \
+par_return [list [list allgather {0o16 {1 2 3} 2.0} $int $comm] \
                 [list allgather {7 0xff yy} $int $comm]] \
     [list [list $odata] [list $odata]]
 
@@ -192,21 +192,21 @@ if {$tcl_version < 8.5} {
 } else {
     set odata {14.0 0.0 2.0 7.0 255.0 0.0}
 }
-par_return [list [list allgather {016 {1 2 3} 2.0} $double $comm] \
+par_return [list [list allgather {0o16 {1 2 3} 2.0} $double $comm] \
                 [list allgather {7 0xff yy} $double $comm]] \
     [list [list $odata] [list $odata]]
 
 set odata {allgather: number of data items must be the same on all processes}
-par_error [list [list allgather {016 {1 2 3}} $int $comm] \
+par_error [list [list allgather {0o16 {1 2 3}} $int $comm] \
                 [list allgather {7 0xff yy} $int $comm]] \
     [list [list $odata] [list $odata]]
-par_error [list [list allgather {016 {1 2 3} 2.0} $double $comm] \
+par_error [list [list allgather {0o16 {1 2 3} 2.0} $double $comm] \
                 [list allgather {2.0 7 0xff yy} $double $comm]] \
     [list [list $odata] [list $odata]]
 
 # gather
 set odata {14 0 0 7 255 0}
-par_return [list [list gather {016 {1 2 3} 2.0} $int 1 $comm] \
+par_return [list [list gather {0o16 {1 2 3} 2.0} $int 1 $comm] \
                 [list gather {7 0xff yy} $int 1 $comm]] \
     [list {} [list $odata]]
 
@@ -215,15 +215,15 @@ if {$tcl_version < 8.5} {
 } else {
     set odata {14.0 0.0 2.0 7.0 255.0 0.0}
 }
-par_return [list [list gather {016 {1 2 3} 2.0} $double 0 $comm] \
+par_return [list [list gather {0o16 {1 2 3} 2.0} $double 0 $comm] \
                 [list gather {7 0xff yy} $double 0 $comm]] \
     [list [list $odata] {}]
 
 set odata {gather: number of data items must be the same on all processes}
-par_error [list [list gather {016 {1 2 3}} $int 1 $comm] \
+par_error [list [list gather {0o16 {1 2 3}} $int 1 $comm] \
                 [list gather {7 0xff yy} $int 1 $comm]] \
     [list [list $odata] [list $odata]]
-par_error [list [list gather {016 {1 2 3} 2.0} $double 0 $comm] \
+par_error [list [list gather {0o16 {1 2 3} 2.0} $double 0 $comm] \
                 [list gather {2.0 7 0xff yy} $double 0 $comm]] \
     [list [list $odata] [list $odata]]
 
@@ -295,7 +295,7 @@ par_return [list [list allreduce $idata $double $mpi_prod $comm] \
     [list [list $rdata] [list $rdata]]
 
 # pairs
-set idata {{-016 0} {2 0} {1.5 0} {2 -1} {two 0} {0x22 0}}
+set idata {{-0o16 0} {2 0} {1.5 0} {2 -1} {two 0} {0x22 0}}
 set odata {{1 1} {-1 1} {-10 1} {0 1} {1 1} {18 1}}
 set rdata {{1 1} {2 0} {0 0} {2 -1} {1 1} {34 0}}
 par_return [list [list allreduce $idata $mpi_intint $mpi_maxloc $comm] \
@@ -396,7 +396,7 @@ par_return [list [list send $idata $double 1 666 $comm] \
     [list {} [list $rdata]]
 
 # pairs
-set idata {{-016 0} {2 0} {1.5 0} {2 -1} {two 0} {0x22 0}}
+set idata {{-0o16 0} {2 0} {1.5 0} {2 -1} {two 0} {0x22 0}}
 set odata {{1 1} {-1 1} {-10 1} {0 1} {1 1} {18 1}}
 set rdata {{1 1} {2 0} {0 0} {2 -1} {1 1} {34 0}}
 par_return [list [list reduce $idata $mpi_intint $mpi_maxloc 1 $comm] \

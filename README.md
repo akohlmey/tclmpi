@@ -101,7 +101,7 @@ module load mpi
 
 You can cite TclMPI as:
 
-Axel Kohlmeyer. (2021). TclMPI: Release 1.2 [Data set]. Zenodo. [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.598343.svg)](https://doi.org/10.5281/zenodo.598343)
+Axel Kohlmeyer. (2024). TclMPI: Release 1.3 [Data set]. Zenodo. [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.598343.svg)](https://doi.org/10.5281/zenodo.598343)
 
 # Acknowledgements
 
